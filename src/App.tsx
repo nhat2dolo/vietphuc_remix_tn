@@ -132,7 +132,7 @@ export default function App() {
                 <span aria-hidden="true" className="text-stone-300">·</span>
                 <div className="flex items-center gap-1.5">
                   <span className="font-bold text-stone-800 tabular-nums">AI</span>
-                  <span>Gemini 2.5 Flash Tích Hợp</span>
+                  <span>Gemini 3.8 Flash Tích Hợp</span>
                 </div>
                 <span aria-hidden="true" className="text-stone-300">·</span>
                 <div className="flex items-center gap-1.5">

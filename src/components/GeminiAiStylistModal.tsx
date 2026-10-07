@@ -3,17 +3,13 @@ import { OutfitData, TraditionalColor, AccessoryData } from '../types/vietphuc';
 import {
   analyzeOutfitWithGemini,
   chatWithHeritageStylist,
-  getStoredApiKey,
-  setStoredApiKey,
   StylingAnalysisResult,
 } from '../services/geminiService';
 import {
   Sparkles,
   Bot,
-  Key,
   Send,
   Loader2,
-  CheckCircle2,
   X,
   ShieldCheck,
   Compass,
@@ -39,8 +35,6 @@ export const GeminiAiStylistModal: React.FC<GeminiAiStylistModalProps> = ({
   accessories,
   gender,
 }) => {
-  const [apiKey, setApiKey] = useState(getStoredApiKey());
-  const [showKeyInput, setShowKeyInput] = useState(false);
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<StylingAnalysisResult | null>(null);
 
@@ -55,11 +49,6 @@ export const GeminiAiStylistModal: React.FC<GeminiAiStylistModalProps> = ({
   const [chatLoading, setChatLoading] = useState(false);
 
   if (!isOpen) return null;
-
-  const handleSaveKey = () => {
-    setStoredApiKey(apiKey);
-    setShowKeyInput(false);
-  };
 
   const handleAnalyze = async () => {
     setLoading(true);
@@ -124,7 +113,7 @@ export const GeminiAiStylistModal: React.FC<GeminiAiStylistModalProps> = ({
                   Gemini Heritage Stylist AI
                 </h3>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-bold">
-                  Gemini 2.5 Flash
+                  Gemini 3.8 Flash
                 </span>
               </div>
               <p className="text-xs text-stone-500 font-serif italic">
@@ -135,14 +124,6 @@ export const GeminiAiStylistModal: React.FC<GeminiAiStylistModalProps> = ({
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setShowKeyInput(!showKeyInput)}
-              className="p-2 rounded-xl text-stone-600 hover:bg-stone-100 transition-colors border border-stone-200 text-xs flex items-center gap-1.5 cursor-pointer"
-              title="Cài đặt Google Gemini API Key"
-            >
-              <Key className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">API Key</span>
-            </button>
-            <button
               onClick={onClose}
               className="p-2 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
             >
@@ -150,40 +131,6 @@ export const GeminiAiStylistModal: React.FC<GeminiAiStylistModalProps> = ({
             </button>
           </div>
         </div>
-
-        {/* API Key Banner Config if active */}
-        {showKeyInput && (
-          <div className="bg-blue-50/70 border-b border-blue-200 p-4 text-xs space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-semibold text-blue-900">
-                Nhập Google Gemini API Key (Không bắt buộc - Có sẵn AI Engine dự phòng):
-              </span>
-              <a
-                href="https://aistudio.google.com/apikey"
-                target="_blank"
-                rel="noreferrer"
-                className="text-blue-700 underline font-medium"
-              >
-                Lấy key miễn phí tại Google AI Studio ↗
-              </a>
-            </div>
-            <div className="flex gap-2">
-              <input
-                type="password"
-                placeholder="Dán AI Studio API Key (AIzaSy...)"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                className="flex-1 px-3 py-1.5 rounded-lg border border-blue-300 bg-white text-xs font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button
-                onClick={handleSaveKey}
-                className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs transition-colors cursor-pointer"
-              >
-                Lưu Key
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Main Body */}
         <div className="p-5 sm:p-6 overflow-y-auto space-y-6 flex-1">
