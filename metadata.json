@@ -1,0 +1,6 @@
+{
+  "name": "Việt phục Remix - Di sản & Gen Z",
+  "description": "Studio phối đồ và khám phá di sản cổ phục Việt Nam kết hợp phong cách hiện đại cho Gen Z.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

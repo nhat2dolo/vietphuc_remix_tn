@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Be Vietnam Pro', system-ui, -apple-system, sans-serif;
+    color: #262320;
+    background-color: #FAF7F2;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+}
+
+/* Subtle traditional Vietnamese lotus/cloud decorative watermark patterns in CSS */
+.bg-heritage-paper {
+  background-color: #FAF7F2;
+  background-image: radial-gradient(#d3c7b5 0.75px, transparent 0.75px), radial-gradient(#d3c7b5 0.75px, #FAF7F2 0.75px);
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px;
+}
+
+.bg-pattern-brocade {
+  background-image: radial-gradient(circle at 50% 50%, rgba(200, 42, 39, 0.04) 2px, transparent 2px);
+  background-size: 16px 16px;
+}
