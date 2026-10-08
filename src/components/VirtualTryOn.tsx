@@ -36,6 +36,7 @@ export const VirtualTryOn: React.FC = () => {
   const [selectedStickerInfo, setSelectedStickerInfo] = useState<StickerItem | null>(null);
   const [activeObject, setActiveObject] = useState<fabric.FabricObject | null>(null);
   const [culturalWarning, setCulturalWarning] = useState<string | null>(null);
+  const [isWarningDismissed, setIsWarningDismissed] = useState<boolean>(false);
 
   // Background and Onboarding
   const [showSetupModal, setShowSetupModal] = useState<boolean>(false);
@@ -131,7 +132,12 @@ export const VirtualTryOn: React.FC = () => {
       warning = 'Áo Bà Ba đi cùng Khăn Rằn là bộ đôi chuẩn mực, mộc mạc và thân thương của người dân Nam Bộ.';
     }
 
-    setCulturalWarning(warning);
+    setCulturalWarning((prev) => {
+      if (prev !== warning) {
+        setIsWarningDismissed(false);
+      }
+      return warning;
+    });
   }, []);
 
   // Initialize Canvas
@@ -193,27 +199,71 @@ export const VirtualTryOn: React.FC = () => {
     };
   }, [currentBgPreset, customBgUrl, setCanvasBackground, saveState, evaluateCulturalCombinations]);
 
-  // Add Sticker to Canvas
+  // Add Sticker to Canvas with Anatomical Grounding & Single-Item Replacement
   const addStickerToCanvas = (item: StickerItem) => {
     const canvas = fabricCanvasRef.current;
     if (!canvas) return;
+
+    // Prevent multiple overlapping hats, robes, or shoes:
+    // Remove conflicting item of the same major type before adding the new one
+    if (['mu', 'ao', 'giay'].includes(item.type)) {
+      const existingConflicting = canvas.getObjects().filter((obj) => {
+        const meta = (obj as unknown as { stickerMeta?: StickerItem }).stickerMeta;
+        return meta && meta.type === item.type;
+      });
+      existingConflicting.forEach((obj) => canvas.remove(obj));
+    }
 
     fabric.FabricImage.fromURL(item.svgDataUri, { crossOrigin: 'anonymous' })
       .then((img) => {
         if (!canvas) return;
 
-        // Scale appropriately depending on type
-        let baseScale = 0.85;
-        if (item.type === 'ao') baseScale = 0.95;
-        if (item.type === 'mu') baseScale = 0.7;
-        if (item.type === 'phukien') baseScale = 0.65;
-
         const canvasWidth = canvas.getWidth();
         const canvasHeight = canvas.getHeight();
 
+        // Anatomically anchored positioning and scaling based on model coordinates
+        let posX = canvasWidth / 2;
+        let posY = canvasHeight / 2;
+        let baseScale = 0.75;
+
+        if (item.type === 'mu') {
+          // Anchored directly on top of head crown (no floating hat, no clipping through skull)
+          posY = canvasHeight * 0.155;
+          baseScale = item.id.includes('quai-thao') ? 0.75 : item.id.includes('non-la') ? 0.72 : 0.65;
+        } else if (item.type === 'ao') {
+          // Anchored cleanly at chest and torso down to hem
+          posY = canvasHeight * 0.44;
+          baseScale = item.category === 'baba' ? 0.9 : 0.95;
+        } else if (item.type === 'giay') {
+          // Anchored at feet level
+          posY = canvasHeight * 0.89;
+          baseScale = 0.55;
+        } else if (item.type === 'khan') {
+          // Anchored around neck and collar
+          posY = canvasHeight * 0.31;
+          baseScale = 0.72;
+        } else if (item.id === 'pk-kinh-ram') {
+          posY = canvasHeight * 0.155;
+          baseScale = 0.55;
+        } else if (item.id === 'pk-chuoi-ngoc') {
+          posY = canvasHeight * 0.26;
+          baseScale = 0.65;
+        } else if (item.id === 'pk-quat') {
+          posX = canvasWidth * 0.72;
+          posY = canvasHeight * 0.45;
+          baseScale = 0.65;
+        } else if (item.id === 'pk-tui-coi') {
+          posX = canvasWidth * 0.28;
+          posY = canvasHeight * 0.46;
+          baseScale = 0.62;
+        } else if (item.id === 'pk-headphone') {
+          posY = canvasHeight * 0.21;
+          baseScale = 0.62;
+        }
+
         img.set({
-          left: canvasWidth / 2,
-          top: canvasHeight / 2 - 20,
+          left: posX,
+          top: posY,
           originX: 'center',
           originY: 'center',
           scaleX: baseScale,
@@ -229,6 +279,14 @@ export const VirtualTryOn: React.FC = () => {
         (img as unknown as { stickerMeta: StickerItem }).stickerMeta = item;
 
         canvas.add(img);
+
+        // Natural layer ordering: robes in back, headphone behind neck/collar, headwear & accessories on top
+        if (item.type === 'ao' || item.id === 'pk-headphone') {
+          canvas.sendObjectBackwards(img);
+        } else {
+          canvas.bringObjectToFront(img);
+        }
+
         canvas.setActiveObject(img);
         canvas.renderAll();
         saveState();
@@ -447,7 +505,7 @@ export const VirtualTryOn: React.FC = () => {
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={() => setShowSetupModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-stone-800 text-xs font-semibold transition-colors shadow-xs cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 hover:border-[#C82A27] hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 active:scale-95 text-stone-800 text-xs font-semibold transition-all duration-200 shadow-xs cursor-pointer"
           >
             <Upload className="w-3.5 h-3.5 text-[#C82A27]" />
             <span>Đổi người mẫu / Tải ảnh bạn</span>
@@ -467,7 +525,7 @@ export const VirtualTryOn: React.FC = () => {
           <div className="flex items-center gap-1.5 text-xs font-semibold">
             <button
               onClick={handleUndo}
-              className="p-1.5 rounded-lg bg-white/20 hover:bg-white/30 text-white transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg bg-white/20 hover:bg-white/30 hover:-translate-y-0.5 active:scale-95 text-white transition-all duration-150 cursor-pointer"
               title="Hoàn tác (Undo)"
               aria-label="Hoàn tác"
             >
@@ -475,7 +533,7 @@ export const VirtualTryOn: React.FC = () => {
             </button>
             <button
               onClick={handleRedo}
-              className="p-1.5 rounded-lg bg-white/20 hover:bg-white/30 text-white transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg bg-white/20 hover:bg-white/30 hover:-translate-y-0.5 active:scale-95 text-white transition-all duration-150 cursor-pointer"
               title="Làm lại (Redo)"
               aria-label="Làm lại"
             >
@@ -483,7 +541,7 @@ export const VirtualTryOn: React.FC = () => {
             </button>
             <button
               onClick={handleResetCanvas}
-              className="p-1.5 rounded-lg bg-white/20 hover:bg-white/30 text-white transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg bg-white/20 hover:bg-white/30 hover:-translate-y-0.5 active:scale-95 text-white transition-all duration-150 cursor-pointer"
               title="Làm mới (Clear)"
               aria-label="Làm mới"
             >
@@ -491,7 +549,7 @@ export const VirtualTryOn: React.FC = () => {
             </button>
             <button
               onClick={handleDownloadImage}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#E4A025] hover:bg-[#c9891c] text-stone-900 font-bold transition-colors cursor-pointer shadow-xs ml-1"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#E4A025] hover:bg-[#c9891c] hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-95 text-stone-900 font-bold transition-all duration-200 cursor-pointer shadow-xs ml-1"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Tải ảnh</span>
@@ -509,13 +567,29 @@ export const VirtualTryOn: React.FC = () => {
 
           {/* Cultural Warnings & Info Overlay (Top Left) */}
           <div className="absolute top-3 left-3 right-16 pointer-events-none flex flex-col gap-2 z-10">
-            {culturalWarning && (
-              <div className="pointer-events-auto p-3 rounded-xl bg-[#FFF3EB] border-l-4 border-[#D87040] text-stone-900 shadow-md text-xs leading-relaxed animate-in fade-in duration-200">
-                <div className="flex items-center gap-1.5 font-bold text-[#D87040] mb-0.5">
-                  <AlertTriangle className="w-3.5 h-3.5" />
-                  <span>Lưu ý Remix:</span>
+            {culturalWarning && !isWarningDismissed && (
+              <div
+                id="remixAlertBox"
+                className="remix-alert-box pointer-events-auto animate-in fade-in duration-200"
+              >
+                <div className="alert-header">
+                  <div className="alert-title">
+                    <span className="alert-icon">⚠️</span>
+                    <strong>Lưu ý Remix:</strong>
+                  </div>
+                  {/* Nút đóng dấu x */}
+                  <button
+                    type="button"
+                    className="close-btn"
+                    onClick={() => setIsWarningDismissed(true)}
+                    aria-label="Đóng"
+                  >
+                    &times;
+                  </button>
                 </div>
-                <div>{culturalWarning}</div>
+                <p className="alert-content">
+                  {culturalWarning}
+                </p>
               </div>
             )}
 
@@ -617,10 +691,10 @@ export const VirtualTryOn: React.FC = () => {
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer border ${
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer border hover:-translate-y-0.5 hover:shadow-xs active:scale-95 ${
                   activeCategory === cat.id
-                    ? 'bg-[#E4A025] text-stone-900 border-[#E4A025]'
-                    : 'bg-white text-stone-600 border-stone-300 hover:border-stone-400'
+                    ? 'bg-[#E4A025] text-stone-900 border-[#E4A025] shadow-xs'
+                    : 'bg-white text-stone-600 border-stone-300 hover:border-stone-400 hover:text-stone-900'
                 }`}
               >
                 {cat.name}
@@ -628,7 +702,7 @@ export const VirtualTryOn: React.FC = () => {
             ))}
 
             {/* Custom Sticker Upload button */}
-            <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap bg-white text-[#C82A27] border border-[#C82A27] hover:bg-[#FFF5F4] transition-colors cursor-pointer shrink-0">
+            <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap bg-white text-[#C82A27] border border-[#C82A27] hover:bg-[#FFF5F4] hover:-translate-y-0.5 hover:shadow-xs active:scale-95 transition-all duration-200 cursor-pointer shrink-0">
               <Upload className="w-3 h-3" />
               <span>Thêm Sticker PNG</span>
               <input
@@ -646,15 +720,15 @@ export const VirtualTryOn: React.FC = () => {
               <button
                 key={sticker.id}
                 onClick={() => addStickerToCanvas(sticker)}
-                className="group aspect-square rounded-2xl border-2 border-dashed border-stone-200 hover:border-[#C82A27] bg-stone-50/50 hover:bg-[#FFF5F4] p-1.5 flex flex-col items-center justify-center transition-all cursor-pointer relative"
+                className="group aspect-square rounded-2xl border-2 border-dashed border-stone-200 hover:border-[#C82A27] bg-stone-50/50 hover:bg-[#FFF5F4] p-1.5 flex flex-col items-center justify-center transition-all duration-200 cursor-pointer relative hover:-translate-y-1 hover:shadow-md active:scale-95"
                 title={`Nhấn để thêm: ${sticker.name}`}
               >
                 <img
                   src={sticker.svgDataUri}
                   alt={sticker.name}
-                  className="max-w-full max-h-full object-contain pointer-events-none group-hover:scale-105 transition-transform"
+                  className="max-w-full max-h-full object-contain pointer-events-none group-hover:scale-110 transition-transform duration-200"
                 />
-                <span className="text-[10px] text-stone-600 font-medium truncate w-full text-center mt-1">
+                <span className="text-[10px] text-stone-600 group-hover:text-[#8D1815] font-medium truncate w-full text-center mt-1 transition-colors">
                   {sticker.name.split(' ')[0]}
                 </span>
               </button>

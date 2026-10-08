@@ -114,7 +114,7 @@ export default function App() {
                 <span className="text-[#C82A27]">Tự Hào Bước Ra Thế Giới</span>
               </h1>
 
-              <p className="text-stone-600 font-serif text-base sm:text-lg max-w-2xl leading-relaxed">
+              <p className="text-stone-600 text-base sm:text-lg max-w-2xl leading-relaxed">
                 Khám phá cấu trúc chuẩn mực của Áo Dài, Ngũ Thân, Nhật Bình, Tứ Thân, Bà Ba, Giao Lĩnh. Phối đồ thông minh cùng Cố vấn AI Google Gemini, gợi ý theo thời tiết & dịp lễ, và ướm thử kéo thả tương tác Fabric.js!
               </p>
 
@@ -151,107 +151,107 @@ export default function App() {
               <div className="space-y-2.5">
                 <button
                   onClick={() => setActiveTab('tryon')}
-                  className={`w-full p-3 rounded-xl border text-left text-xs sm:text-sm font-medium transition-all flex items-center justify-between cursor-pointer ${
+                  className={`group w-full p-3.5 rounded-2xl border text-left text-xs sm:text-sm font-medium transition-all duration-200 flex items-center justify-between cursor-pointer hover:shadow-md hover:-translate-y-1 hover:scale-[1.015] active:translate-y-0 active:scale-95 ${
                     activeTab === 'tryon'
-                      ? 'border-[#C82A27] bg-[#FFF5F4] text-[#8D1815]'
-                      : 'border-stone-200 hover:bg-stone-50 text-stone-700'
+                      ? 'border-[#C82A27] bg-gradient-to-r from-[#FFF5F4] to-[#FFF0EE] text-[#8D1815] shadow-xs ring-1 ring-[#C82A27]/20'
+                      : 'border-stone-200/90 bg-white hover:border-[#C82A27]/40 hover:bg-stone-50/90 text-stone-700 hover:text-stone-900'
                   }`}
                 >
-                  <span className="flex items-center gap-2">
-                    <Camera className="w-4 h-4 text-[#C82A27]" />
-                    <span>Thử Đồ Ảo (Virtual Try-On)</span>
+                  <span className="flex items-center gap-2.5">
+                    <Camera className="w-4 h-4 text-[#C82A27] transition-transform duration-200 group-hover:scale-125 group-hover:rotate-3" />
+                    <span className="group-hover:font-semibold transition-all">Thử Đồ Ảo (Virtual Try-On)</span>
                   </span>
-                  <ArrowUpRight className="w-4 h-4 text-stone-400" />
+                  <ArrowUpRight className="w-4 h-4 text-stone-400 transition-all duration-200 group-hover:text-[#C82A27] group-hover:translate-x-1 group-hover:-translate-y-1" />
                 </button>
 
                 <button
                   onClick={() => setActiveTab('studio')}
-                  className={`w-full p-3 rounded-xl border text-left text-xs sm:text-sm font-medium transition-all flex items-center justify-between cursor-pointer ${
+                  className={`group w-full p-3.5 rounded-2xl border text-left text-xs sm:text-sm font-medium transition-all duration-200 flex items-center justify-between cursor-pointer hover:shadow-md hover:-translate-y-1 hover:scale-[1.015] active:translate-y-0 active:scale-95 ${
                     activeTab === 'studio'
-                      ? 'border-[#C82A27] bg-[#FFF5F4] text-[#8D1815]'
-                      : 'border-stone-200 hover:bg-stone-50 text-stone-700'
+                      ? 'border-[#C82A27] bg-gradient-to-r from-[#FFF5F4] to-[#FFF0EE] text-[#8D1815] shadow-xs ring-1 ring-[#C82A27]/20'
+                      : 'border-stone-200/90 bg-white hover:border-[#C82A27]/40 hover:bg-stone-50/90 text-stone-700 hover:text-stone-900'
                   }`}
                 >
-                  <span className="flex items-center gap-2">
-                    <Compass className="w-4 h-4 text-[#1F4F89]" />
-                    <span>Studio Mannequin & Gemini AI</span>
+                  <span className="flex items-center gap-2.5">
+                    <Compass className="w-4 h-4 text-[#1F4F89] transition-transform duration-200 group-hover:scale-125 group-hover:rotate-3" />
+                    <span className="group-hover:font-semibold transition-all">Studio Mannequin & Gemini AI</span>
                   </span>
-                  <ArrowUpRight className="w-4 h-4 text-stone-400" />
+                  <ArrowUpRight className="w-4 h-4 text-stone-400 transition-all duration-200 group-hover:text-[#C82A27] group-hover:translate-x-1 group-hover:-translate-y-1" />
                 </button>
 
                 <button
                   onClick={() => setActiveTab('weather')}
-                  className={`w-full p-3 rounded-xl border text-left text-xs sm:text-sm font-medium transition-all flex items-center justify-between cursor-pointer ${
+                  className={`group w-full p-3.5 rounded-2xl border text-left text-xs sm:text-sm font-medium transition-all duration-200 flex items-center justify-between cursor-pointer hover:shadow-md hover:-translate-y-1 hover:scale-[1.015] active:translate-y-0 active:scale-95 ${
                     activeTab === 'weather'
-                      ? 'border-[#C82A27] bg-[#FFF5F4] text-[#8D1815]'
-                      : 'border-stone-200 hover:bg-stone-50 text-stone-700'
+                      ? 'border-[#C82A27] bg-gradient-to-r from-[#FFF5F4] to-[#FFF0EE] text-[#8D1815] shadow-xs ring-1 ring-[#C82A27]/20'
+                      : 'border-stone-200/90 bg-white hover:border-[#C82A27]/40 hover:bg-stone-50/90 text-stone-700 hover:text-stone-900'
                   }`}
                 >
-                  <span className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-[#C82A27]" />
-                    <span>Gợi Ý Dịp Lễ & Thời Tiết</span>
+                  <span className="flex items-center gap-2.5">
+                    <Calendar className="w-4 h-4 text-[#C82A27] transition-transform duration-200 group-hover:scale-125 group-hover:rotate-3" />
+                    <span className="group-hover:font-semibold transition-all">Gợi Ý Dịp Lễ & Thời Tiết</span>
                   </span>
-                  <ArrowUpRight className="w-4 h-4 text-stone-400" />
+                  <ArrowUpRight className="w-4 h-4 text-stone-400 transition-all duration-200 group-hover:text-[#C82A27] group-hover:translate-x-1 group-hover:-translate-y-1" />
                 </button>
 
                 <button
                   onClick={() => setActiveTab('compare')}
-                  className={`w-full p-3 rounded-xl border text-left text-xs sm:text-sm font-medium transition-all flex items-center justify-between cursor-pointer ${
+                  className={`group w-full p-3.5 rounded-2xl border text-left text-xs sm:text-sm font-medium transition-all duration-200 flex items-center justify-between cursor-pointer hover:shadow-md hover:-translate-y-1 hover:scale-[1.015] active:translate-y-0 active:scale-95 ${
                     activeTab === 'compare'
-                      ? 'border-[#C82A27] bg-[#FFF5F4] text-[#8D1815]'
-                      : 'border-stone-200 hover:bg-stone-50 text-stone-700'
+                      ? 'border-[#C82A27] bg-gradient-to-r from-[#FFF5F4] to-[#FFF0EE] text-[#8D1815] shadow-xs ring-1 ring-[#C82A27]/20'
+                      : 'border-stone-200/90 bg-white hover:border-[#C82A27]/40 hover:bg-stone-50/90 text-stone-700 hover:text-stone-900'
                   }`}
                 >
-                  <span className="flex items-center gap-2">
-                    <ArrowLeftRight className="w-4 h-4 text-[#3D7D73]" />
-                    <span>So Sánh Các Phương Án</span>
+                  <span className="flex items-center gap-2.5">
+                    <ArrowLeftRight className="w-4 h-4 text-[#3D7D73] transition-transform duration-200 group-hover:scale-125 group-hover:rotate-3" />
+                    <span className="group-hover:font-semibold transition-all">So Sánh Các Phương Án</span>
                   </span>
-                  <ArrowUpRight className="w-4 h-4 text-stone-400" />
+                  <ArrowUpRight className="w-4 h-4 text-stone-400 transition-all duration-200 group-hover:text-[#C82A27] group-hover:translate-x-1 group-hover:-translate-y-1" />
                 </button>
 
                 <button
                   onClick={() => setActiveTab('presets')}
-                  className={`w-full p-3 rounded-xl border text-left text-xs sm:text-sm font-medium transition-all flex items-center justify-between cursor-pointer ${
+                  className={`group w-full p-3.5 rounded-2xl border text-left text-xs sm:text-sm font-medium transition-all duration-200 flex items-center justify-between cursor-pointer hover:shadow-md hover:-translate-y-1 hover:scale-[1.015] active:translate-y-0 active:scale-95 ${
                     activeTab === 'presets'
-                      ? 'border-[#C82A27] bg-[#FFF5F4] text-[#8D1815]'
-                      : 'border-stone-200 hover:bg-stone-50 text-stone-700'
+                      ? 'border-[#C82A27] bg-gradient-to-r from-[#FFF5F4] to-[#FFF0EE] text-[#8D1815] shadow-xs ring-1 ring-[#C82A27]/20'
+                      : 'border-stone-200/90 bg-white hover:border-[#C82A27]/40 hover:bg-stone-50/90 text-stone-700 hover:text-stone-900'
                   }`}
                 >
-                  <span className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-[#E4A025]" />
-                    <span>Bộ Sưu Tập Lookbook Mẫu</span>
+                  <span className="flex items-center gap-2.5">
+                    <Sparkles className="w-4 h-4 text-[#E4A025] transition-transform duration-200 group-hover:scale-125 group-hover:rotate-3" />
+                    <span className="group-hover:font-semibold transition-all">Bộ Sưu Tập Lookbook Mẫu</span>
                   </span>
-                  <ArrowUpRight className="w-4 h-4 text-stone-400" />
+                  <ArrowUpRight className="w-4 h-4 text-stone-400 transition-all duration-200 group-hover:text-[#C82A27] group-hover:translate-x-1 group-hover:-translate-y-1" />
                 </button>
 
                 <button
                   onClick={() => setActiveTab('archive')}
-                  className={`w-full p-3 rounded-xl border text-left text-xs sm:text-sm font-medium transition-all flex items-center justify-between cursor-pointer ${
+                  className={`group w-full p-3.5 rounded-2xl border text-left text-xs sm:text-sm font-medium transition-all duration-200 flex items-center justify-between cursor-pointer hover:shadow-md hover:-translate-y-1 hover:scale-[1.015] active:translate-y-0 active:scale-95 ${
                     activeTab === 'archive'
-                      ? 'border-[#C82A27] bg-[#FFF5F4] text-[#8D1815]'
-                      : 'border-stone-200 hover:bg-stone-50 text-stone-700'
+                      ? 'border-[#C82A27] bg-gradient-to-r from-[#FFF5F4] to-[#FFF0EE] text-[#8D1815] shadow-xs ring-1 ring-[#C82A27]/20'
+                      : 'border-stone-200/90 bg-white hover:border-[#C82A27]/40 hover:bg-stone-50/90 text-stone-700 hover:text-stone-900'
                   }`}
                 >
-                  <span className="flex items-center gap-2">
-                    <BookOpen className="w-4 h-4 text-[#593C28]" />
-                    <span>Bách Khoa Cổ Phục & Triết Lý</span>
+                  <span className="flex items-center gap-2.5">
+                    <BookOpen className="w-4 h-4 text-[#593C28] transition-transform duration-200 group-hover:scale-125 group-hover:rotate-3" />
+                    <span className="group-hover:font-semibold transition-all">Bách Khoa Cổ Phục & Triết Lý</span>
                   </span>
-                  <ArrowUpRight className="w-4 h-4 text-stone-400" />
+                  <ArrowUpRight className="w-4 h-4 text-stone-400 transition-all duration-200 group-hover:text-[#C82A27] group-hover:translate-x-1 group-hover:-translate-y-1" />
                 </button>
 
                 <button
                   onClick={() => setActiveTab('quiz')}
-                  className={`w-full p-3 rounded-xl border text-left text-xs sm:text-sm font-medium transition-all flex items-center justify-between cursor-pointer ${
+                  className={`group w-full p-3.5 rounded-2xl border text-left text-xs sm:text-sm font-medium transition-all duration-200 flex items-center justify-between cursor-pointer hover:shadow-md hover:-translate-y-1 hover:scale-[1.015] active:translate-y-0 active:scale-95 ${
                     activeTab === 'quiz'
-                      ? 'border-[#C82A27] bg-[#FFF5F4] text-[#8D1815]'
-                      : 'border-stone-200 hover:bg-stone-50 text-stone-700'
+                      ? 'border-[#C82A27] bg-gradient-to-r from-[#FFF5F4] to-[#FFF0EE] text-[#8D1815] shadow-xs ring-1 ring-[#C82A27]/20'
+                      : 'border-stone-200/90 bg-white hover:border-[#C82A27]/40 hover:bg-stone-50/90 text-stone-700 hover:text-stone-900'
                   }`}
                 >
-                  <span className="flex items-center gap-2">
-                    <Heart className="w-4 h-4 text-[#3D7D73]" />
-                    <span>Trắc Nghiệm: Vibe Của Bạn</span>
+                  <span className="flex items-center gap-2.5">
+                    <Heart className="w-4 h-4 text-[#3D7D73] transition-transform duration-200 group-hover:scale-125 group-hover:rotate-3" />
+                    <span className="group-hover:font-semibold transition-all">Trắc Nghiệm: Vibe Của Bạn</span>
                   </span>
-                  <ArrowUpRight className="w-4 h-4 text-stone-400" />
+                  <ArrowUpRight className="w-4 h-4 text-stone-400 transition-all duration-200 group-hover:text-[#C82A27] group-hover:translate-x-1 group-hover:-translate-y-1" />
                 </button>
               </div>
             </div>

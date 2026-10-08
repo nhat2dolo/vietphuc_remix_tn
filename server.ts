@@ -18,6 +18,18 @@ app.use(express.json());
 const apiKey = process.env.GEMINI_API_KEY || '';
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
+function normalizeVietnameseText(input: string): string {
+  if (!input) return '';
+  let text = String(input).normalize('NFC');
+  text = text.replace(/([a-zA-Z\u00C0-\u1EF9])[\u00B4\u0060\u02CA\u02CB\u02C6\u02DC\u02C7\u02D9]+\s+(ng|nh|ch|[nmtpcuioy])\b/gi, '$1$2');
+  text = text.replace(/([a-zA-Z\u00C0-\u1EF9])\s+[\u00B4\u0060\u02CA\u02CB\u02C6\u02DC\u02C7\u02D9]+(ng|nh|ch|[nmtpcuioy])\b/gi, '$1$2');
+  text = text.replace(/([\p{L}\p{M}])[\u00B4\u0060\u02CA\u02CB\u02C6\u02DC\u02C7\u02D9]+/gu, '$1');
+  text = text.replace(/[\u00B4\u0060\u02CA\u02CB\u02C6\u02DC\u02C7\u02D9]+([\p{L}\p{M}])/gu, '$1');
+  text = text.replace(/(?<=[\p{L}\p{M}])`+(?=[\p{L}\p{M}])/gu, '');
+  text = text.replace(/[\u0300-\u036f\u1dc0-\u1dff\u20d0-\u20ff\ufe20-\ufe2f]/g, '');
+  return text.normalize('NFC');
+}
+
 function withTimeout<T>(promise: Promise<T>, ms = 6000): Promise<T> {
   return Promise.race([
     promise,
@@ -84,6 +96,8 @@ Hãy đánh giá bản phối trang phục truyền thống Việt Nam sau:
 - Dịp tham gia: ${event || 'Tự do / Dạo phố'}
 - Thời tiết: ${weather || 'Thoải mái'}
 
+QUY TẮC BẮT BUỘC: Toàn bộ văn bản tiếng Việt xuất ra BẮT BUỘC phải dùng bảng mã Unicode Dựng Sẵn (NFC), tuyệt đối không xuất ký tự Unicode Tổ Hợp (NFD) hay dấu thanh rời rạc (như cấ´u, Phố´i, đồ\`, vấ´n, tiế´t). Mọi từ tiếng Việt phải liền mạch, chuẩn chính tả tuyệt đối.
+
 Yêu cầu trả về định dạng JSON thuần túy (không bọc markdown \`\`\`json) với cấu trúc sau:
 {
   "score": <số nguyên từ 70 đến 100>,
@@ -108,11 +122,11 @@ Yêu cầu trả về định dạng JSON thuần túy (không bọc markdown \`
       const data = JSON.parse(cleanText);
       return res.json({
         score: Number(data.score) || 92,
-        title: data.title || `${outfit?.name || 'Cổ phục'} Remix`,
-        verdict: data.verdict || '',
-        culturalInsight: data.culturalInsight || '',
-        modernStylingAdvice: data.modernStylingAdvice || '',
-        eventSuitability: data.eventSuitability || '',
+        title: normalizeVietnameseText(data.title || `${outfit?.name || 'Cổ phục'} Remix`),
+        verdict: normalizeVietnameseText(data.verdict || ''),
+        culturalInsight: normalizeVietnameseText(data.culturalInsight || ''),
+        modernStylingAdvice: normalizeVietnameseText(data.modernStylingAdvice || ''),
+        eventSuitability: normalizeVietnameseText(data.eventSuitability || ''),
       });
     } catch {
       return res.json(getLocalStylingAnalysis(outfit, color, accList, event, weather));
@@ -130,13 +144,13 @@ app.post('/api/stylist/chat', async (req, res) => {
     const { message, context } = req.body;
     if (!ai) {
       return res.json({
-        reply: `[Cố vấn Việt Phục Remix (Chế độ Cổ Phong)]: Bộ ${context?.outfitName || 'cổ phục'} sắc ${context?.colorName || 'truyền thống'} của bạn rất ấn tượng! Để tăng tính Gen Z mà vẫn chuẩn mực, hãy chú ý giữ nguyên phom dáng cổ áo và tà áo, đồng thời bạn có thể tự do biến tấu phụ kiện như túi tote thổ cẩm, giày sneaker tối giản hoặc mắt kính gọng kim loại thanh mảnh.`
+        reply: normalizeVietnameseText(`[Cố vấn Việt Phục Remix (Chế độ Cổ Phong)]: Bộ ${context?.outfitName || 'cổ phục'} sắc ${context?.colorName || 'truyền thống'} của bạn rất ấn tượng! Để tăng tính Gen Z mà vẫn chuẩn mực, hãy chú ý giữ nguyên phom dáng cổ áo và tà áo, đồng thời bạn có thể tự do biến tấu phụ kiện như túi tote thổ cẩm, giày sneaker tối giản hoặc mắt kính gọng kim loại thanh mảnh.`)
       });
     }
 
     const systemInstruction = `Bạn là Trợ lý AI Cố Vấn Văn Hóa & Thời Trang "Việt phục Remix" được tài trợ bởi Google AI.
 Người dùng đang mặc: ${context?.outfitName || 'Cổ phục'}, màu ${context?.colorName || 'Truyền thống'}, phụ kiện: ${(context?.accessories || []).join(', ') || 'Không'}.
-Nhiệm vụ: Trả lời thân thiện, am hiểu sâu sắc về lịch sử Đại Việt (Ngàn năm áo mũ, triều Nguyễn, Lê...), khéo léo cổ vũ tinh thần Gen Z phối đồ hiện đại mà vẫn tôn trọng chuẩn mực văn hóa. Trả lời súc tích, truyền cảm hứng dưới 150 từ.`;
+Nhiệm vụ: Trả lời thân thiện, am hiểu sâu sắc về lịch sử Đại Việt (Ngàn năm áo mũ, triều Nguyễn, Lê...), khéo léo cổ vũ tinh thần Gen Z phối đồ hiện đại mà vẫn tôn trọng chuẩn mực văn hóa. Trả lời súc tích, truyền cảm hứng dưới 150 từ. Bắt buộc dùng tiếng Việt Unicode dựng sẵn (NFC), không dùng dấu rời hay ký tự lạ.`;
 
     const response = await withTimeout(
       ai.models.generateContent({
@@ -150,13 +164,13 @@ Nhiệm vụ: Trả lời thân thiện, am hiểu sâu sắc về lịch sử �
     );
 
     return res.json({
-      reply: response.text || 'Rất vui được hỗ trợ bạn khám phá di sản Việt phục!',
+      reply: normalizeVietnameseText(response.text || 'Rất vui được hỗ trợ bạn khám phá di sản Việt phục!'),
     });
   } catch (error: any) {
     console.warn('Gemini chat error, using contextual fallback:', error?.message);
     const { context } = req.body;
     return res.json({
-      reply: `[Cố vấn Việt Phục Remix (Chế độ Cổ Phong)]: Bộ ${context?.outfitName || 'cổ phục'} sắc ${context?.colorName || 'truyền thống'} của bạn rất ấn tượng! Để tăng tính Gen Z mà vẫn chuẩn mực, hãy chú ý giữ nguyên phom dáng cổ áo và tà áo, đồng thời bạn có thể tự do biến tấu phụ kiện như túi tote thổ cẩm, giày sneaker tối giản hoặc mắt kính gọng kim loại thanh mảnh.`
+      reply: normalizeVietnameseText(`[Cố vấn Việt Phục Remix (Chế độ Cổ Phong)]: Bộ ${context?.outfitName || 'cổ phục'} sắc ${context?.colorName || 'truyền thống'} của bạn rất ấn tượng! Để tăng tính Gen Z mà vẫn chuẩn mực, hãy chú ý giữ nguyên phom dáng cổ áo và tà áo, đồng thời bạn có thể tự do biến tấu phụ kiện như túi tote thổ cẩm, giày sneaker tối giản hoặc mắt kính gọng kim loại thanh mảnh.`)
     });
   }
 });

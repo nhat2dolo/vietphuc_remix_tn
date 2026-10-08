@@ -23,65 +23,79 @@ export const Navbar: React.FC<NavbarProps> = ({
             e.preventDefault();
             onSelectTab('tryon');
           }}
-          className="text-xl sm:text-2xl font-display font-bold text-[#8D1815] tracking-tight whitespace-nowrap"
+          className="text-xl sm:text-2xl font-display font-bold text-[#8D1815] tracking-tight whitespace-nowrap transition-all duration-200 hover:scale-[1.02] hover:text-[#C82A27] active:scale-95"
         >
           Việt phục Remix
         </a>
 
         {/* Zone 2: Navigation links */}
-        <nav className="hidden lg:flex items-center gap-6 text-sm font-medium text-stone-600">
+        <nav className="hidden lg:flex items-center gap-1.5 text-sm font-medium">
           <button
             onClick={() => onSelectTab('tryon')}
-            className={`transition-colors whitespace-nowrap cursor-pointer hover:text-stone-900 ${
-              activeTab === 'tryon' ? 'text-[#C82A27] font-semibold border-b-2 border-[#C82A27] pb-1' : ''
+            className={`px-3.5 py-1.5 rounded-xl transition-all duration-200 whitespace-nowrap cursor-pointer ${
+              activeTab === 'tryon'
+                ? 'bg-[#C82A27] text-white font-semibold shadow-xs hover:bg-[#A8221F] hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-95'
+                : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60 hover:-translate-y-0.5 hover:shadow-xs active:translate-y-0 active:scale-95'
             }`}
           >
             Thử đồ ảo
           </button>
           <button
             onClick={() => onSelectTab('studio')}
-            className={`transition-colors whitespace-nowrap cursor-pointer hover:text-stone-900 ${
-              activeTab === 'studio' ? 'text-[#C82A27] font-semibold border-b-2 border-[#C82A27] pb-1' : ''
+            className={`px-3.5 py-1.5 rounded-xl transition-all duration-200 whitespace-nowrap cursor-pointer ${
+              activeTab === 'studio'
+                ? 'bg-[#C82A27] text-white font-semibold shadow-xs hover:bg-[#A8221F] hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-95'
+                : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60 hover:-translate-y-0.5 hover:shadow-xs active:translate-y-0 active:scale-95'
             }`}
           >
             Studio
           </button>
           <button
             onClick={() => onSelectTab('weather')}
-            className={`transition-colors whitespace-nowrap cursor-pointer hover:text-stone-900 ${
-              activeTab === 'weather' ? 'text-[#C82A27] font-semibold border-b-2 border-[#C82A27] pb-1' : ''
+            className={`px-3.5 py-1.5 rounded-xl transition-all duration-200 whitespace-nowrap cursor-pointer ${
+              activeTab === 'weather'
+                ? 'bg-[#C82A27] text-white font-semibold shadow-xs hover:bg-[#A8221F] hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-95'
+                : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60 hover:-translate-y-0.5 hover:shadow-xs active:translate-y-0 active:scale-95'
             }`}
           >
             Dịp lễ & Thời tiết
           </button>
           <button
             onClick={() => onSelectTab('compare')}
-            className={`transition-colors whitespace-nowrap cursor-pointer hover:text-stone-900 ${
-              activeTab === 'compare' ? 'text-[#C82A27] font-semibold border-b-2 border-[#C82A27] pb-1' : ''
+            className={`px-3.5 py-1.5 rounded-xl transition-all duration-200 whitespace-nowrap cursor-pointer ${
+              activeTab === 'compare'
+                ? 'bg-[#C82A27] text-white font-semibold shadow-xs hover:bg-[#A8221F] hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-95'
+                : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60 hover:-translate-y-0.5 hover:shadow-xs active:translate-y-0 active:scale-95'
             }`}
           >
             So sánh
           </button>
           <button
             onClick={() => onSelectTab('presets')}
-            className={`transition-colors whitespace-nowrap cursor-pointer hover:text-stone-900 ${
-              activeTab === 'presets' ? 'text-[#C82A27] font-semibold border-b-2 border-[#C82A27] pb-1' : ''
+            className={`px-3.5 py-1.5 rounded-xl transition-all duration-200 whitespace-nowrap cursor-pointer ${
+              activeTab === 'presets'
+                ? 'bg-[#C82A27] text-white font-semibold shadow-xs hover:bg-[#A8221F] hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-95'
+                : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60 hover:-translate-y-0.5 hover:shadow-xs active:translate-y-0 active:scale-95'
             }`}
           >
             Cảm hứng
           </button>
           <button
             onClick={() => onSelectTab('archive')}
-            className={`transition-colors whitespace-nowrap cursor-pointer hover:text-stone-900 ${
-              activeTab === 'archive' ? 'text-[#C82A27] font-semibold border-b-2 border-[#C82A27] pb-1' : ''
+            className={`px-3.5 py-1.5 rounded-xl transition-all duration-200 whitespace-nowrap cursor-pointer ${
+              activeTab === 'archive'
+                ? 'bg-[#C82A27] text-white font-semibold shadow-xs hover:bg-[#A8221F] hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-95'
+                : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60 hover:-translate-y-0.5 hover:shadow-xs active:translate-y-0 active:scale-95'
             }`}
           >
             Bách khoa
           </button>
           <button
             onClick={() => onSelectTab('quiz')}
-            className={`transition-colors whitespace-nowrap cursor-pointer hover:text-stone-900 ${
-              activeTab === 'quiz' ? 'text-[#C82A27] font-semibold border-b-2 border-[#C82A27] pb-1' : ''
+            className={`px-3.5 py-1.5 rounded-xl transition-all duration-200 whitespace-nowrap cursor-pointer ${
+              activeTab === 'quiz'
+                ? 'bg-[#C82A27] text-white font-semibold shadow-xs hover:bg-[#A8221F] hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-95'
+                : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60 hover:-translate-y-0.5 hover:shadow-xs active:translate-y-0 active:scale-95'
             }`}
           >
             Trắc nghiệm
@@ -92,7 +106,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center gap-3">
           <button
             onClick={onOpenQuickStudio}
-            className="px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-[#C82A27] hover:bg-[#A8221F] rounded-xl transition-colors whitespace-nowrap shadow-sm cursor-pointer"
+            className="px-4 py-2 text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-[#C82A27] to-[#A8221F] hover:from-[#B52522] hover:to-[#8D1815] hover:shadow-lg hover:shadow-red-900/20 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 rounded-xl transition-all duration-200 whitespace-nowrap shadow-sm cursor-pointer"
           >
             Thử đồ ngay
           </button>
@@ -100,59 +114,73 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {/* Mobile Sub-Navigation Bar for Small Screens */}
-      <div className="lg:hidden flex items-center gap-1 px-3 py-2 border-t border-stone-200/60 bg-white/80 text-xs font-medium overflow-x-auto scrollbar-none">
+      <div className="lg:hidden flex items-center gap-1.5 px-3 py-2 border-t border-stone-200/60 bg-white/80 text-xs font-medium overflow-x-auto scrollbar-none">
         <button
           onClick={() => onSelectTab('tryon')}
-          className={`py-1 px-2.5 rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
-            activeTab === 'tryon' ? 'bg-[#C82A27]/10 text-[#C82A27] font-bold' : 'text-stone-600'
+          className={`py-1.5 px-3 rounded-lg transition-all duration-200 whitespace-nowrap cursor-pointer hover:-translate-y-0.5 active:scale-95 ${
+            activeTab === 'tryon'
+              ? 'bg-[#C82A27] text-white font-bold shadow-xs'
+              : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
           }`}
         >
           Thử đồ ảo
         </button>
         <button
           onClick={() => onSelectTab('studio')}
-          className={`py-1 px-2.5 rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
-            activeTab === 'studio' ? 'bg-[#C82A27]/10 text-[#C82A27] font-bold' : 'text-stone-600'
+          className={`py-1.5 px-3 rounded-lg transition-all duration-200 whitespace-nowrap cursor-pointer hover:-translate-y-0.5 active:scale-95 ${
+            activeTab === 'studio'
+              ? 'bg-[#C82A27] text-white font-bold shadow-xs'
+              : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
           }`}
         >
           Studio
         </button>
         <button
           onClick={() => onSelectTab('weather')}
-          className={`py-1 px-2.5 rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
-            activeTab === 'weather' ? 'bg-[#C82A27]/10 text-[#C82A27] font-bold' : 'text-stone-600'
+          className={`py-1.5 px-3 rounded-lg transition-all duration-200 whitespace-nowrap cursor-pointer hover:-translate-y-0.5 active:scale-95 ${
+            activeTab === 'weather'
+              ? 'bg-[#C82A27] text-white font-bold shadow-xs'
+              : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
           }`}
         >
           Dịp lễ & Thời tiết
         </button>
         <button
           onClick={() => onSelectTab('compare')}
-          className={`py-1 px-2.5 rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
-            activeTab === 'compare' ? 'bg-[#C82A27]/10 text-[#C82A27] font-bold' : 'text-stone-600'
+          className={`py-1.5 px-3 rounded-lg transition-all duration-200 whitespace-nowrap cursor-pointer hover:-translate-y-0.5 active:scale-95 ${
+            activeTab === 'compare'
+              ? 'bg-[#C82A27] text-white font-bold shadow-xs'
+              : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
           }`}
         >
           So sánh
         </button>
         <button
           onClick={() => onSelectTab('presets')}
-          className={`py-1 px-2.5 rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
-            activeTab === 'presets' ? 'bg-[#C82A27]/10 text-[#C82A27] font-bold' : 'text-stone-600'
+          className={`py-1.5 px-3 rounded-lg transition-all duration-200 whitespace-nowrap cursor-pointer hover:-translate-y-0.5 active:scale-95 ${
+            activeTab === 'presets'
+              ? 'bg-[#C82A27] text-white font-bold shadow-xs'
+              : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
           }`}
         >
           Cảm hứng
         </button>
         <button
           onClick={() => onSelectTab('archive')}
-          className={`py-1 px-2.5 rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
-            activeTab === 'archive' ? 'bg-[#C82A27]/10 text-[#C82A27] font-bold' : 'text-stone-600'
+          className={`py-1.5 px-3 rounded-lg transition-all duration-200 whitespace-nowrap cursor-pointer hover:-translate-y-0.5 active:scale-95 ${
+            activeTab === 'archive'
+              ? 'bg-[#C82A27] text-white font-bold shadow-xs'
+              : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
           }`}
         >
           Bách khoa
         </button>
         <button
           onClick={() => onSelectTab('quiz')}
-          className={`py-1 px-2.5 rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
-            activeTab === 'quiz' ? 'bg-[#C82A27]/10 text-[#C82A27] font-bold' : 'text-stone-600'
+          className={`py-1.5 px-3 rounded-lg transition-all duration-200 whitespace-nowrap cursor-pointer hover:-translate-y-0.5 active:scale-95 ${
+            activeTab === 'quiz'
+              ? 'bg-[#C82A27] text-white font-bold shadow-xs'
+              : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
           }`}
         >
           Trắc nghiệm

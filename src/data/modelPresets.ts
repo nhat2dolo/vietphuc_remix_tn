@@ -1,4 +1,5 @@
 // Preset background models and scenes for immediate virtual try-on
+// High-fidelity anatomy: natural contours, sculpted necks and graceful hands (no stiff paper doll cutout)
 
 export interface ModelPreset {
   id: string;
@@ -9,7 +10,7 @@ export interface ModelPreset {
 
 const svgToUri = (svgStr: string) => `data:image/svg+xml;utf8,${encodeURIComponent(svgStr)}`;
 
-// 1. Female Standing Portrait Model
+// 1. Female Standing Portrait Model with Natural Human Anatomy
 const femaleModelSvg = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" width="400" height="600">
   <defs>
@@ -21,51 +22,68 @@ const femaleModelSvg = `
       <stop offset="0%" stop-color="#FFF8EE" stop-opacity="0.8"/>
       <stop offset="100%" stop-color="#E2D7C8" stop-opacity="0"/>
     </radialGradient>
+    <linearGradient id="skinF" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE8D4"/>
+      <stop offset="60%" stop-color="#F8D4B7"/>
+      <stop offset="100%" stop-color="#ECC19E"/>
+    </linearGradient>
   </defs>
-  <!-- Background -->
+  <!-- Background Studio Environment -->
   <rect width="400" height="600" fill="url(#bgG)"/>
   <circle cx="200" cy="200" r="180" fill="url(#halo)"/>
 
-  <!-- Soft Shadow -->
-  <ellipse cx="200" cy="565" rx="100" ry="12" fill="rgba(0,0,0,0.12)"/>
+  <!-- Soft Ground Ambient Shadow -->
+  <ellipse cx="200" cy="565" rx="105" ry="12" fill="rgba(0,0,0,0.12)"/>
 
-  <!-- Legs / Base Trousers -->
-  <path d="M175 340 L168 540 L188 540 L195 380 L205 380 L212 540 L232 540 L225 340 Z" fill="#E8DEC8"/>
-  <ellipse cx="178" cy="545" rx="12" ry="5" fill="#C5B7A1"/>
-  <ellipse cx="222" cy="545" rx="12" ry="5" fill="#C5B7A1"/>
+  <!-- Legs / Base Silk Trousers -->
+  <path d="M174 340 L166 540 L188 540 L195 380 L205 380 L212 540 L234 540 L226 340 Z" fill="#E8DEC8"/>
+  <ellipse cx="177" cy="545" rx="12" ry="5" fill="#B39F85"/>
+  <ellipse cx="223" cy="545" rx="12" ry="5" fill="#B39F85"/>
 
-  <!-- Silhouette Torso & Basic Base Layer -->
-  <path d="M160 170 C170 160 190 156 200 156 C210 156 230 160 240 170 L248 340 L152 340 Z" fill="#F4EADB"/>
-  <path d="M152 172 L120 280 L136 288 L164 210 Z" fill="#F4EADB"/>
-  <path d="M248 172 L280 280 L264 288 L236 210 Z" fill="#F4EADB"/>
-  <circle cx="126" cy="284" r="10" fill="#FCD7BA"/>
-  <circle cx="274" cy="284" r="10" fill="#FCD7BA"/>
+  <!-- Torso & Natural Shoulder Contours -->
+  <path d="M156 168 C168 158 190 154 200 154 C210 154 232 158 244 168 L248 340 L152 340 Z" fill="#F4EADB"/>
+  <path d="M152 170 C140 205 125 245 118 280 L134 286 C144 250 156 215 164 195 Z" fill="#F4EADB"/>
+  <path d="M248 170 C260 205 275 245 282 280 L266 286 C256 250 244 215 236 195 Z" fill="#F4EADB"/>
 
-  <!-- Neck -->
-  <rect x="187" y="125" width="26" height="35" rx="5" fill="#FCD7BA"/>
+  <!-- Graceful Sculpted Hands (No floating circles) -->
+  <ellipse cx="125" cy="283" rx="7" ry="9" fill="url(#skinF)" transform="rotate(-15 125 283)"/>
+  <ellipse cx="275" cy="283" rx="7" ry="9" fill="url(#skinF)" transform="rotate(15 275 283)"/>
 
-  <!-- Head & Facial Features -->
-  <ellipse cx="200" cy="95" rx="28" ry="36" fill="#FDE1CA"/>
-  <!-- Eyes, Lips, Hair -->
-  <path d="M182 85 Q190 82 195 85" stroke="#4A3423" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-  <path d="M205 85 Q210 82 218 85" stroke="#4A3423" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-  <ellipse cx="188" cy="93" rx="3.5" ry="2" fill="#2E2319"/>
-  <ellipse cx="212" cy="93" rx="3.5" ry="2" fill="#2E2319"/>
-  <path d="M200 93 L199 102 L202 103" stroke="#D79E79" stroke-width="1.5" fill="none"/>
-  <path d="M194 110 Q200 114 206 110" stroke="#DC2626" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <!-- Naturally Sculpted Neck Tapering into Clavicle (No crude rectangle) -->
+  <path d="M187 122 C187 136 182 152 176 160 L224 160 C218 152 213 136 213 122 Z" fill="url(#skinF)"/>
+  <path d="M188 124 Q200 132 212 124" stroke="#D79E79" stroke-width="1.2" fill="none" opacity="0.3"/>
+  <path d="M182 158 Q192 160 200 163 Q208 160 218 158" stroke="#D79E79" stroke-width="0.8" fill="none" opacity="0.3"/>
 
-  <!-- Hair Bun -->
-  <circle cx="200" cy="56" r="18" fill="#1C1815"/>
-  <path d="M172 90 C172 65 182 58 200 60 C218 58 228 65 228 90 C218 76 206 74 200 76 C194 74 182 76 172 90 Z" fill="#1C1815"/>
+  <!-- Symmetrical Head & Facial Features -->
+  <ellipse cx="200" cy="94" rx="27" ry="34" fill="url(#skinF)"/>
+  <ellipse cx="184" cy="102" rx="5" ry="3" fill="#F87171" opacity="0.22"/>
+  <ellipse cx="216" cy="102" rx="5" ry="3" fill="#F87171" opacity="0.22"/>
+
+  <!-- Eyes, Lips, Serene Facial Expression -->
+  <path d="M183 85 Q189 82 195 85" stroke="#3D291C" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <path d="M205 85 Q211 82 217 85" stroke="#3D291C" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <ellipse cx="189" cy="92" rx="3" ry="2" fill="#261A13"/>
+  <ellipse cx="211" cy="92" rx="3" ry="2" fill="#261A13"/>
+  <path d="M200 91 L199 100 L202 101" stroke="#C98A62" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+  <path d="M195 109 Q200 112 205 109" stroke="#C82A27" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+
+  <!-- Hair Bun (Tucked neatly, ready for headwear without clipping) -->
+  <circle cx="200" cy="56" r="16" fill="#1C1815"/>
+  <path d="M174 88 C174 65 184 58 200 60 C216 58 226 65 226 88 C216 75 206 73 200 74 C194 73 184 75 174 88 Z" fill="#1C1815"/>
 </svg>`;
 
-// 2. Male Standing Portrait Model
+// 2. Male Standing Portrait Model with Natural Anatomy
 const maleModelSvg = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" width="400" height="600">
   <defs>
     <linearGradient id="bgM" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#EEF2F6"/>
       <stop offset="100%" stop-color="#CFD9E5"/>
+    </linearGradient>
+    <linearGradient id="skinM" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE5D0"/>
+      <stop offset="60%" stop-color="#F5CEB0"/>
+      <stop offset="100%" stop-color="#E5B995"/>
     </linearGradient>
   </defs>
   <rect width="400" height="600" fill="url(#bgM)"/>
@@ -76,28 +94,31 @@ const maleModelSvg = `
   <ellipse cx="175" cy="545" rx="14" ry="6" fill="#1E232B"/>
   <ellipse cx="225" cy="545" rx="14" ry="6" fill="#1E232B"/>
 
-  <!-- Broad Shoulders -->
-  <path d="M150 170 C165 158 190 154 200 154 C210 154 235 158 250 170 L256 340 L144 340 Z" fill="#E2E8F0"/>
-  <path d="M144 172 L110 280 L128 290 L158 210 Z" fill="#E2E8F0"/>
-  <path d="M256 172 L290 280 L272 290 L242 210 Z" fill="#E2E8F0"/>
-  <circle cx="118" cy="286" r="11" fill="#FCD7BA"/>
-  <circle cx="282" cy="286" r="11" fill="#FCD7BA"/>
+  <!-- Broad Natural Shoulders -->
+  <path d="M148 168 C164 156 190 152 200 152 C210 152 236 156 252 168 L256 340 L144 340 Z" fill="#E2E8F0"/>
+  <path d="M144 170 C132 205 116 248 108 280 L126 288 C136 250 150 215 158 195 Z" fill="#E2E8F0"/>
+  <path d="M256 170 C268 205 284 248 292 280 L274 288 C264 250 250 215 242 195 Z" fill="#E2E8F0"/>
 
-  <!-- Neck -->
-  <rect x="185" y="122" width="30" height="38" rx="5" fill="#FCD7BA"/>
+  <!-- Natural Hands -->
+  <ellipse cx="116" cy="285" rx="8" ry="10" fill="url(#skinM)" transform="rotate(-15 116 285)"/>
+  <ellipse cx="284" cy="285" rx="8" ry="10" fill="url(#skinM)" transform="rotate(15 284 285)"/>
+
+  <!-- Natural Sculpted Neck -->
+  <path d="M185 120 C185 136 178 152 172 160 L228 160 C222 152 215 136 215 120 Z" fill="url(#skinM)"/>
 
   <!-- Head -->
-  <ellipse cx="200" cy="92" rx="30" ry="38" fill="#FDE1CA"/>
-  <path d="M180 82 Q188 78 195 82" stroke="#332418" stroke-width="2.6" stroke-linecap="round" fill="none"/>
-  <path d="M205 82 Q212 78 220 82" stroke="#332418" stroke-width="2.6" stroke-linecap="round" fill="none"/>
-  <ellipse cx="187" cy="90" rx="3.5" ry="2" fill="#2E2319"/>
-  <ellipse cx="213" cy="90" rx="3.5" ry="2" fill="#2E2319"/>
-  <path d="M200 90 L199 100 L203 101" stroke="#D79E79" stroke-width="1.6" fill="none"/>
-  <path d="M192 108 Q200 110 208 108" stroke="#B91C1C" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <ellipse cx="200" cy="92" rx="28" ry="36" fill="url(#skinM)"/>
+  <path d="M178 81 L196 80" stroke="#261A13" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M204 80 L222 81" stroke="#261A13" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <ellipse cx="188" cy="89" rx="3" ry="2" fill="#2E2319"/>
+  <ellipse cx="212" cy="89" rx="3" ry="2" fill="#2E2319"/>
+  <path d="M200 89 L199 98 L203 99" stroke="#C98A62" stroke-width="1.4" fill="none"/>
+  <path d="M194 107 L206 107" stroke="#C27A5B" stroke-width="1.8" stroke-linecap="round" fill="none"/>
 
-  <!-- Hair -->
-  <circle cx="200" cy="58" r="15" fill="#18181B"/>
-  <path d="M170 85 C170 60 182 54 200 54 C218 54 230 60 230 85 C220 72 208 70 200 70 C192 70 180 72 170 85 Z" fill="#18181B"/>
+  <!-- Modern Neat Short Hair (No Bun) -->
+  <path d="M172 82 C172 58 182 48 200 48 C218 48 228 58 228 82 C226 77 222 72 216 70 C208 66 192 66 184 70 C178 72 174 77 172 82 Z" fill="#18181B"/>
+  <path d="M174 70 C177 56 187 48 200 48 C212 48 224 53 226 67 C220 60 210 57 200 58 C189 59 180 62 174 70 Z" fill="#27272A"/>
+  <path d="M192 50 C193 56 191 62 189 67" stroke="#3F3F46" stroke-width="1.2" stroke-linecap="round" fill="none"/>
 </svg>`;
 
 // 3. Ancient Heritage Garden Backdrop

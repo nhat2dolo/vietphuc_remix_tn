@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { OutfitData, TraditionalColor, AccessoryData, PatternId, GenderMode } from '../types/vietphuc';
+import { normalizeVietnameseText } from '../utils/textUtils';
 import { Download, Copy, Check, X, Sparkles } from 'lucide-react';
 
 interface LookbookCardModalProps {
@@ -33,12 +34,12 @@ export const LookbookCardModal: React.FC<LookbookCardModalProps> = ({
 
   const handleCopyRecipe = async () => {
     const accList = selectedAccessories.map((a) => `${a.name} (${a.emoji})`).join(', ') || 'Không phụ kiện';
-    const text = `🇻🇳 [VIỆT PHỤC REMIX - LOOKBOOK]
+    const text = normalizeVietnameseText(`🇻🇳 [VIỆT PHỤC REMIX - LOOKBOOK]
 Bộ trang phục: ${outfitData.name} (${outfitData.era})
 Tone màu: ${colorData.name} [${colorData.hex}] - Ngũ hành: ${colorData.element}
 Phụ kiện remix: ${accList}
 Triết lý: "${outfitData.philosophy}"
-👉 Khám phá tại: Việt phục Remix - Di sản & Gen Z`;
+👉 Khám phá tại: Việt phục Remix - Di sản & Gen Z`);
 
     try {
       await navigator.clipboard.writeText(text);
@@ -76,16 +77,16 @@ Triết lý: "${outfitData.philosophy}"
     ctx.strokeRect(52, 52, canvas.width - 104, canvas.height - 104);
 
     // Header Tag
-    ctx.font = '600 24px sans-serif';
+    ctx.font = '600 24px "Be Vietnam Pro", sans-serif';
     ctx.fillStyle = '#8D1815';
     ctx.fillText('VIỆT PHỤC REMIX · GEN Z HERITAGE ATELIER', 80, 110);
 
     // Look Name & Outfit Title
-    ctx.font = 'bold 64px Georgia, serif';
+    ctx.font = 'bold 64px Lora, "Be Vietnam Pro", serif';
     ctx.fillStyle = '#1C1917';
     ctx.fillText(lookName || outfitData.name, 80, 200);
 
-    ctx.font = 'italic 32px Georgia, serif';
+    ctx.font = 'italic 32px Lora, "Be Vietnam Pro", serif';
     ctx.fillStyle = '#78350F';
     ctx.fillText(outfitData.tagline, 80, 255);
 
@@ -111,10 +112,10 @@ Triết lý: "${outfitData.philosophy}"
 
     // Text details inside card
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 36px Georgia, serif';
+    ctx.font = 'bold 36px Lora, "Be Vietnam Pro", serif';
     ctx.fillText(outfitData.name, 170, 470);
 
-    ctx.font = '24px sans-serif';
+    ctx.font = '24px "Be Vietnam Pro", sans-serif';
     ctx.fillText(`Màu chính: ${colorData.name}`, 170, 530);
     ctx.fillText(`Mã màu: ${colorData.hex}`, 170, 575);
     ctx.fillText(`Hành: ${colorData.element}`, 170, 620);
@@ -127,10 +128,10 @@ Triết lý: "${outfitData.philosophy}"
     ctx.fill();
 
     ctx.fillStyle = '#1C1917';
-    ctx.font = 'bold 30px Georgia, serif';
+    ctx.font = 'bold 30px Lora, "Be Vietnam Pro", serif';
     ctx.fillText('Phụ Kiện Remix Đã Chọn', 620, 460);
 
-    ctx.font = '26px sans-serif';
+    ctx.font = '26px "Be Vietnam Pro", sans-serif';
     ctx.fillStyle = '#44403C';
     let yOffset = 520;
     if (selectedAccessories.length === 0) {
@@ -144,10 +145,10 @@ Triết lý: "${outfitData.philosophy}"
 
     // Heritage Philosophy Section
     ctx.fillStyle = '#1C1917';
-    ctx.font = 'bold 30px Georgia, serif';
+    ctx.font = 'bold 30px Lora, "Be Vietnam Pro", serif';
     ctx.fillText('Ý Nghĩa & Triết Lý Di Sản', 80, 1140);
 
-    ctx.font = '26px Georgia, serif';
+    ctx.font = '26px Lora, "Be Vietnam Pro", serif';
     ctx.fillStyle = '#57534E';
     const words = outfitData.philosophy.split(' ');
     let line = '';

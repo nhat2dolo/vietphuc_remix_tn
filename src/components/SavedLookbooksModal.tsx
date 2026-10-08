@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { OutfitId, GenderMode, PatternId, AccessoryId } from '../types/vietphuc';
 import { OUTFITS, TRADITIONAL_COLORS, ACCESSORIES } from '../data/vietphucData';
+import { normalizeVietnameseText } from '../utils/textUtils';
 import { MannequinViewer } from './MannequinViewer';
 import { Bookmark, Trash2, ArrowRight, X, Share2, Check, Sparkles } from 'lucide-react';
 
@@ -32,6 +33,7 @@ export function saveLookToStorage(item: Omit<SavedLookItem, 'id' | 'savedAt'>): 
   const looks = getSavedLooks();
   const newItem: SavedLookItem = {
     ...item,
+    name: normalizeVietnameseText(item.name),
     id: `look-${Date.now()}`,
     savedAt: new Date().toLocaleDateString('vi-VN'),
   };
@@ -76,11 +78,11 @@ export const SavedLookbooksModal: React.FC<SavedLookbooksModalProps> = ({
       .filter(Boolean)
       .join(', ');
 
-    const shareText = `🇻🇳 [VIỆT PHỤC REMIX] Look: "${look.name}"
+    const shareText = normalizeVietnameseText(`🇻🇳 [VIỆT PHỤC REMIX] Look: "${look.name}"
 Cổ phục: ${outfit.name} (${outfit.era})
 Màu sắc: ${color.name} [${color.hex}]
 Phụ kiện remix: ${accList || 'Không'}
-Triết lý: "${outfit.philosophy}"`;
+Triết lý: "${outfit.philosophy}"`);
 
     try {
       await navigator.clipboard.writeText(shareText);

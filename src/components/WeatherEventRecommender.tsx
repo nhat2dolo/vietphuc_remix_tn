@@ -67,16 +67,16 @@ export const WeatherEventRecommender: React.FC<WeatherEventRecommenderProps> = (
                   <button
                     key={evt.id}
                     onClick={() => setSelectedEvent(evt)}
-                    className={`p-3.5 rounded-2xl text-left border transition-all cursor-pointer ${
+                    className={`group p-3.5 rounded-2xl text-left border transition-all duration-200 cursor-pointer hover:-translate-y-1 hover:shadow-md active:scale-[0.98] ${
                       isSelected
                         ? 'border-[#C82A27] bg-[#FFF5F4] text-[#8D1815] shadow-xs ring-1 ring-[#C82A27]/20'
-                        : 'border-stone-200 hover:border-stone-300 hover:bg-stone-50 bg-white text-stone-800'
+                        : 'border-stone-200 hover:border-[#C82A27]/40 hover:bg-stone-50 bg-white text-stone-800'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <span className="text-2xl">{evt.emoji}</span>
+                      <span className="text-2xl transition-transform duration-200 group-hover:scale-125">{evt.emoji}</span>
                       <div className="min-w-0 flex-1">
-                        <div className="text-xs sm:text-sm font-semibold truncate">{evt.name}</div>
+                        <div className="text-xs sm:text-sm font-semibold truncate group-hover:text-[#C82A27] transition-colors">{evt.name}</div>
                         <div className="text-[11px] text-stone-500 line-clamp-1">{evt.desc}</div>
                       </div>
                       {isSelected && <Check className="w-4 h-4 text-[#C82A27] shrink-0" />}
@@ -100,17 +100,17 @@ export const WeatherEventRecommender: React.FC<WeatherEventRecommenderProps> = (
                   <button
                     key={w.id}
                     onClick={() => setSelectedWeather(w)}
-                    className={`p-3 rounded-2xl text-left border transition-all cursor-pointer ${
+                    className={`group p-3 rounded-2xl text-left border transition-all duration-200 cursor-pointer hover:-translate-y-0.5 hover:shadow-sm active:scale-[0.98] ${
                       isSelected
                         ? 'border-[#1F4F89] bg-blue-50/60 text-[#12335A] font-semibold ring-1 ring-[#1F4F89]/20'
-                        : 'border-stone-200 hover:border-stone-300 hover:bg-stone-50 bg-white text-stone-700'
+                        : 'border-stone-200 hover:border-[#1F4F89]/40 hover:bg-stone-50 bg-white text-stone-700'
                     }`}
                   >
                     <div className="flex items-center justify-between text-base">
-                      <span>{w.icon}</span>
+                      <span className="transition-transform duration-200 group-hover:scale-125">{w.icon}</span>
                       <span className="text-[11px] font-mono text-stone-500 font-normal">{w.temp}</span>
                     </div>
-                    <div className="text-xs font-semibold mt-1">{w.name}</div>
+                    <div className="text-xs font-semibold mt-1 group-hover:text-[#12335A] transition-colors">{w.name}</div>
                     <div className="text-[10px] text-stone-500 truncate mt-0.5">{w.desc}</div>
                   </button>
                 );
@@ -173,10 +173,10 @@ export const WeatherEventRecommender: React.FC<WeatherEventRecommenderProps> = (
 
           <button
             onClick={handleApply}
-            className="w-full py-3.5 px-4 rounded-xl bg-[#C82A27] hover:bg-[#A8221F] text-white font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+            className="w-full py-3.5 px-4 rounded-xl bg-[#C82A27] hover:bg-[#A8221F] hover:-translate-y-1 hover:shadow-lg text-white font-bold text-xs sm:text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-sm cursor-pointer active:translate-y-0 active:scale-95"
           >
             <span>Áp Dụng Bản Phối Này Vào Studio</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
           </button>
         </div>
       </div>

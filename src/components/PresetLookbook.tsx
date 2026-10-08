@@ -30,10 +30,10 @@ export const PresetLookbook: React.FC<PresetLookbookProps> = ({ onSelectPreset, 
           return (
             <div
               key={preset.id}
-              className={`p-5 rounded-2xl border transition-all flex flex-col justify-between space-y-4 bg-white ${
+              className={`group p-5 rounded-2xl border transition-all duration-200 flex flex-col justify-between space-y-4 bg-white hover:-translate-y-1.5 hover:shadow-lg ${
                 isCurrent
                   ? 'border-[#C82A27] ring-2 ring-[#C82A27]/20 shadow-md'
-                  : 'border-stone-200/80 hover:border-stone-400 hover:shadow-sm'
+                  : 'border-stone-200/80 hover:border-[#C82A27]/40'
               }`}
             >
               <div className="space-y-2">
@@ -42,13 +42,13 @@ export const PresetLookbook: React.FC<PresetLookbookProps> = ({ onSelectPreset, 
                     {outfit.name}
                   </span>
                   <div
-                    className="w-5 h-5 rounded-full border border-black/10 shadow-inner"
+                    className="w-5 h-5 rounded-full border border-black/10 shadow-inner transition-transform duration-200 group-hover:scale-125"
                     style={{ backgroundColor: preset.colorHex }}
                     title={`Màu chính: ${preset.colorHex}`}
                   />
                 </div>
 
-                <h4 className="text-lg font-display font-bold text-stone-900">
+                <h4 className="text-lg font-display font-bold text-stone-900 group-hover:text-[#C82A27] transition-colors">
                   {preset.name}
                 </h4>
                 <p className="text-xs text-stone-600 font-serif italic leading-relaxed">
@@ -62,14 +62,14 @@ export const PresetLookbook: React.FC<PresetLookbookProps> = ({ onSelectPreset, 
 
               <button
                 onClick={() => onSelectPreset(preset)}
-                className={`w-full py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                className={`w-full py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all duration-200 cursor-pointer hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-95 ${
                   isCurrent
                     ? 'bg-[#C82A27] text-white'
                     : 'bg-stone-100 hover:bg-[#C82A27] hover:text-white text-stone-800'
                 }`}
               >
                 <span>{isCurrent ? 'Đang kích hoạt' : 'Áp dụng phong cách này'}</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
               </button>
             </div>
           );

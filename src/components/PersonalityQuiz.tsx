@@ -67,17 +67,17 @@ export const PersonalityQuiz: React.FC<PersonalityQuizProps> = ({ onApplyResult 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
           <button
             onClick={() => onApplyResult(resultOutfit)}
-            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#C82A27] hover:bg-[#A8221F] text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+            className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-[#C82A27] hover:bg-[#A8221F] hover:-translate-y-1 hover:shadow-lg text-white text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 shadow-sm cursor-pointer active:translate-y-0 active:scale-95"
           >
             <span>Khoác lên bộ {outfitInfo.name} ngay!</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 transition-transform hover:translate-x-1" />
           </button>
 
           <button
             onClick={handleReset}
-            className="w-full sm:w-auto px-4 py-3 rounded-xl border border-stone-300 hover:bg-stone-100 text-stone-700 text-sm font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full sm:w-auto px-4 py-3.5 rounded-xl border border-stone-300 hover:border-stone-400 hover:bg-stone-100 hover:-translate-y-0.5 hover:shadow-xs text-stone-700 text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className="w-4 h-4 transition-transform hover:-rotate-45" />
             <span>Thử lại trắc nghiệm</span>
           </button>
         </div>
@@ -107,12 +107,12 @@ export const PersonalityQuiz: React.FC<PersonalityQuizProps> = ({ onApplyResult 
           <button
             key={idx}
             onClick={() => handleSelectOption(opt.targetOutfit)}
-            className="w-full text-left p-4 rounded-xl border border-stone-200 hover:border-[#C82A27] hover:bg-[#FAF7F2] transition-all group flex items-center justify-between cursor-pointer"
+            className="w-full text-left p-4 rounded-xl border border-stone-200 hover:border-[#C82A27] hover:bg-[#FFF5F4] hover:-translate-y-1 hover:shadow-md transition-all duration-200 group flex items-center justify-between cursor-pointer active:scale-[0.98]"
           >
-            <span className="text-sm text-stone-800 font-medium group-hover:text-[#C82A27]">
+            <span className="text-sm text-stone-800 font-semibold group-hover:text-[#C82A27] transition-colors">
               {opt.text}
             </span>
-            <span className="text-xs text-stone-400 group-hover:text-stone-600 shrink-0 ml-2">
+            <span className="text-xs text-stone-400 group-hover:text-[#8D1815] shrink-0 ml-2 transition-colors">
               #{opt.trait}
             </span>
           </button>

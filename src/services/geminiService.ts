@@ -5,6 +5,7 @@
  */
 
 import { OutfitData, TraditionalColor, AccessoryData } from '../types/vietphuc';
+import { normalizeVietnameseText } from '../utils/textUtils';
 
 export interface StylingAnalysisResult {
   score: number; // 0 - 100
@@ -77,11 +78,11 @@ export async function analyzeOutfitWithGemini(params: {
     const data = await res.json();
     return {
       score: Number(data.score) || 90,
-      title: data.title || `${params.outfit.name} Remix`,
-      verdict: data.verdict || '',
-      culturalInsight: data.culturalInsight || '',
-      modernStylingAdvice: data.modernStylingAdvice || '',
-      eventSuitability: data.eventSuitability || '',
+      title: normalizeVietnameseText(data.title || `${params.outfit.name} Remix`),
+      verdict: normalizeVietnameseText(data.verdict || ''),
+      culturalInsight: normalizeVietnameseText(data.culturalInsight || ''),
+      modernStylingAdvice: normalizeVietnameseText(data.modernStylingAdvice || ''),
+      eventSuitability: normalizeVietnameseText(data.eventSuitability || ''),
     };
   } catch (err) {
     console.warn('API call failed, using local cultural engine fallback:', err);
@@ -118,9 +119,9 @@ export async function chatWithHeritageStylist(
     }
 
     const data = await res.json();
-    return data.reply || 'Rất vui được hỗ trợ bạn khám phá di sản Việt phục!';
+    return normalizeVietnameseText(data.reply || 'Rất vui được hỗ trợ bạn khám phá di sản Việt phục!');
   } catch (err) {
     console.warn('Chat API error, using fallback:', err);
-    return `[Cố vấn Việt Phục Remix (Chế độ Cổ Phong)]: Bộ ${context.outfitName} sắc ${context.colorName} của bạn rất ấn tượng! Để tăng tính Gen Z mà vẫn chuẩn mực, hãy chú ý giữ nguyên phom dáng cổ áo và tà áo, đồng thời bạn có thể tự do biến tấu phụ kiện như túi tote thổ cẩm, giày sneaker tối giản hoặc mắt kính gọng kim loại thanh mảnh.`;
+    return normalizeVietnameseText(`[Cố vấn Việt Phục Remix (Chế độ Cổ Phong)]: Bộ ${context.outfitName} sắc ${context.colorName} của bạn rất ấn tượng! Để tăng tính Gen Z mà vẫn chuẩn mực, hãy chú ý giữ nguyên phom dáng cổ áo và tà áo, đồng thời bạn có thể tự do biến tấu phụ kiện như túi tote thổ cẩm, giày sneaker tối giản hoặc mắt kính gọng kim loại thanh mảnh.`);
   }
 }

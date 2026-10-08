@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CulturalWarning } from '../types/vietphuc';
 import { AlertCircle, Lightbulb, HeartHandshake, ShieldCheck } from 'lucide-react';
 
@@ -7,11 +7,18 @@ interface CulturalGuideProps {
 }
 
 export const CulturalGuide: React.FC<CulturalGuideProps> = ({ warnings }) => {
-  if (warnings.length === 0) return null;
+  const [dismissedTitles, setDismissedTitles] = useState<Set<string>>(new Set());
+
+  const activeWarnings = warnings.filter((item) => !dismissedTitles.has(item.title));
+  if (activeWarnings.length === 0) return null;
+
+  const handleDismiss = (title: string) => {
+    setDismissedTitles((prev) => new Set(prev).add(title));
+  };
 
   return (
     <div className="space-y-3">
-      {warnings.map((item, index) => {
+      {activeWarnings.map((item, index) => {
         let borderColor = 'border-amber-400 bg-amber-50/70 text-amber-950';
         let icon = <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />;
 
@@ -26,12 +33,12 @@ export const CulturalGuide: React.FC<CulturalGuideProps> = ({ warnings }) => {
         return (
           <div
             key={index}
-            className={`p-4 rounded-xl border-l-4 border shadow-sm transition-all animate-in fade-in duration-300 ${borderColor}`}
+            className={`p-4 rounded-xl border-l-4 border shadow-sm transition-all animate-in fade-in duration-300 relative group ${borderColor}`}
           >
             <div className="flex items-start gap-3">
               {icon}
-              <div className="space-y-1 text-xs sm:text-sm">
-                <div className="font-semibold flex items-center gap-2">
+              <div className="space-y-1 text-xs sm:text-sm flex-1 pr-6">
+                <div className="font-semibold flex items-center gap-2 flex-wrap">
                   <span>{item.title}</span>
                   {item.severity === 'praise' && (
                     <span className="text-[10px] font-sans font-medium px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
@@ -57,6 +64,17 @@ export const CulturalGuide: React.FC<CulturalGuideProps> = ({ warnings }) => {
                   </div>
                 )}
               </div>
+
+              {/* Nút đóng dấu x */}
+              <button
+                type="button"
+                onClick={() => handleDismiss(item.title)}
+                className="close-btn absolute top-3 right-3 text-stone-400 hover:text-stone-800 p-1 rounded hover:bg-black/5 cursor-pointer transition-colors leading-none font-bold text-base"
+                aria-label="Đóng"
+                title="Đóng lưu ý này"
+              >
+                &times;
+              </button>
             </div>
           </div>
         );

@@ -31,12 +31,19 @@ interface FittingStudioProps {
 
 export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'nguthan' }) => {
   const [outfit, setOutfit] = useState<OutfitId>(initialOutfit);
-  const [gender, setGender] = useState<GenderMode>('female');
+  const [gender, setGender] = useState<GenderMode>('male');
   const [selectedColorId, setSelectedColorId] = useState<string>('vang-nghe');
   const [secondaryColorHex, setSecondaryColorHex] = useState<string>('#EDE7DC');
   const [pattern, setPattern] = useState<PatternId>('lotus');
-  const [accessories, setAccessories] = useState<AccessoryId[]>(['man', 'chuoingoc']);
+  const [accessories, setAccessories] = useState<AccessoryId[]>([]);
   const [isNightStudio, setIsNightStudio] = useState<boolean>(false);
+
+  const handleSetGender = (newGender: GenderMode) => {
+    setGender(newGender);
+    if (newGender === 'male') {
+      setAccessories((prev) => prev.filter((id) => id !== 'chuoingoc'));
+    }
+  };
 
   // Modals & Collapsible Sections
   const [showLookbookModal, setShowLookbookModal] = useState<boolean>(false);
@@ -62,11 +69,22 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
     return analyzeCulturalContext(outfit, accessories);
   }, [outfit, accessories]);
 
+  // Headwear items are mutually exclusive to prevent multiple overlapping hats
+  const HEADWEAR_IDS: AccessoryId[] = ['man', 'nonla'];
+
   // Handlers
   const toggleAccessory = (accId: AccessoryId) => {
-    setAccessories((prev) =>
-      prev.includes(accId) ? prev.filter((id) => id !== accId) : [...prev, accId]
-    );
+    setAccessories((prev) => {
+      if (prev.includes(accId)) {
+        return prev.filter((id) => id !== accId);
+      }
+      // If selecting a headwear item, replace existing headwear to avoid overlapping hats
+      if (HEADWEAR_IDS.includes(accId)) {
+        const filtered = prev.filter((id) => !HEADWEAR_IDS.includes(id));
+        return [...filtered, accId];
+      }
+      return [...prev, accId];
+    });
   };
 
   const handleResetOutfit = () => {
@@ -150,7 +168,7 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
           >
             <Bot className="w-4 h-4 text-amber-200" />
             <span>Cố Vấn AI Gemini (Google AI)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full font-mono">2.5 Flash</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full font-mono">3.8 Flash</span>
           </button>
 
           {/* Weather & Event Toggle */}
@@ -245,17 +263,17 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
               {/* Gender Switch */}
               <div className="inline-flex p-1 bg-stone-100 rounded-xl">
                 <button
-                  onClick={() => setGender('female')}
-                  className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
-                    gender === 'female' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-600 hover:text-stone-900'
+                  onClick={() => handleSetGender('female')}
+                  className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all duration-200 cursor-pointer hover:-translate-y-0.5 active:scale-95 ${
+                    gender === 'female' ? 'bg-white text-stone-900 shadow-sm font-bold' : 'text-stone-600 hover:text-stone-900 hover:bg-white/60'
                   }`}
                 >
                   Nữ Giới
                 </button>
                 <button
-                  onClick={() => setGender('male')}
-                  className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
-                    gender === 'male' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-600 hover:text-stone-900'
+                  onClick={() => handleSetGender('male')}
+                  className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all duration-200 cursor-pointer hover:-translate-y-0.5 active:scale-95 ${
+                    gender === 'male' ? 'bg-white text-stone-900 shadow-sm font-bold' : 'text-stone-600 hover:text-stone-900 hover:bg-white/60'
                   }`}
                 >
                   Nam Giới
@@ -266,7 +284,7 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsNightStudio(!isNightStudio)}
-                  className="p-2 rounded-xl text-stone-600 hover:bg-stone-100 transition-colors border border-stone-200/80 cursor-pointer"
+                  className="p-2 rounded-xl text-stone-600 hover:bg-stone-100 hover:-translate-y-0.5 hover:shadow-xs active:scale-95 transition-all duration-200 border border-stone-200/80 cursor-pointer"
                   title="Chuyển ánh sáng ngày / đêm"
                   aria-label="Chuyển ánh sáng ngày / đêm"
                 >
@@ -274,7 +292,7 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
                 </button>
                 <button
                   onClick={handleResetOutfit}
-                  className="p-2 rounded-xl text-stone-600 hover:bg-stone-100 transition-colors border border-stone-200/80 cursor-pointer"
+                  className="p-2 rounded-xl text-stone-600 hover:bg-stone-100 hover:-translate-y-0.5 hover:shadow-xs active:scale-95 transition-all duration-200 border border-stone-200/80 cursor-pointer"
                   title="Đặt lại nguyên bản"
                   aria-label="Đặt lại nguyên bản"
                 >
@@ -292,6 +310,7 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
               pattern={pattern}
               accessories={accessories}
               isNightStudio={isNightStudio}
+              onSelectGender={handleSetGender}
             />
 
             {/* Quick Summary Pill Bar under Mannequin */}
@@ -308,7 +327,7 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
 
               <button
                 onClick={() => setShowLookbookModal(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#C82A27] hover:bg-[#A8221F] text-white text-xs font-medium transition-colors shadow-sm cursor-pointer shrink-0"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#C82A27] hover:bg-[#A8221F] hover:-translate-y-0.5 hover:shadow-md text-white text-xs font-semibold transition-all duration-200 shadow-sm cursor-pointer shrink-0 active:scale-95"
               >
                 <Share2 className="w-3.5 h-3.5" />
                 <span>Xuất thẻ Lookbook</span>
@@ -347,15 +366,15 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
                     <button
                       key={item.id}
                       onClick={() => setOutfit(item.id)}
-                      className={`p-3.5 rounded-2xl text-left border transition-all cursor-pointer ${
+                      className={`group p-3.5 rounded-2xl text-left border transition-all duration-200 cursor-pointer hover:-translate-y-1 hover:shadow-md active:translate-y-0 active:scale-[0.98] ${
                         isSelected
                           ? 'border-[#C82A27] bg-[#FFF5F4] text-[#8D1815] shadow-xs'
-                          : 'border-stone-200 bg-stone-50/50 hover:bg-stone-50 hover:border-stone-300 text-stone-800'
+                          : 'border-stone-200 bg-stone-50/50 hover:bg-stone-50 hover:border-[#C82A27]/40 text-stone-800'
                       }`}
                     >
                       <div className="font-semibold text-sm flex items-center justify-between">
-                        <span>{item.name}</span>
-                        {isSelected && <Check className="w-4 h-4 text-[#C82A27]" />}
+                        <span className="group-hover:text-[#C82A27] transition-colors">{item.name}</span>
+                        {isSelected && <Check className="w-4 h-4 text-[#C82A27] transition-transform group-hover:scale-110" />}
                       </div>
                       <div className="text-[11px] text-stone-500 mt-0.5 line-clamp-1">{item.era}</div>
                     </button>
@@ -383,14 +402,14 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
                     <button
                       key={col.id}
                       onClick={() => setSelectedColorId(col.id)}
-                      className={`group relative flex items-center gap-2 p-1.5 pr-3 rounded-full border transition-all cursor-pointer ${
+                      className={`group relative flex items-center gap-2 p-1.5 pr-3 rounded-full border transition-all duration-200 cursor-pointer hover:scale-105 hover:-translate-y-0.5 hover:shadow-xs active:scale-95 ${
                         isSelected
                           ? 'border-stone-900 bg-stone-100 ring-2 ring-stone-900/10'
                           : 'border-stone-200 hover:border-stone-400 bg-white'
                       }`}
                     >
                       <span
-                        className="w-7 h-7 rounded-full shadow-inner border border-black/10 shrink-0"
+                        className="w-7 h-7 rounded-full shadow-inner border border-black/10 shrink-0 transition-transform group-hover:scale-110"
                         style={{ backgroundColor: col.hex }}
                       />
                       <span className="text-xs font-medium text-stone-800">{col.name.split(' ')[0]}</span>
@@ -427,10 +446,10 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
                     <button
                       key={pat.id}
                       onClick={() => setPattern(pat.id as PatternId)}
-                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                      className={`p-3 rounded-xl border text-left transition-all duration-200 cursor-pointer hover:-translate-y-0.5 hover:shadow-xs active:scale-[0.98] ${
                         isSelected
                           ? 'border-[#1F4F89] bg-blue-50/50 text-[#12335A] font-semibold'
-                          : 'border-stone-200 bg-stone-50/40 text-stone-700 hover:bg-stone-50'
+                          : 'border-stone-200 bg-stone-50/40 text-stone-700 hover:bg-stone-50 hover:border-[#1F4F89]/40'
                       }`}
                     >
                       <div className="text-xs font-semibold">{pat.label}</div>
@@ -463,13 +482,13 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
                       <button
                         key={acc.id}
                         onClick={() => toggleAccessory(acc.id)}
-                        className={`p-3 rounded-xl border text-left transition-all flex items-center gap-2 cursor-pointer ${
+                        className={`p-3 rounded-xl border text-left transition-all duration-200 flex items-center gap-2 cursor-pointer hover:-translate-y-0.5 hover:shadow-xs hover:scale-[1.02] active:scale-95 ${
                           active
                             ? 'border-[#3D7D73] bg-[#EBF4F2] text-[#25544D] font-semibold'
-                            : 'border-stone-200 bg-stone-50/40 hover:bg-stone-50 text-stone-700'
+                            : 'border-stone-200 bg-stone-50/40 hover:bg-stone-50 hover:border-[#3D7D73]/40 text-stone-700'
                         }`}
                       >
-                        <span className="text-xl">{acc.emoji}</span>
+                        <span className="text-xl transition-transform hover:scale-110">{acc.emoji}</span>
                         <div className="min-w-0">
                           <div className="text-xs font-medium leading-tight">{acc.name}</div>
                         </div>
@@ -488,13 +507,13 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
                       <button
                         key={acc.id}
                         onClick={() => toggleAccessory(acc.id)}
-                        className={`p-3 rounded-xl border text-left transition-all flex items-center gap-2 cursor-pointer ${
+                        className={`p-3 rounded-xl border text-left transition-all duration-200 flex items-center gap-2 cursor-pointer hover:-translate-y-0.5 hover:shadow-xs hover:scale-[1.02] active:scale-95 ${
                           active
                             ? 'border-[#C82A27] bg-[#FFF5F4] text-[#8D1815] font-semibold'
-                            : 'border-stone-200 bg-stone-50/40 hover:bg-stone-50 text-stone-700'
+                            : 'border-stone-200 bg-stone-50/40 hover:bg-stone-50 hover:border-[#C82A27]/40 text-stone-700'
                         }`}
                       >
-                        <span className="text-xl">{acc.emoji}</span>
+                        <span className="text-xl transition-transform hover:scale-110">{acc.emoji}</span>
                         <div className="min-w-0">
                           <div className="text-xs font-medium leading-tight">{acc.name}</div>
                         </div>
@@ -524,17 +543,17 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
             <div className="pt-2 flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => setShowLookbookModal(true)}
-                className="flex-1 py-4 px-6 rounded-2xl bg-[#C82A27] hover:bg-[#A8221F] text-white font-semibold text-sm sm:text-base transition-all flex items-center justify-center gap-2.5 shadow-md cursor-pointer hover:shadow-lg"
+                className="flex-1 py-4 px-6 rounded-2xl bg-[#C82A27] hover:bg-[#A8221F] hover:-translate-y-1 hover:shadow-xl text-white font-bold text-sm sm:text-base transition-all duration-200 flex items-center justify-center gap-2.5 shadow-md cursor-pointer active:translate-y-0 active:scale-95"
               >
-                <Sparkles className="w-5 h-5" />
+                <Sparkles className="w-5 h-5 transition-transform hover:rotate-12" />
                 <span>Xuất Thẻ Lookbook Của Bạn</span>
               </button>
 
               <button
                 onClick={() => setShowGeminiModal(true)}
-                className="py-4 px-6 rounded-2xl bg-stone-900 hover:bg-stone-800 text-white font-semibold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                className="py-4 px-6 rounded-2xl bg-stone-900 hover:bg-stone-800 hover:-translate-y-1 hover:shadow-xl text-white font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-md active:translate-y-0 active:scale-95"
               >
-                <Bot className="w-5 h-5 text-amber-300" />
+                <Bot className="w-5 h-5 text-amber-300 transition-transform hover:scale-110" />
                 <span>Cố Vấn AI Gemini</span>
               </button>
             </div>

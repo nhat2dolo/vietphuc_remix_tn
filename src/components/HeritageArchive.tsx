@@ -34,10 +34,10 @@ export const HeritageArchive: React.FC<HeritageArchiveProps> = ({ onSelectOutfit
             <button
               key={outfit.id}
               onClick={() => setSelectedOutfitId(outfit.id)}
-              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap cursor-pointer border ${
+              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer border hover:-translate-y-0.5 hover:shadow-xs active:scale-95 ${
                 isSelected
                   ? 'bg-[#C82A27] text-white border-[#C82A27] shadow-sm'
-                  : 'bg-white text-stone-700 border-stone-200 hover:border-stone-400 hover:bg-stone-50'
+                  : 'bg-white text-stone-700 border-stone-200 hover:border-[#C82A27]/40 hover:bg-stone-50 hover:text-stone-900'
               }`}
             >
               {outfit.name}
@@ -59,7 +59,7 @@ export const HeritageArchive: React.FC<HeritageArchiveProps> = ({ onSelectOutfit
               {onSelectOutfitForStudio && (
                 <button
                   onClick={() => onSelectOutfitForStudio(activeOutfit.id)}
-                  className="px-4 py-1.5 rounded-lg text-xs font-medium bg-stone-100 hover:bg-[#C82A27] hover:text-white text-stone-800 transition-colors"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-stone-100 hover:bg-[#C82A27] hover:text-white hover:-translate-y-0.5 hover:shadow-md text-stone-800 transition-all duration-200 cursor-pointer active:scale-95"
                 >
                   Thử đồ dáng này trong Studio →
                 </button>

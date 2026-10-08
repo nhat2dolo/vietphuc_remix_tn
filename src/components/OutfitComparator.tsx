@@ -90,7 +90,7 @@ export const OutfitComparator: React.FC<OutfitComparatorProps> = ({
             </span>
             <button
               onClick={() => onApplyOutfit(slotA)}
-              className="px-3 py-1 rounded-lg bg-[#C82A27] hover:bg-[#A8221F] text-white text-xs font-semibold transition-colors cursor-pointer"
+              className="px-3.5 py-1.5 rounded-xl bg-[#C82A27] hover:bg-[#A8221F] hover:-translate-y-0.5 hover:shadow-md active:scale-95 text-white text-xs font-semibold transition-all duration-200 cursor-pointer"
             >
               Chọn bản A
             </button>
@@ -142,7 +142,7 @@ export const OutfitComparator: React.FC<OutfitComparatorProps> = ({
             </span>
             <button
               onClick={() => onApplyOutfit(slotB)}
-              className="px-3 py-1 rounded-lg bg-[#1F4F89] hover:bg-[#12335A] text-white text-xs font-semibold transition-colors cursor-pointer"
+              className="px-3.5 py-1.5 rounded-xl bg-[#1F4F89] hover:bg-[#12335A] hover:-translate-y-0.5 hover:shadow-md active:scale-95 text-white text-xs font-semibold transition-all duration-200 cursor-pointer"
             >
               Chọn bản B
             </button>
