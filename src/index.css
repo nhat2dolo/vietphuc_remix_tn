@@ -105,3 +105,28 @@
   font-weight: 500;
   line-height: 1.5;
 }
+
+/* Hiệu ứng chuyển Tab trượt nhẹ & mờ dần với nhịp spring (Horizontal Slide & Fade Morph) */
+@keyframes tabSlideFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.995);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-tab-transition {
+  animation: tabSlideFadeIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Hide scrollbar for clean horizontal carousel */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

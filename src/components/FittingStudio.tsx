@@ -9,6 +9,7 @@ import { WeatherEventRecommender } from './WeatherEventRecommender';
 import { ColorHarmonyValidator } from './ColorHarmonyValidator';
 import { OutfitComparator, SavedOutfitSlot } from './OutfitComparator';
 import { SavedLookbooksModal, saveLookToStorage } from './SavedLookbooksModal';
+import { GarmentKnowledgeModal } from './GarmentKnowledgeModal';
 import {
   Sparkles,
   Moon,
@@ -49,6 +50,7 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
   const [showLookbookModal, setShowLookbookModal] = useState<boolean>(false);
   const [showGeminiModal, setShowGeminiModal] = useState<boolean>(false);
   const [showSavedLooksModal, setShowSavedLooksModal] = useState<boolean>(false);
+  const [showKnowledgeModal, setShowKnowledgeModal] = useState<boolean>(false);
   const [showWeatherSection, setShowWeatherSection] = useState<boolean>(false);
   const [showComparatorSection, setShowComparatorSection] = useState<boolean>(false);
   const [saveSuccessNotice, setSaveSuccessNotice] = useState<string | null>(null);
@@ -524,19 +526,29 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
               </div>
             </div>
 
-            {/* Garment Knowledge Box */}
-            <div className="p-5 rounded-2xl bg-[#FAF7F2] border border-stone-200/90 space-y-3">
-              <div className="flex items-center gap-2 text-[#8D1815] text-xs font-bold uppercase tracking-wider">
-                <Info className="w-4 h-4" />
-                <span>Tri thức phục trang: {activeOutfitData.name}</span>
+            {/* Nút Tri thức phục trang dạng viên thuốc kèm icon 'i' mở popup/modal (Tối giản chữ cho học sinh) */}
+            <div className="p-3.5 rounded-2xl bg-[#FAF7F2] border border-stone-200/90 flex items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-full bg-[#C82A27]/10 text-[#C82A27] flex items-center justify-center shrink-0">
+                  <Info className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-stone-900 truncate">
+                    Tri thức: {activeOutfitData.name} ({activeOutfitData.era.split('(')[0].trim()})
+                  </div>
+                  <div className="text-[11px] text-stone-500 font-serif italic truncate">
+                    "{activeOutfitData.tagline}"
+                  </div>
+                </div>
               </div>
-              <p className="text-xs sm:text-sm text-stone-700 leading-relaxed font-serif">
-                {activeOutfitData.desc}
-              </p>
-              <div className="pt-2 border-t border-stone-200/60 flex items-center justify-between text-[11px] text-stone-500 italic">
-                <span>{activeOutfitData.referenceCitation}</span>
-                <span className="font-sans font-medium text-stone-700">{activeOutfitData.era}</span>
-              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowKnowledgeModal(true)}
+                className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 text-xs font-bold shadow-xs hover:border-[#C82A27]/40 hover:-translate-y-0.5 active:scale-95 transition-all duration-200 cursor-pointer shrink-0"
+              >
+                Tra cứu 📜
+              </button>
             </div>
 
             {/* Export Lookbook Action Button */}
@@ -560,6 +572,13 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
           </div>
         </div>
       </div>
+
+      {/* Garment Knowledge Modal (Tri thức khảo cứu lịch sử) */}
+      <GarmentKnowledgeModal
+        isOpen={showKnowledgeModal}
+        onClose={() => setShowKnowledgeModal(false)}
+        outfit={activeOutfitData}
+      />
 
       {/* Export Lookbook Card Modal */}
       <LookbookCardModal
