@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import * as fabric from 'fabric';
 import { ALL_STICKERS, StickerItem } from '../data/stickersData';
 import { MODEL_PRESETS, ModelPreset } from '../data/modelPresets';
@@ -14,22 +15,25 @@ import {
   ChevronDown,
   Lock,
   Unlock,
-  ShieldCheck,
   Sparkles,
   Info,
-  AlertTriangle,
   ZoomIn,
   ZoomOut,
   RotateCw,
-  Image as ImageIcon,
-  Check,
   X,
+  Shirt,
+  Layers,
+  ChevronRight,
+  Maximize2,
 } from 'lucide-react';
 
 export const VirtualTryOn: React.FC = () => {
   const canvasElRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
+
+  // 1. Quản lý trạng thái Collapsible Sidebar
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
 
   // States
   const [activeCategory, setActiveCategory] = useState<string>('all');
@@ -44,21 +48,33 @@ export const VirtualTryOn: React.FC = () => {
   const [currentBgPreset, setCurrentBgPreset] = useState<ModelPreset>(MODEL_PRESETS[0]);
   const [customBgUrl, setCustomBgUrl] = useState<string | null>(null);
 
+  // Lock body scroll when setup modal is open
+  useEffect(() => {
+    if (!showSetupModal) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow || 'auto';
+    };
+  }, [showSetupModal]);
+
   // Undo / Redo history
   const historyRef = useRef<string[]>([]);
   const historyIndexRef = useRef<number>(-1);
   const isUndoRedoRef = useRef<boolean>(false);
+
+  // Base virtual model dimensions (tỷ lệ chuẩn mực 2:3)
+  const BASE_WIDTH = 400;
+  const BASE_HEIGHT = 600;
 
   // Save state to undo history
   const saveState = useCallback(() => {
     if (!fabricCanvasRef.current || isUndoRedoRef.current) return;
     try {
       const json = JSON.stringify(fabricCanvasRef.current.toJSON());
-      // Truncate redo steps
       const newHistory = historyRef.current.slice(0, historyIndexRef.current + 1);
       newHistory.push(json);
-      // Limit to 20 states
-      if (newHistory.length > 20) newHistory.shift();
+      if (newHistory.length > 25) newHistory.shift();
       historyRef.current = newHistory;
       historyIndexRef.current = newHistory.length - 1;
     } catch {
@@ -66,7 +82,7 @@ export const VirtualTryOn: React.FC = () => {
     }
   }, []);
 
-  // Update background image on Fabric canvas
+  // Update background image on Fabric canvas and re-render
   const setCanvasBackground = useCallback((imageUrl: string) => {
     const canvas = fabricCanvasRef.current;
     if (!canvas) return;
@@ -74,9 +90,10 @@ export const VirtualTryOn: React.FC = () => {
     fabric.FabricImage.fromURL(imageUrl, { crossOrigin: 'anonymous' })
       .then((img) => {
         if (!canvas) return;
-        // Scale to fit canvas dimensions nicely
         const canvasWidth = canvas.getWidth();
         const canvasHeight = canvas.getHeight();
+
+        // Background scales to completely fit canvas frame
         const scaleX = canvasWidth / img.width;
         const scaleY = canvasHeight / img.height;
         const scale = Math.max(scaleX, scaleY);
@@ -111,7 +128,6 @@ export const VirtualTryOn: React.FC = () => {
     const namesOnCanvas: string[] = [];
 
     objects.forEach((obj) => {
-      // Custom attached metadata
       const meta = (obj as unknown as { stickerMeta?: StickerItem }).stickerMeta;
       if (meta) {
         categoriesOnCanvas.add(meta.category);
@@ -140,18 +156,94 @@ export const VirtualTryOn: React.FC = () => {
     });
   }, []);
 
+  // 3. Thuật toán hiển thị Người Mẫu Toàn Thân (Head-to-Toe - KHÔNG crop đầu chân)
+  const adjustCanvasDimensions = useCallback(() => {
+    const canvas = fabricCanvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+
+    const containerWidth = container.clientWidth || 400;
+    const containerHeight = container.clientHeight || 600;
+
+    // Tỷ lệ chuẩn mực 2:3 (baseWidth: 400, baseHeight: 600)
+    // const scale = Math.min(containerWidth / baseWidth, containerHeight / baseHeight) * 0.96;
+    const scale = Math.min(containerWidth / BASE_WIDTH, containerHeight / BASE_HEIGHT) * 0.96;
+
+    // Kích thước canvas thực tế
+    const targetWidth = Math.round(BASE_WIDTH * scale);
+    const targetHeight = Math.round(BASE_HEIGHT * scale);
+
+    const oldWidth = canvas.getWidth();
+    const oldHeight = canvas.getHeight();
+
+    canvas.setDimensions({ width: targetWidth, height: targetHeight });
+
+    // Cập nhật lại tỉ lệ các đối tượng và ảnh nền nếu kích thước thay đổi
+    if (oldWidth > 0 && oldHeight > 0 && (oldWidth !== targetWidth || oldHeight !== targetHeight)) {
+      const zoomRatio = targetWidth / oldWidth;
+
+      // Cập nhật background
+      if (canvas.backgroundImage && typeof canvas.backgroundImage === 'object') {
+        const bg = canvas.backgroundImage as fabric.FabricImage;
+        bg.set({
+          scaleX: (bg.scaleX || 1) * zoomRatio,
+          scaleY: (bg.scaleY || 1) * zoomRatio,
+          left: targetWidth / 2,
+          top: targetHeight / 2,
+        });
+      }
+
+      // Cập nhật các đối tượng trên canvas mà không làm mất trang phục
+      canvas.getObjects().forEach((obj) => {
+        obj.set({
+          left: (obj.left || 0) * zoomRatio,
+          top: (obj.top || 0) * zoomRatio,
+          scaleX: (obj.scaleX || 1) * zoomRatio,
+          scaleY: (obj.scaleY || 1) * zoomRatio,
+        });
+        obj.setCoords();
+      });
+    }
+
+    canvas.renderAll();
+  }, [BASE_WIDTH, BASE_HEIGHT]);
+
+  // Lắng nghe thay đổi kích thước container khi đóng/mở sidebar hoặc resize cửa sổ
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      adjustCanvasDimensions();
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    // Trigger một nhịp sau khi kết thúc transition 300ms của sidebar
+    const timer = setTimeout(() => {
+      adjustCanvasDimensions();
+    }, 320);
+
+    return () => {
+      resizeObserver.disconnect();
+      clearTimeout(timer);
+    };
+  }, [isSidebarOpen, adjustCanvasDimensions]);
+
   // Initialize Canvas
   useEffect(() => {
     if (!canvasElRef.current || !containerRef.current) return;
 
-    // Responsive dimensions
     const container = containerRef.current;
-    const width = Math.min(container.clientWidth || 380, 480);
-    const height = Math.min(window.innerHeight * 0.58, 620);
+    const containerWidth = container.clientWidth || 400;
+    const containerHeight = container.clientHeight || 600;
+    const initialScale = Math.min(containerWidth / BASE_WIDTH, containerHeight / BASE_HEIGHT) * 0.96;
+
+    const initialWidth = Math.round(BASE_WIDTH * initialScale);
+    const initialHeight = Math.round(BASE_HEIGHT * initialScale);
 
     const canvas = new fabric.Canvas(canvasElRef.current, {
-      width,
-      height,
+      width: initialWidth,
+      height: initialHeight,
       preserveObjectStacking: true,
       selection: true,
     });
@@ -197,15 +289,14 @@ export const VirtualTryOn: React.FC = () => {
       canvas.dispose();
       fabricCanvasRef.current = null;
     };
-  }, [currentBgPreset, customBgUrl, setCanvasBackground, saveState, evaluateCulturalCombinations]);
+  }, [currentBgPreset, customBgUrl, setCanvasBackground, saveState, evaluateCulturalCombinations, BASE_WIDTH, BASE_HEIGHT]);
 
-  // Add Sticker to Canvas with Anatomical Grounding & Single-Item Replacement
-  const addStickerToCanvas = (item: StickerItem) => {
+  // 4. Kéo & thả (Drag and Drop) và Click 1-chạm vào ma-nơ-canh
+  const addStickerToCanvasAt = (item: StickerItem, dropX?: number, dropY?: number) => {
     const canvas = fabricCanvasRef.current;
     if (!canvas) return;
 
-    // Prevent multiple overlapping hats, robes, or shoes:
-    // Remove conflicting item of the same major type before adding the new one
+    // Prevent multiple overlapping hats, robes, or shoes
     if (['mu', 'ao', 'giay'].includes(item.type)) {
       const existingConflicting = canvas.getObjects().filter((obj) => {
         const meta = (obj as unknown as { stickerMeta?: StickerItem }).stickerMeta;
@@ -221,44 +312,54 @@ export const VirtualTryOn: React.FC = () => {
         const canvasWidth = canvas.getWidth();
         const canvasHeight = canvas.getHeight();
 
-        // Anatomically anchored positioning and scaling based on model coordinates
-        let posX = canvasWidth / 2;
-        let posY = canvasHeight / 2;
-        let baseScale = 0.75;
+        // Tỷ lệ scale của canvas so với BASE_WIDTH
+        const currentScaleFactor = canvasWidth / BASE_WIDTH;
 
-        if (item.type === 'mu') {
-          // Anchored directly on top of head crown (no floating hat, no clipping through skull)
-          posY = canvasHeight * 0.155;
-          baseScale = item.id.includes('quai-thao') ? 0.75 : item.id.includes('non-la') ? 0.72 : 0.65;
-        } else if (item.type === 'ao') {
-          // Anchored cleanly at chest and torso down to hem
-          posY = canvasHeight * 0.44;
-          baseScale = item.category === 'baba' ? 0.9 : 0.95;
-        } else if (item.type === 'giay') {
-          // Anchored at feet level
-          posY = canvasHeight * 0.89;
-          baseScale = 0.55;
-        } else if (item.type === 'khan') {
-          // Anchored around neck and collar
-          posY = canvasHeight * 0.31;
-          baseScale = 0.72;
-        } else if (item.id === 'pk-kinh-ram') {
-          posY = canvasHeight * 0.155;
-          baseScale = 0.55;
-        } else if (item.id === 'pk-chuoi-ngoc') {
-          posY = canvasHeight * 0.26;
-          baseScale = 0.65;
-        } else if (item.id === 'pk-quat') {
-          posX = canvasWidth * 0.72;
-          posY = canvasHeight * 0.45;
-          baseScale = 0.65;
-        } else if (item.id === 'pk-tui-coi') {
-          posX = canvasWidth * 0.28;
-          posY = canvasHeight * 0.46;
-          baseScale = 0.62;
-        } else if (item.id === 'pk-headphone') {
-          posY = canvasHeight * 0.21;
-          baseScale = 0.62;
+        // Điểm thả tự do hoặc vị trí tự động tính theo giải phẫu cơ thể
+        let posX = dropX !== undefined ? dropX : canvasWidth / 2;
+        let posY = dropY !== undefined ? dropY : canvasHeight / 2;
+        let baseScale = 0.75 * currentScaleFactor;
+
+        if (dropX === undefined || dropY === undefined) {
+          if (item.type === 'mu') {
+            posY = canvasHeight * 0.155;
+            baseScale = (item.id.includes('quai-thao') ? 0.75 : item.id.includes('non-la') ? 0.72 : 0.65) * currentScaleFactor;
+          } else if (item.type === 'ao') {
+            posY = canvasHeight * 0.44;
+            baseScale = (item.category === 'baba' ? 0.9 : 0.95) * currentScaleFactor;
+          } else if (item.type === 'giay') {
+            posY = canvasHeight * 0.89;
+            baseScale = 0.55 * currentScaleFactor;
+          } else if (item.type === 'khan') {
+            posY = canvasHeight * 0.31;
+            baseScale = 0.72 * currentScaleFactor;
+          } else if (item.id === 'pk-kinh-ram') {
+            posY = canvasHeight * 0.155;
+            baseScale = 0.55 * currentScaleFactor;
+          } else if (item.id === 'pk-chuoi-ngoc') {
+            posY = canvasHeight * 0.26;
+            baseScale = 0.65 * currentScaleFactor;
+          } else if (item.id === 'pk-quat') {
+            posX = canvasWidth * 0.72;
+            posY = canvasHeight * 0.45;
+            baseScale = 0.65 * currentScaleFactor;
+          } else if (item.id === 'pk-tui-coi') {
+            posX = canvasWidth * 0.28;
+            posY = canvasHeight * 0.46;
+            baseScale = 0.62 * currentScaleFactor;
+          } else if (item.id === 'pk-headphone') {
+            posY = canvasHeight * 0.21;
+            baseScale = 0.62 * currentScaleFactor;
+          }
+        } else {
+          // Khi kéo thả tự do, vẫn giữ scale chuẩn
+          if (item.type === 'ao') {
+            baseScale = 0.92 * currentScaleFactor;
+          } else if (item.type === 'mu') {
+            baseScale = 0.68 * currentScaleFactor;
+          } else if (item.type === 'giay') {
+            baseScale = 0.55 * currentScaleFactor;
+          }
         }
 
         img.set({
@@ -280,7 +381,7 @@ export const VirtualTryOn: React.FC = () => {
 
         canvas.add(img);
 
-        // Natural layer ordering: robes in back, headphone behind neck/collar, headwear & accessories on top
+        // Layer ordering
         if (item.type === 'ao' || item.id === 'pk-headphone') {
           canvas.sendObjectBackwards(img);
         } else {
@@ -296,6 +397,45 @@ export const VirtualTryOn: React.FC = () => {
       .catch((err) => {
         console.error('Failed to load sticker:', err);
       });
+  };
+
+  const addStickerToCanvas = (item: StickerItem) => {
+    addStickerToCanvasAt(item);
+  };
+
+  // Drag and Drop handlers
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, sticker: StickerItem) => {
+    e.dataTransfer.setData('text/plain', JSON.stringify(sticker));
+    e.dataTransfer.effectAllowed = 'copy';
+  };
+
+  const handleCanvasDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+  };
+
+  const handleCanvasDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    try {
+      const dataStr = e.dataTransfer.getData('text/plain');
+      if (!dataStr) return;
+      const sticker: StickerItem = JSON.parse(dataStr);
+      if (!sticker || !sticker.svgDataUri) return;
+
+      const canvasEl = canvasElRef.current;
+      if (!canvasEl) {
+        addStickerToCanvas(sticker);
+        return;
+      }
+
+      const rect = canvasEl.getBoundingClientRect();
+      const dropX = e.clientX - rect.left;
+      const dropY = e.clientY - rect.top;
+
+      addStickerToCanvasAt(sticker, dropX, dropY);
+    } catch {
+      // ignore
+    }
   };
 
   // Object Control Actions
@@ -397,7 +537,6 @@ export const VirtualTryOn: React.FC = () => {
   const handleResetCanvas = () => {
     const canvas = fabricCanvasRef.current;
     if (!canvas) return;
-    // Remove all sticker objects except background
     const objects = [...canvas.getObjects()];
     objects.forEach((obj) => canvas.remove(obj));
     canvas.discardActiveObject();
@@ -413,15 +552,13 @@ export const VirtualTryOn: React.FC = () => {
     const canvas = fabricCanvasRef.current;
     if (!canvas) return;
 
-    // Deselect object first so bounding box controls are hidden in exported image
     canvas.discardActiveObject();
     canvas.renderAll();
 
-    // Create high-res data URL
     const dataURL = canvas.toDataURL({
       format: 'png',
       quality: 1,
-      multiplier: 2, // 2x for retina quality
+      multiplier: 2,
     });
 
     const link = document.createElement('a');
@@ -470,7 +607,7 @@ export const VirtualTryOn: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
-  // Filtered stickers for drawer
+  // Filtered stickers for sidebar
   const filteredStickers = activeCategory === 'all'
     ? ALL_STICKERS
     : ALL_STICKERS.filter((s) => s.category === activeCategory);
@@ -486,46 +623,60 @@ export const VirtualTryOn: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Editorial Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-stone-200 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-stone-200 pb-3">
         <div>
-          <div className="text-xs uppercase tracking-widest text-[#8D1815] font-sans font-semibold mb-1">
-            VIRTUAL TRY-ON STUDIO · KÉO THẢ PHỤC TRANG & THỬ ĐỒ TRỰC TIẾP
+          <div className="text-xs uppercase tracking-widest text-[#8D1815] font-sans font-semibold mb-1 flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-[#E4A025]" />
+            <span>VIRTUAL TRY-ON STUDIO · KÉO THẢ PHỤC TRANG & ƯỚM ĐỒ TOÀN THÂN</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-display font-bold text-stone-900">
             Thử Đồ Ảo: Trực Tiếp Ướm Cổ Phục Lên Ảnh Của Bạn
           </h2>
           <p className="text-xs sm:text-sm text-stone-600 font-serif italic mt-0.5">
-            Tải ảnh của bạn hoặc chọn người mẫu sẵn có, kéo thả áo dài, ngũ thân, nón lá, sneaker và tạo dáng ấn tượng
+            Dáng đứng chuẩn mực tỷ lệ 2:3 từ đỉnh đầu đến gót chân — Kéo thả hoặc click chọn trang phục để tự động ướm
           </p>
         </div>
 
-        {/* Change Background / Upload Photo Trigger */}
+        {/* Action Buttons: Background Setup & Expand Wardrobe */}
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={() => setShowSetupModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 hover:border-[#C82A27] hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 active:scale-95 text-stone-800 text-xs font-semibold transition-all duration-200 shadow-xs cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 hover:border-[#C82A27] hover:-translate-y-0.5 hover:shadow-xs active:translate-y-0 text-stone-800 text-xs font-semibold transition-all duration-200 cursor-pointer"
           >
             <Upload className="w-3.5 h-3.5 text-[#C82A27]" />
             <span>Đổi người mẫu / Tải ảnh bạn</span>
           </button>
+
+          {!isSidebarOpen && (
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#C82A27] to-[#8D1815] text-white text-xs font-bold hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all duration-200 cursor-pointer shadow-sm border border-amber-300/30"
+              title="Mở tủ đồ"
+            >
+              <Shirt className="w-4 h-4 text-amber-200" />
+              <span>Chọn trang phục</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Main Studio Frame (Mobile-first responsive card container) */}
-      <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-md border border-stone-200/90 overflow-hidden flex flex-col">
-        {/* Top Tools Bar inside Frame */}
-        <div className="bg-[#C82A27] text-white px-4 py-2.5 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs font-bold tracking-wide">
-            <Sparkles className="w-4 h-4 text-amber-200" />
-            <span>Thử Đồ Trực Tiếp 🇻🇳</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 text-xs font-semibold">
+      {/* 2. BỐ CỤC 2 PHẦN CO GIÃN LINH HOẠT: Canvas bên trái & Tủ đồ trượt xếp bên phải */}
+      <div className="relative flex w-full h-[calc(100vh-170px)] min-h-[580px] max-h-[820px] rounded-3xl overflow-hidden bg-[#0F0D0B] border border-stone-800 shadow-2xl">
+        
+        {/* CỘT TRÁI (PREVIEW CANVAS AREA) */}
+        <div
+          ref={containerRef}
+          onDragOver={handleCanvasDragOver}
+          onDrop={handleCanvasDrop}
+          className="relative flex-1 flex flex-col items-center justify-center p-3 sm:p-5 transition-all duration-300 ease-in-out overflow-hidden"
+        >
+          {/* Top Canvas Bar (Tools: Undo, Redo, Reset, Download) */}
+          <div className="absolute top-4 left-4 z-20 flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-white/10 shadow-lg">
             <button
               onClick={handleUndo}
-              className="p-1.5 rounded-lg bg-white/20 hover:bg-white/30 hover:-translate-y-0.5 active:scale-95 text-white transition-all duration-150 cursor-pointer"
+              className="p-1.5 rounded-xl text-stone-300 hover:text-white hover:bg-white/15 active:scale-95 transition-all cursor-pointer"
               title="Hoàn tác (Undo)"
               aria-label="Hoàn tác"
             >
@@ -533,91 +684,101 @@ export const VirtualTryOn: React.FC = () => {
             </button>
             <button
               onClick={handleRedo}
-              className="p-1.5 rounded-lg bg-white/20 hover:bg-white/30 hover:-translate-y-0.5 active:scale-95 text-white transition-all duration-150 cursor-pointer"
+              className="p-1.5 rounded-xl text-stone-300 hover:text-white hover:bg-white/15 active:scale-95 transition-all cursor-pointer"
               title="Làm lại (Redo)"
               aria-label="Làm lại"
             >
               <Redo2 className="w-4 h-4" />
             </button>
+            <div className="w-[1px] h-4 bg-white/20 mx-0.5" />
             <button
               onClick={handleResetCanvas}
-              className="p-1.5 rounded-lg bg-white/20 hover:bg-white/30 hover:-translate-y-0.5 active:scale-95 text-white transition-all duration-150 cursor-pointer"
-              title="Làm mới (Clear)"
+              className="p-1.5 rounded-xl text-stone-300 hover:text-rose-400 hover:bg-white/15 active:scale-95 transition-all cursor-pointer"
+              title="Làm mới trang phục"
               aria-label="Làm mới"
             >
               <RotateCcw className="w-4 h-4" />
             </button>
             <button
               onClick={handleDownloadImage}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#E4A025] hover:bg-[#c9891c] hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-95 text-stone-900 font-bold transition-all duration-200 cursor-pointer shadow-xs ml-1"
+              className="flex items-center gap-1 px-3 py-1 rounded-xl bg-gradient-to-r from-[#E4A025] to-[#C99700] hover:from-[#f0b037] hover:to-[#dfa705] text-stone-950 font-bold text-xs shadow-sm hover:scale-[1.03] active:scale-95 transition-all cursor-pointer ml-1"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Tải ảnh</span>
+              <span className="hidden sm:inline">Tải ảnh</span>
             </button>
           </div>
-        </div>
 
-        {/* Canvas Workspace Area */}
-        <div
-          ref={containerRef}
-          className="relative bg-stone-100 flex items-center justify-center overflow-hidden min-h-[460px] sm:min-h-[520px]"
-        >
-          {/* Real Fabric.js HTML5 Canvas */}
-          <canvas ref={canvasElRef} className="touch-none" />
+          {/* NÚT MỞ LẠI SIDEBAR KHI ĐANG ẨN (Góc trên bên phải khu vực Canvas) */}
+          {!isSidebarOpen && (
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="absolute top-4 right-4 z-20 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#C82A27] via-[#A8221F] to-[#8D1815] text-white text-xs sm:text-sm font-bold shadow-xl border border-amber-400/40 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer animate-in fade-in zoom-in-95 group"
+            >
+              <Shirt className="w-4 h-4 text-amber-300 group-hover:rotate-12 transition-transform duration-200" />
+              <span>Chọn trang phục</span>
+              <ChevronRight className="w-4 h-4 text-amber-200/80" />
+            </button>
+          )}
 
           {/* Cultural Warnings & Info Overlay (Top Left) */}
-          <div className="absolute top-3 left-3 right-16 pointer-events-none flex flex-col gap-2 z-10">
+          <div className="absolute top-16 left-4 max-w-sm pointer-events-none flex flex-col gap-2 z-10">
             {culturalWarning && !isWarningDismissed && (
-              <div
-                id="remixAlertBox"
-                className="remix-alert-box pointer-events-auto animate-in fade-in duration-200"
-              >
-                <div className="alert-header">
-                  <div className="alert-title">
-                    <span className="alert-icon">⚠️</span>
-                    <strong>Lưu ý Remix:</strong>
-                  </div>
-                  {/* Nút đóng dấu x */}
+              <div className="pointer-events-auto p-3 rounded-2xl bg-stone-900/90 backdrop-blur-md border border-amber-500/40 text-amber-100 shadow-xl text-xs leading-relaxed animate-in fade-in duration-200">
+                <div className="flex items-center justify-between font-bold text-amber-400 mb-1">
+                  <span className="flex items-center gap-1.5">
+                    <span>⚠️</span>
+                    <span>Lưu ý Remix Phục Trang:</span>
+                  </span>
                   <button
-                    type="button"
-                    className="close-btn"
                     onClick={() => setIsWarningDismissed(true)}
+                    className="text-stone-400 hover:text-white cursor-pointer p-0.5"
                     aria-label="Đóng"
                   >
-                    &times;
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
-                <p className="alert-content">
-                  {culturalWarning}
-                </p>
+                <p className="text-stone-200 text-[11px]">{culturalWarning}</p>
               </div>
             )}
 
             {selectedStickerInfo && (
-              <div className="pointer-events-auto p-3 rounded-xl bg-white/95 backdrop-blur-xs border-l-4 border-[#1F4F89] text-stone-900 shadow-md text-xs leading-relaxed animate-in fade-in duration-200">
-                <div className="flex items-center justify-between font-bold text-[#1F4F89] mb-0.5">
+              <div className="pointer-events-auto p-3 rounded-2xl bg-stone-900/95 backdrop-blur-md border-l-4 border-[#E4A025] border-stone-800 text-stone-200 shadow-xl text-xs leading-relaxed animate-in fade-in duration-200">
+                <div className="flex items-center justify-between font-bold text-[#E4A025] mb-1">
                   <span className="flex items-center gap-1.5">
                     <Info className="w-3.5 h-3.5" />
                     <span>{selectedStickerInfo.name}</span>
                   </span>
                   <button
                     onClick={() => setSelectedStickerInfo(null)}
-                    className="text-stone-400 hover:text-stone-600 cursor-pointer"
+                    className="text-stone-400 hover:text-white cursor-pointer"
                   >
                     <X className="w-3 h-3" />
                   </button>
                 </div>
-                <div className="text-stone-700">{selectedStickerInfo.info}</div>
+                <div className="text-stone-300 text-[11px]">{selectedStickerInfo.info}</div>
               </div>
             )}
           </div>
 
+          {/* Canvas Wrapper với Drop-shadow và bo tròn sang trọng */}
+          <div className="relative rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-stone-800/80 bg-stone-950 flex items-center justify-center">
+            {/* Real Fabric.js Canvas */}
+            <canvas ref={canvasElRef} className="touch-none" />
+
+            {/* Hint overlay on bottom for users */}
+            <div className="absolute bottom-2 inset-x-0 flex justify-center pointer-events-none">
+              <span className="px-3 py-1 rounded-full bg-black/60 backdrop-blur-xs text-[10px] text-stone-300 border border-white/10">
+                💡 Kéo thả hoặc click vào trang phục bên phải để ướm thử
+              </span>
+            </div>
+          </div>
+
           {/* Floating Object Controls (Right Side when object is active) */}
           {activeObject && (
-            <div className="absolute top-3 right-3 flex flex-col gap-1.5 z-20 animate-in fade-in zoom-in-95 duration-150">
+            <div className="absolute right-4 top-20 flex flex-col gap-1.5 z-20 animate-in fade-in zoom-in-95 duration-150 bg-black/70 backdrop-blur-md p-1.5 rounded-2xl border border-white/10 shadow-2xl">
               <button
                 onClick={handleDeleteActive}
-                className="w-9 h-9 rounded-full bg-white hover:bg-rose-50 border border-stone-300 text-rose-600 flex items-center justify-center shadow-md cursor-pointer transition-colors"
+                className="w-8 h-8 rounded-xl bg-white/10 hover:bg-rose-500/80 text-rose-300 hover:text-white flex items-center justify-center cursor-pointer transition-colors"
                 title="Xóa vật phẩm này"
                 aria-label="Xóa"
               >
@@ -625,7 +786,7 @@ export const VirtualTryOn: React.FC = () => {
               </button>
               <button
                 onClick={handleFlipActive}
-                className="w-9 h-9 rounded-full bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 flex items-center justify-center shadow-md cursor-pointer transition-colors"
+                className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/25 text-stone-200 flex items-center justify-center cursor-pointer transition-colors"
                 title="Lật ngang (Flip)"
                 aria-label="Lật ngang"
               >
@@ -633,7 +794,7 @@ export const VirtualTryOn: React.FC = () => {
               </button>
               <button
                 onClick={() => handleRotateStep(15)}
-                className="w-9 h-9 rounded-full bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 flex items-center justify-center shadow-md cursor-pointer transition-colors"
+                className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/25 text-stone-200 flex items-center justify-center cursor-pointer transition-colors"
                 title="Xoay 15°"
                 aria-label="Xoay"
               >
@@ -641,7 +802,7 @@ export const VirtualTryOn: React.FC = () => {
               </button>
               <button
                 onClick={() => handleScaleStep(0.1)}
-                className="w-9 h-9 rounded-full bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 flex items-center justify-center shadow-md cursor-pointer transition-colors"
+                className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/25 text-stone-200 flex items-center justify-center cursor-pointer transition-colors"
                 title="Phóng to"
                 aria-label="Phóng to"
               >
@@ -649,7 +810,7 @@ export const VirtualTryOn: React.FC = () => {
               </button>
               <button
                 onClick={() => handleScaleStep(-0.1)}
-                className="w-9 h-9 rounded-full bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 flex items-center justify-center shadow-md cursor-pointer transition-colors"
+                className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/25 text-stone-200 flex items-center justify-center cursor-pointer transition-colors"
                 title="Thu nhỏ"
                 aria-label="Thu nhỏ"
               >
@@ -657,7 +818,7 @@ export const VirtualTryOn: React.FC = () => {
               </button>
               <button
                 onClick={handleMoveUp}
-                className="w-9 h-9 rounded-full bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 flex items-center justify-center shadow-md cursor-pointer transition-colors"
+                className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/25 text-stone-200 flex items-center justify-center cursor-pointer transition-colors"
                 title="Đưa lên trên (Bring forward)"
                 aria-label="Đưa lên trên"
               >
@@ -665,7 +826,7 @@ export const VirtualTryOn: React.FC = () => {
               </button>
               <button
                 onClick={handleMoveDown}
-                className="w-9 h-9 rounded-full bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 flex items-center justify-center shadow-md cursor-pointer transition-colors"
+                className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/25 text-stone-200 flex items-center justify-center cursor-pointer transition-colors"
                 title="Hạ xuống dưới (Send backward)"
                 aria-label="Hạ xuống dưới"
               >
@@ -673,74 +834,135 @@ export const VirtualTryOn: React.FC = () => {
               </button>
               <button
                 onClick={handleToggleLock}
-                className="w-9 h-9 rounded-full bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 flex items-center justify-center shadow-md cursor-pointer transition-colors"
+                className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/25 text-stone-200 flex items-center justify-center cursor-pointer transition-colors"
                 title="Khóa / Mở khóa vị trí"
                 aria-label="Khóa vị trí"
               >
-                {activeObject.lockMovementX ? <Lock className="w-4 h-4 text-amber-600" /> : <Unlock className="w-4 h-4" />}
+                {activeObject.lockMovementX ? <Lock className="w-4 h-4 text-amber-400" /> : <Unlock className="w-4 h-4 text-stone-300" />}
               </button>
             </div>
           )}
         </div>
 
-        {/* Sticker Drawer (Bottom Container) */}
-        <div className="bg-white border-t border-stone-200 flex flex-col">
-          {/* Drawer Tabs */}
-          <div className="flex gap-2 overflow-x-auto px-4 py-2.5 bg-stone-50 border-b border-stone-200/70 scrollbar-none">
+        {/* CỘT PHẢI (COLLAPSIBLE WARDROBE SIDEBAR) */}
+        <div
+          className={`h-full flex flex-col bg-stone-900 border-l border-stone-800 transition-all duration-300 ease-in-out shrink-0 select-none ${
+            isSidebarOpen
+              ? 'w-[360px] md:w-[380px] translate-x-0 opacity-100'
+              : 'w-0 translate-x-full opacity-0 overflow-hidden border-none pointer-events-none'
+          }`}
+        >
+          {/* Header Sidebar với Nút Đóng X */}
+          <div className="p-4 border-b border-stone-800 flex items-center justify-between bg-stone-950/80">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-xl bg-gradient-to-br from-[#C82A27] to-[#8D1815] text-white shadow-xs">
+                <Shirt className="w-4 h-4 text-amber-300" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white font-display">Tủ Đồ Cổ Phục</h3>
+                <p className="text-[10px] text-stone-400">Click hoặc kéo thả vào ma-nơ-canh</p>
+              </div>
+            </div>
+
+            {/* Nút đóng sidebar */}
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              className="p-1.5 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800 transition-colors cursor-pointer group"
+              title="Thu gọn tủ đồ"
+              aria-label="Thu gọn tủ đồ"
+            >
+              <X className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            </button>
+          </div>
+
+          {/* Danh mục (Category Tabs) */}
+          <div className="px-3 py-2.5 bg-stone-900/80 border-b border-stone-800 flex gap-1.5 overflow-x-auto scrollbar-none">
             {categories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer border hover:-translate-y-0.5 hover:shadow-xs active:scale-95 ${
+                className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer border ${
                   activeCategory === cat.id
-                    ? 'bg-[#E4A025] text-stone-900 border-[#E4A025] shadow-xs'
-                    : 'bg-white text-stone-600 border-stone-300 hover:border-stone-400 hover:text-stone-900'
+                    ? 'bg-[#E4A025] text-stone-950 border-[#E4A025] shadow-xs font-bold'
+                    : 'bg-stone-800 text-stone-300 border-stone-700/60 hover:border-stone-500 hover:text-white'
                 }`}
               >
                 {cat.name}
               </button>
             ))}
-
-            {/* Custom Sticker Upload button */}
-            <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap bg-white text-[#C82A27] border border-[#C82A27] hover:bg-[#FFF5F4] hover:-translate-y-0.5 hover:shadow-xs active:scale-95 transition-all duration-200 cursor-pointer shrink-0">
-              <Upload className="w-3 h-3" />
-              <span>Thêm Sticker PNG</span>
-              <input
-                type="file"
-                accept="image/png, image/webp"
-                className="hidden"
-                onChange={handleCustomStickerUpload}
-              />
-            </label>
           </div>
 
-          {/* Sticker Grid Items */}
-          <div className="p-4 grid grid-cols-4 sm:grid-cols-6 gap-3 max-h-52 overflow-y-auto">
-            {filteredStickers.map((sticker) => (
-              <button
-                key={sticker.id}
-                onClick={() => addStickerToCanvas(sticker)}
-                className="group aspect-square rounded-2xl border-2 border-dashed border-stone-200 hover:border-[#C82A27] bg-stone-50/50 hover:bg-[#FFF5F4] p-1.5 flex flex-col items-center justify-center transition-all duration-200 cursor-pointer relative hover:-translate-y-1 hover:shadow-md active:scale-95"
-                title={`Nhấn để thêm: ${sticker.name}`}
-              >
-                <img
-                  src={sticker.svgDataUri}
-                  alt={sticker.name}
-                  className="max-w-full max-h-full object-contain pointer-events-none group-hover:scale-110 transition-transform duration-200"
+          {/* Lưới vật phẩm 3 cột (Grid Items) */}
+          <div className="flex-1 overflow-y-auto p-3.5 pr-2.5 space-y-3">
+            <div className="grid grid-cols-3 gap-2.5">
+              {filteredStickers.map((sticker) => (
+                <div
+                  key={sticker.id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, sticker)}
+                  onClick={() => addStickerToCanvas(sticker)}
+                  className="group relative aspect-square rounded-2xl bg-stone-800/80 hover:bg-[#8D1815]/20 border border-stone-700/60 hover:border-[#E4A025] p-2 flex flex-col items-center justify-between transition-all duration-200 cursor-grab active:cursor-grabbing hover:-translate-y-1 hover:shadow-lg select-none"
+                  title={`${sticker.name} (Kéo hoặc bấm để thử)`}
+                >
+                  <div className="w-full flex-1 flex items-center justify-center p-1 pointer-events-none">
+                    <img
+                      src={sticker.svgDataUri}
+                      alt={sticker.name}
+                      className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-200 filter drop-shadow-sm"
+                    />
+                  </div>
+                  <span className="text-[10px] text-stone-300 group-hover:text-amber-300 font-medium truncate w-full text-center transition-colors">
+                    {sticker.name}
+                  </span>
+
+                  {/* Badges for Hat, Robe, Shoes */}
+                  {sticker.type === 'mu' && (
+                    <span className="absolute top-1 right-1 text-[8px] bg-amber-500/20 text-amber-300 px-1 rounded-md font-mono">
+                      Mũ
+                    </span>
+                  )}
+                  {sticker.type === 'ao' && (
+                    <span className="absolute top-1 right-1 text-[8px] bg-rose-500/20 text-rose-300 px-1 rounded-md font-mono">
+                      Áo
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Upload Custom PNG Sticker Box */}
+            <div className="pt-2 border-t border-stone-800">
+              <label className="flex items-center justify-center gap-2 p-2.5 rounded-2xl border border-dashed border-stone-700 hover:border-[#E4A025] bg-stone-800/40 hover:bg-stone-800/80 text-stone-300 hover:text-amber-300 text-xs font-semibold cursor-pointer transition-all">
+                <Upload className="w-3.5 h-3.5 text-amber-400" />
+                <span>Thêm sticker ảnh PNG của bạn</span>
+                <input
+                  type="file"
+                  accept="image/png, image/webp"
+                  className="hidden"
+                  onChange={handleCustomStickerUpload}
                 />
-                <span className="text-[10px] text-stone-600 group-hover:text-[#8D1815] font-medium truncate w-full text-center mt-1 transition-colors">
-                  {sticker.name.split(' ')[0]}
-                </span>
-              </button>
-            ))}
+              </label>
+            </div>
+          </div>
+
+          {/* Footer Sidebar Info */}
+          <div className="p-3 bg-stone-950 border-t border-stone-800 text-center text-[10px] text-stone-500">
+            Hỗ trợ kéo & thả tự do hoặc 1-chạm tự động căn chỉnh
           </div>
         </div>
+
       </div>
 
       {/* Setup / Background & Model Selection Modal */}
-      {showSetupModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="relative w-full max-w-md bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-stone-200 space-y-6">
+      {showSetupModal && typeof document !== 'undefined' && createPortal(
+        <div
+          className="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setShowSetupModal(false)}
+        >
+          <div
+            className="relative w-full max-w-md bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-stone-200 space-y-6"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between border-b border-stone-100 pb-3">
               <h3 className="text-xl font-display font-bold text-stone-900">
                 Chọn Người Mẫu & Tải Ảnh Nền
@@ -827,7 +1049,8 @@ export const VirtualTryOn: React.FC = () => {
               </label>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

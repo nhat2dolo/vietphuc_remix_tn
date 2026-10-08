@@ -16,7 +16,16 @@ app.use(express.json());
 
 // Initialize Gemini SDK with GEMINI_API_KEY from environment
 const apiKey = process.env.GEMINI_API_KEY || '';
-const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+const ai = apiKey
+  ? new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        },
+      },
+    })
+  : null;
 
 function normalizeVietnameseText(input: string): string {
   if (!input) return '';
@@ -30,7 +39,7 @@ function normalizeVietnameseText(input: string): string {
   return text.normalize('NFC');
 }
 
-function withTimeout<T>(promise: Promise<T>, ms = 6000): Promise<T> {
+function withTimeout<T>(promise: Promise<T>, ms = 25000): Promise<T> {
   return Promise.race([
     promise,
     new Promise<T>((_, reject) =>
@@ -113,7 +122,7 @@ Yêu cầu trả về định dạng JSON thuần túy (không bọc markdown \`
         model: 'gemini-3.8-flash',
         contents: prompt,
       }),
-      6000
+      25000
     );
 
     const text = response.text || '';
@@ -160,7 +169,7 @@ Nhiệm vụ: Trả lời thân thiện, am hiểu sâu sắc về lịch sử �
           systemInstruction,
         },
       }),
-      6000
+      25000
     );
 
     return res.json({
@@ -168,9 +177,26 @@ Nhiệm vụ: Trả lời thân thiện, am hiểu sâu sắc về lịch sử �
     });
   } catch (error: any) {
     console.warn('Gemini chat error, using contextual fallback:', error?.message);
-    const { context } = req.body;
+    const { message, context } = req.body;
+    const msg = (message || '').toLowerCase();
+    const outfit = context?.outfitName || 'cổ phục';
+
+    let fallbackReply = `Bộ ${outfit} sắc ${context?.colorName || 'truyền thống'} của bạn mang đậm phong thái thanh nhã của mỹ thuật Đại Việt! Để vừa chuẩn mực vừa mang hơi thở đương đại, bạn có thể kết hợp cùng giày sneaker trắng tối giản hoặc túi tote thêu tay nhẹ nhàng.`;
+
+    if (msg.includes('ngũ thân') || msg.includes('áo dài tân thời') || msg.includes('le mur')) {
+      fallbackReply = `Áo Ngũ Thân thời Nguyễn gồm 5 thân vải tượng trưng cho Tứ thân phụ mẫu và bản thân người mặc, 5 hạt cúc biểu trưng cho Ngũ thường (Nhân - Lễ - Nghĩa - Trí - Tín). Thập niên 1930, họa sĩ Cát Tường (Le Mur) đã cách tân tà áo ôm sát đường nét cơ thể. Khi phối đồ cho Gen Z, bạn có thể giữ phom áo suông thanh tao của ngũ thân và điểm xuyết sneaker tối giản để tôn dáng vẻ đĩnh đạc.`;
+    } else if (msg.includes('nhật bình') || msg.includes('cung đình') || msg.includes('hoàng tộc')) {
+      fallbackReply = `Áo Nhật Bình là thường phục cao quý của bậc Hoàng hậu, Công chúa triều Nguyễn với cổ áo hình chữ nhật trước ngực và dải ngũ hành rực rỡ ở tay áo. Khi diện Nhật Bình, búi tóc hoặc quấn mấn gọn gàng, tiết chế phụ kiện hiện đại rườm rà sẽ tôn trọn vẻ quý phái uy nghiêm.`;
+    } else if (msg.includes('ngũ hành') || msg.includes('phối màu') || msg.includes('màu sắc')) {
+      fallbackReply = `Theo ngũ hành Á Đông: Kim (Trắng ngà), Mộc (Xanh ngọc), Thủy (Lam chàm/Đen), Hỏa (Đỏ chu sa), Thổ (Vàng hoàng yến/Nâu). Bạn có thể phối theo luật Tương Sinh (Thủy sinh Mộc, Mộc sinh Hỏa) hoặc Tương Hợp để đạt được sự hòa sắc cát tường và tôn lên khí chất cao quý.`;
+    } else if (msg.includes('sneaker') || msg.includes('hiện đại') || msg.includes('gen z')) {
+      fallbackReply = `Bí quyết mix sneaker với cổ phục: Hãy ưu tiên sneaker cổ thấp (low-top), tông màu đơn sắc trung tính như trắng ngà, be nhạt hoặc xám khói với phom dáng thanh thoát. Tránh giày chunky quá hầm hố để không làm mất đi nét uyển chuyển của tà áo.`;
+    } else if (msg.includes('tay chẽn') || msg.includes('tay thụng') || msg.includes('áo tấc')) {
+      fallbackReply = `Áo Tay Chẽn gọn gàng, linh hoạt cho sinh hoạt thường nhật, trong khi Áo Tay Thụng (Áo Tấc) với ống tay thụng dài từ 40-50cm lại là lễ phục trang trọng bậc nhất trong các đại lễ cung đình, cưới hỏi và tế tự thời Nguyễn.`;
+    }
+
     return res.json({
-      reply: normalizeVietnameseText(`[Cố vấn Việt Phục Remix (Chế độ Cổ Phong)]: Bộ ${context?.outfitName || 'cổ phục'} sắc ${context?.colorName || 'truyền thống'} của bạn rất ấn tượng! Để tăng tính Gen Z mà vẫn chuẩn mực, hãy chú ý giữ nguyên phom dáng cổ áo và tà áo, đồng thời bạn có thể tự do biến tấu phụ kiện như túi tote thổ cẩm, giày sneaker tối giản hoặc mắt kính gọng kim loại thanh mảnh.`)
+      reply: normalizeVietnameseText(fallbackReply)
     });
   }
 });

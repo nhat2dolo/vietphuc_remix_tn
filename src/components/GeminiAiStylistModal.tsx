@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { OutfitData, TraditionalColor, AccessoryData } from '../types/vietphuc';
 import {
   analyzeOutfitWithGemini,
@@ -47,6 +48,16 @@ export const GeminiAiStylistModal: React.FC<GeminiAiStylistModalProps> = ({
   ]);
   const [inputText, setInputText] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (!isOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow || 'auto';
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -98,26 +109,34 @@ export const GeminiAiStylistModal: React.FC<GeminiAiStylistModalProps> = ({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-stone-200">
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-stone-200"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Modal Header */}
         <div className="p-5 sm:p-6 bg-gradient-to-r from-[#FAF7F2] to-white border-b border-stone-200 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#C82A27] text-white flex items-center justify-center shadow-md">
-              <Bot className="w-6 h-6" />
+            <div className="w-10 h-10 rounded-2xl bg-[#8B1E1E] text-white flex items-center justify-center shadow-md">
+              <Bot className="w-6 h-6 text-[#E5A93C]" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-display font-bold text-lg sm:text-xl text-stone-900">
-                  Gemini Heritage Stylist AI
+                  Tư Vấn Phối Đồ Hoàng Cung · Gemini AI
                 </h3>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-bold">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-100 text-[#8B1E1E] font-bold border border-[#E5A93C]/30">
                   Gemini 3.8 Flash
                 </span>
               </div>
               <p className="text-xs text-stone-500 font-serif italic">
-                Cố vấn văn hóa & thẩm mỹ phục trang ứng dụng Google GenAI
+                Cố vấn văn hóa, sắc phục ngũ hành & hoàn cảnh cung đình đương đại
               </p>
             </div>
           </div>
@@ -126,6 +145,7 @@ export const GeminiAiStylistModal: React.FC<GeminiAiStylistModalProps> = ({
             <button
               onClick={onClose}
               className="p-2 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
+              aria-label="Đóng"
             >
               <X className="w-5 h-5" />
             </button>
@@ -154,16 +174,16 @@ export const GeminiAiStylistModal: React.FC<GeminiAiStylistModalProps> = ({
             <button
               onClick={handleAnalyze}
               disabled={loading}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#C82A27] hover:bg-[#A8221F] text-white font-semibold text-xs transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer disabled:opacity-50 shrink-0"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#8B1E1E] hover:bg-[#A32222] text-white font-semibold text-xs transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer disabled:opacity-50 shrink-0 border border-[#E5A93C]/40"
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin text-[#E5A93C]" />
                   <span>Đang phân tích cùng Gemini...</span>
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4" />
+                  <Sparkles className="w-4 h-4 text-[#E5A93C]" />
                   <span>Chấm Điểm & Nhận Xét Cùng Gemini AI</span>
                 </>
               )}
@@ -183,7 +203,7 @@ export const GeminiAiStylistModal: React.FC<GeminiAiStylistModalProps> = ({
                   </h4>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-display font-bold text-[#C82A27]">
+                  <div className="text-2xl font-display font-bold text-[#8B1E1E]">
                     {analysis.score}
                     <span className="text-xs text-stone-400 font-sans">/100</span>
                   </div>
@@ -200,7 +220,7 @@ export const GeminiAiStylistModal: React.FC<GeminiAiStylistModalProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/80 space-y-1">
                   <div className="font-semibold text-amber-900 flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#C99700]" />
                     <span>Góc Nhìn Văn Hóa & Lịch Sử</span>
                   </div>
                   <p className="text-amber-800 leading-relaxed">{analysis.culturalInsight}</p>
@@ -208,7 +228,7 @@ export const GeminiAiStylistModal: React.FC<GeminiAiStylistModalProps> = ({
 
                 <div className="p-3.5 rounded-xl bg-blue-50/70 border border-blue-200/80 space-y-1">
                   <div className="font-semibold text-blue-900 flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <Sparkles className="w-3.5 h-3.5 text-[#1A365D]" />
                     <span>Mẹo Styling Cho Gen Z</span>
                   </div>
                   <p className="text-blue-800 leading-relaxed">{analysis.modernStylingAdvice}</p>
@@ -220,8 +240,8 @@ export const GeminiAiStylistModal: React.FC<GeminiAiStylistModalProps> = ({
           {/* Chat with Gemini Assistant */}
           <div className="space-y-3 pt-2">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-stone-700">
-              <MessageSquare className="w-4 h-4 text-[#C82A27]" />
-              <span>Hỏi Đáp Thời Gian Thực Cùng Cố Vấn Gemini</span>
+              <MessageSquare className="w-4 h-4 text-[#8B1E1E]" />
+              <span>Hỏi Đáp Thời Gian Thực Cùng Cố Vấn Hoàng Cung</span>
             </div>
 
             <div className="h-48 overflow-y-auto p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-3 text-xs">
@@ -233,7 +253,7 @@ export const GeminiAiStylistModal: React.FC<GeminiAiStylistModalProps> = ({
                   <div
                     className={`max-w-[85%] p-3 rounded-2xl leading-relaxed ${
                       m.sender === 'user'
-                        ? 'bg-[#C82A27] text-white rounded-br-none'
+                        ? 'bg-[#8B1E1E] text-white rounded-br-none'
                         : 'bg-white text-stone-800 border border-stone-200/80 rounded-bl-none shadow-2xs'
                     }`}
                   >
@@ -243,7 +263,7 @@ export const GeminiAiStylistModal: React.FC<GeminiAiStylistModalProps> = ({
               ))}
               {chatLoading && (
                 <div className="flex items-center gap-2 text-stone-400 italic">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-[#8B1E1E]" />
                   <span>Gemini đang suy nghĩ câu trả lời...</span>
                 </div>
               )}
@@ -255,20 +275,21 @@ export const GeminiAiStylistModal: React.FC<GeminiAiStylistModalProps> = ({
                 placeholder="Ví dụ: Phối áo ngũ thân với sneaker cổ cao đi chụp ảnh Tết có ổn không?"
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                className="flex-1 px-4 py-2.5 rounded-xl border border-stone-300 text-xs focus:outline-none focus:ring-2 focus:ring-[#C82A27]/20 focus:border-[#C82A27] bg-white"
+                className="flex-1 px-4 py-2.5 rounded-xl border border-stone-300 text-xs focus:outline-none focus:ring-2 focus:ring-[#8B1E1E]/20 focus:border-[#8B1E1E] bg-white"
               />
               <button
                 type="submit"
                 disabled={!inputText.trim() || chatLoading}
-                className="px-4 py-2.5 rounded-xl bg-[#C82A27] hover:bg-[#A8221F] text-white font-medium text-xs transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                className="px-4 py-2.5 rounded-xl bg-[#8B1E1E] hover:bg-[#A32222] text-white font-medium text-xs transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1.5 border border-[#E5A93C]/40"
               >
-                <Send className="w-3.5 h-3.5" />
+                <Send className="w-3.5 h-3.5 text-[#E5A93C]" />
                 <span>Gửi</span>
               </button>
             </form>
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

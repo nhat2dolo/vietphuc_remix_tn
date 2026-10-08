@@ -163,16 +163,6 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
       {/* 1. TOP STUDIO ACTION TOOLBAR */}
       <div className="bg-white rounded-3xl p-4 sm:p-5 border border-stone-200/90 shadow-sm flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          {/* Gemini AI Stylist Button with glowing accent */}
-          <button
-            onClick={() => setShowGeminiModal(true)}
-            className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#C82A27] via-[#D93835] to-[#E4A025] text-white font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-sm hover:shadow-md transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <Bot className="w-4 h-4 text-amber-200" />
-            <span>Cố Vấn AI Gemini (Google AI)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full font-mono">3.8 Flash</span>
-          </button>
-
           {/* Weather & Event Toggle */}
           <button
             onClick={() => setShowWeatherSection(!showWeatherSection)}
@@ -260,37 +250,27 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
         {/* Left Column: Interactive Visual Mannequin Avatar */}
         <div className="lg:col-span-5 space-y-4">
           <div className="bg-white rounded-3xl p-4 sm:p-6 border border-stone-200/90 shadow-sm space-y-4">
-            {/* Top Toolbar above Mannequin */}
-            <div className="flex items-center justify-between">
-              {/* Gender Switch */}
-              <div className="inline-flex p-1 bg-stone-100 rounded-xl">
-                <button
-                  onClick={() => handleSetGender('female')}
-                  className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all duration-200 cursor-pointer hover:-translate-y-0.5 active:scale-95 ${
-                    gender === 'female' ? 'bg-white text-stone-900 shadow-sm font-bold' : 'text-stone-600 hover:text-stone-900 hover:bg-white/60'
-                  }`}
-                >
-                  Nữ Giới
-                </button>
-                <button
-                  onClick={() => handleSetGender('male')}
-                  className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all duration-200 cursor-pointer hover:-translate-y-0.5 active:scale-95 ${
-                    gender === 'male' ? 'bg-white text-stone-900 shadow-sm font-bold' : 'text-stone-600 hover:text-stone-900 hover:bg-white/60'
-                  }`}
-                >
-                  Nam Giới
-                </button>
+            {/* Top Toolbar above Mannequin: Day/Night Lighting and Reset */}
+            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-stone-700 tracking-wider uppercase font-sans">
+                  Góc Trưng Bày Phục Trang
+                </span>
+                <span className="text-[11px] text-stone-400 font-serif italic hidden sm:inline">
+                  (Dáng đứng toàn thân 2D chuẩn mực)
+                </span>
               </div>
 
               {/* Day/Night Lighting and Reset */}
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsNightStudio(!isNightStudio)}
-                  className="p-2 rounded-xl text-stone-600 hover:bg-stone-100 hover:-translate-y-0.5 hover:shadow-xs active:scale-95 transition-all duration-200 border border-stone-200/80 cursor-pointer"
+                  className="p-2 rounded-xl text-stone-600 hover:bg-stone-100 hover:-translate-y-0.5 hover:shadow-xs active:scale-95 transition-all duration-200 border border-stone-200/80 cursor-pointer flex items-center gap-1.5 text-xs font-medium"
                   title="Chuyển ánh sáng ngày / đêm"
                   aria-label="Chuyển ánh sáng ngày / đêm"
                 >
                   {isNightStudio ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-stone-600" />}
+                  <span className="hidden sm:inline">{isNightStudio ? 'Ban Ngày' : 'Ban Đêm'}</span>
                 </button>
                 <button
                   onClick={handleResetOutfit}

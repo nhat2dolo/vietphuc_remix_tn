@@ -35,20 +35,20 @@ export const MannequinViewer: React.FC<MannequinViewerProps> = ({
 
   return (
     <div
-      className={`relative w-full h-[520px] sm:h-[580px] flex items-center justify-center rounded-2xl overflow-hidden transition-colors duration-500 border border-stone-200/80 shadow-inner ${
+      className={`relative w-full min-h-[580px] sm:min-h-[620px] md:min-h-[640px] h-[600px] sm:h-[640px] flex items-center justify-center rounded-2xl overflow-hidden transition-colors duration-500 border border-stone-200/80 shadow-inner ${
         isNightStudio
           ? 'bg-gradient-to-b from-[#181a20] via-[#20222a] to-[#121318]'
           : 'bg-gradient-to-b from-[#FAF6F0] via-[#F3ECE0] to-[#EAE1D1]'
       }`}
     >
-      {/* UI Tags: Nữ Giới / Nam Giới ở góc trên bên trái */}
-      <div className="absolute top-3.5 left-3.5 z-20 flex items-center gap-1.5 p-1 rounded-xl bg-white/90 backdrop-blur-xs border border-stone-200/80 shadow-xs">
+      {/* UI Tags duy nhất: Nữ Giới / Nam Giới ở góc trên bên trái khung Canvas */}
+      <div className="absolute top-3.5 left-3.5 z-20 flex items-center gap-1.5 p-1 rounded-xl bg-white/95 backdrop-blur-md border border-stone-200/90 shadow-sm">
         <button
           type="button"
           onClick={() => onSelectGender?.('female')}
           className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all duration-200 cursor-pointer hover:-translate-y-0.5 active:scale-95 ${
             !isMale
-              ? 'bg-[#C82A27] text-white shadow-xs font-bold'
+              ? 'bg-[#8B1E1E] text-white shadow-xs font-bold border border-[#E5A93C]/40'
               : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
           }`}
         >
@@ -59,7 +59,7 @@ export const MannequinViewer: React.FC<MannequinViewerProps> = ({
           onClick={() => onSelectGender?.('male')}
           className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all duration-200 cursor-pointer hover:-translate-y-0.5 active:scale-95 ${
             isMale
-              ? 'bg-[#C82A27] text-white shadow-xs font-bold'
+              ? 'bg-[#8B1E1E] text-white shadow-xs font-bold border border-[#E5A93C]/40'
               : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
           }`}
         >

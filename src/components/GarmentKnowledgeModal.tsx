@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { OutfitData } from '../types/vietphuc';
 import { X, BookOpen, Clock, HeartHandshake, ShieldCheck } from 'lucide-react';
 
@@ -13,11 +14,20 @@ export const GarmentKnowledgeModal: React.FC<GarmentKnowledgeModalProps> = ({
   onClose,
   outfit,
 }) => {
-  if (!isOpen || !outfit) return null;
+  useEffect(() => {
+    if (!isOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow || 'auto';
+    };
+  }, [isOpen]);
 
-  return (
+  if (!isOpen || !outfit || typeof document === 'undefined') return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
@@ -88,6 +98,7 @@ export const GarmentKnowledgeModal: React.FC<GarmentKnowledgeModalProps> = ({
           Đã hiểu · Trở lại trải nghiệm
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

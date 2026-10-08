@@ -208,38 +208,42 @@ export const HomeView: React.FC<HomeViewProps> = ({
       <HeroVisualBackground className="min-h-[580px] sm:min-h-[640px] md:min-h-[700px] flex items-center justify-center rounded-3xl sm:rounded-4xl shadow-xl border border-stone-200/80">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-24 text-center flex flex-col items-center justify-center space-y-6 sm:space-y-8">
           {/* Inspiring Pill Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/35 text-white text-xs sm:text-sm font-semibold tracking-wider uppercase shadow-md">
-            <Sparkles className="w-4 h-4 text-amber-300 animate-spin" style={{ animationDuration: '6s' }} />
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-[#E5A93C]/40 text-[#FDFBF7] text-xs sm:text-sm font-semibold tracking-wider uppercase shadow-lg">
+            <Sparkles className="w-4 h-4 text-[#E5A93C] animate-spin" style={{ animationDuration: '6s' }} />
             <span>Việt Phục Remix · Di Sản Trăm Năm Trong Nhịp Sống Trẻ</span>
           </div>
 
-          {/* Majestic Hero Headline */}
-          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-bold text-white leading-tight tracking-tight drop-shadow-lg max-w-4xl">
-            Khoác Lên Dấu Ấn Cha Ông, <br className="hidden sm:inline" />
-            <span className="text-[#FBBF24]">Tự Hào Bước Ra Thế Giới</span>
+          {/* Majestic Hero Headline: Serif Playfair/Lora, Dòng 1 Trắng Ngà Ánh Kim, Dòng 2 Vàng Kim Gradient */}
+          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-bold leading-tight tracking-tight drop-shadow-2xl max-w-4xl text-center">
+            <span className="block text-[#FDFBF7] drop-shadow-[0_2px_12px_rgba(201,151,0,0.45)]">
+              KHOÁC LÊN DI SẢN
+            </span>
+            <span className="block bg-gradient-to-r from-[#FBBF24] via-[#E5A93C] to-[#C99700] bg-clip-text text-transparent drop-shadow-[0_4px_16px_rgba(201,151,0,0.55)]">
+              TỰ HÀO DÁNG VIỆT
+            </span>
           </h1>
 
           {/* Clean Inspiring Subtitle */}
-          <p className="text-stone-100/95 text-base sm:text-lg md:text-xl max-w-2xl font-serif italic leading-relaxed drop-shadow-md">
-            Khám phá kết cấu chuẩn mực của Áo Dài, Ngũ Thân, Nhật Bình, Tứ Thân, Bà Ba, Giao Lĩnh qua công nghệ thử đồ tương tác và Cố vấn AI Google Gemini.
+          <p className="text-[#FDFBF7]/90 text-base sm:text-lg md:text-xl max-w-2xl font-serif italic leading-relaxed drop-shadow-md">
+            Khám phá vẻ đẹp của Áo Dài, Ngũ Thân, Nhật Bình, Tứ Thân, Bà Ba và Giao Lĩnh — nơi di sản được tái hiện qua trải nghiệm thử đồ tương tác và công nghệ AI.
           </p>
 
           {/* 2 Nút Bấm Lớn Dạng Viên Thuốc Nổi (Floating Pill Glassmorphism) */}
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
-            {/* Nút 1: Bắt Đầu Thử Đồ Ngay */}
+            {/* Nút 1: Bắt Đầu Thử Đồ (Nền đỏ chu sa viền vàng, hiệu ứng hover nở nhẹ) */}
             <button
               onClick={onStartTryOn}
-              className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#C82A27]/95 hover:bg-[#A8221F] text-white font-bold text-sm sm:text-base backdrop-blur-md border border-white/40 shadow-xl hover:shadow-red-900/50 hover:-translate-y-1 active:translate-y-0 active:scale-95 transition-all duration-200 flex items-center justify-center gap-3 cursor-pointer group"
+              className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#8B1E1E] hover:bg-[#A32222] text-[#FDFBF7] font-bold text-sm sm:text-base backdrop-blur-md border border-[#E5A93C]/80 shadow-[0_10px_30px_rgba(139,30,30,0.5)] hover:shadow-[0_14px_40px_rgba(229,169,60,0.45)] hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center gap-3 cursor-pointer group"
             >
-              <Sparkles className="w-5 h-5 text-amber-300 transition-transform group-hover:rotate-12" />
-              <span>✨ Bắt Đầu Thử Đồ Ngay</span>
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              <Sparkles className="w-5 h-5 text-[#E5A93C] transition-transform group-hover:rotate-12 group-hover:scale-110" />
+              <span>Bắt Đầu Thử Đồ</span>
+              <ArrowRight className="w-4 h-4 text-[#FDFBF7] transition-transform group-hover:translate-x-1" />
             </button>
 
             {/* Nút 2: Khám Phá 6 Dáng Cổ Phục */}
             <button
               onClick={scrollToGarments}
-              className="w-full sm:w-auto px-8 py-4 rounded-full bg-white/25 hover:bg-white/40 text-white font-bold text-sm sm:text-base backdrop-blur-md border border-white/40 shadow-xl hover:-translate-y-1 active:translate-y-0 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2.5 cursor-pointer group"
+              className="w-full sm:w-auto px-8 py-4 rounded-full bg-white/20 hover:bg-white/30 text-[#FDFBF7] font-bold text-sm sm:text-base backdrop-blur-md border border-white/40 shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2.5 cursor-pointer group"
             >
               <span>📜 Khám Phá 6 Dáng Cổ Phục</span>
               <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />

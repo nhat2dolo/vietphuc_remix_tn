@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { OutfitId, GenderMode, PatternId, AccessoryId } from '../types/vietphuc';
 import { OUTFITS, TRADITIONAL_COLORS, ACCESSORIES } from '../data/vietphucData';
 import { normalizeVietnameseText } from '../utils/textUtils';
@@ -59,10 +60,15 @@ export const SavedLookbooksModal: React.FC<SavedLookbooksModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       setLooks(getSavedLooks());
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow || 'auto';
+      };
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
   const handleDelete = (id: string) => {
     const updated = looks.filter((l) => l.id !== id);
@@ -93,9 +99,15 @@ Triết lý: "${outfit.philosophy}"`);
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-stone-200">
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-stone-200"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="p-5 sm:p-6 bg-gradient-to-r from-[#FAF7F2] to-white border-b border-stone-200 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -216,6 +228,7 @@ Triết lý: "${outfit.philosophy}"`);
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

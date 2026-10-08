@@ -90,8 +90,15 @@ export const HeroVisualBackground: React.FC<HeroVisualBackgroundProps> = ({
         />
       )}
 
-      {/* 3. Lớp phủ bóng mờ Gradient (Overlay) Bắt buộc theo thiết kế */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#FAF7F2] via-black/30 to-black/60 pointer-events-none" />
+      {/* 3. Lớp phủ bóng mờ Gradient (Overlay) & Hiệu ứng điện ảnh Cung Đình */}
+      {/* Ambient Glow ở tâm (quầng sáng vàng ấm lan tỏa nhẹ) */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,rgba(229,169,60,0.18)_0%,rgba(201,151,0,0.06)_45%,transparent_75%)]" />
+
+      {/* Viền tối điện ảnh (Vignette đen mờ dần về 4 cạnh) */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0)_0%,rgba(15,13,11,0.85)_100%)]" />
+
+      {/* Gradient nâng đỡ chữ phía dưới */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0F0D0B]/90 via-black/25 to-black/60 pointer-events-none" />
 
       {/* 4. Nội dung phía trên (Hero text & buttons) */}
       <div className="relative z-10 w-full">

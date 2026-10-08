@@ -1,4 +1,5 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { OutfitData, TraditionalColor, AccessoryData, PatternId, GenderMode } from '../types/vietphuc';
 import { normalizeVietnameseText } from '../utils/textUtils';
 import { Download, Copy, Check, X, Sparkles } from 'lucide-react';
@@ -30,7 +31,16 @@ export const LookbookCardModal: React.FC<LookbookCardModalProps> = ({
   const [isExporting, setIsExporting] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (!isOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow || 'auto';
+    };
+  }, [isOpen]);
+
+  if (!isOpen || typeof document === 'undefined') return null;
 
   const handleCopyRecipe = async () => {
     const accList = selectedAccessories.map((a) => `${a.name} (${a.emoji})`).join(', ') || 'Không phụ kiện';
@@ -180,9 +190,15 @@ Triết lý: "${outfitData.philosophy}"
     setIsExporting(false);
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl bg-[#FAF7F2] rounded-3xl shadow-2xl border border-stone-300 overflow-hidden max-h-[92vh] flex flex-col">
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-2xl bg-[#FAF7F2] rounded-3xl shadow-2xl border border-stone-300 overflow-hidden max-h-[92vh] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Top bar */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-stone-200 bg-white/70">
           <div className="flex items-center gap-2 text-stone-800 font-medium">
@@ -297,6 +313,7 @@ Triết lý: "${outfitData.philosophy}"
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

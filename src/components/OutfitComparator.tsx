@@ -56,7 +56,7 @@ export const OutfitComparator: React.FC<OutfitComparatorProps> = ({
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#8D1815]">
             <ArrowLeftRight className="w-4 h-4 text-[#C82A27]" />
-            <span>Đối Sánh Trực Quan (Side-by-Side Comparison)</span>
+            <span>ĐỐI SÁNH TRỰC QUAN</span>
           </div>
           <h3 className="text-xl sm:text-2xl font-display font-bold text-stone-900 mt-1">
             So Sánh Các Phương Án Phối Đồ
@@ -96,7 +96,7 @@ export const OutfitComparator: React.FC<OutfitComparatorProps> = ({
             </button>
           </div>
 
-          <div className="w-full h-80 rounded-2xl overflow-hidden bg-white border border-stone-200 flex items-center justify-center">
+          <div className="w-full min-h-[580px] sm:min-h-[620px] md:min-h-[640px] rounded-2xl overflow-hidden bg-white border border-stone-200 flex items-center justify-center">
             <MannequinViewer
               outfit={slotA.outfit}
               gender={slotA.gender}
@@ -104,6 +104,7 @@ export const OutfitComparator: React.FC<OutfitComparatorProps> = ({
               secondaryColorHex={slotA.secondaryColorHex}
               pattern={slotA.pattern}
               accessories={slotA.accessories}
+              onSelectGender={(gender) => setSlotA({ ...slotA, gender })}
             />
           </div>
 
@@ -148,7 +149,7 @@ export const OutfitComparator: React.FC<OutfitComparatorProps> = ({
             </button>
           </div>
 
-          <div className="w-full h-80 rounded-2xl overflow-hidden bg-white border border-stone-200 flex items-center justify-center">
+          <div className="w-full min-h-[580px] sm:min-h-[620px] md:min-h-[640px] rounded-2xl overflow-hidden bg-white border border-stone-200 flex items-center justify-center">
             <MannequinViewer
               outfit={slotB.outfit}
               gender={slotB.gender}
@@ -156,6 +157,7 @@ export const OutfitComparator: React.FC<OutfitComparatorProps> = ({
               secondaryColorHex={slotB.secondaryColorHex}
               pattern={slotB.pattern}
               accessories={slotB.accessories}
+              onSelectGender={(gender) => setSlotB({ ...slotB, gender })}
             />
           </div>
 

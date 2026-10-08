@@ -13,6 +13,7 @@ import { HeritageArchive } from './components/HeritageArchive';
 import { PersonalityQuiz } from './components/PersonalityQuiz';
 import { WeatherEventRecommender } from './components/WeatherEventRecommender';
 import { OutfitComparator, SavedOutfitSlot } from './components/OutfitComparator';
+import { GlobalAiAssistant } from './components/GlobalAiAssistant';
 import { OutfitId, PresetLook, PatternId, AccessoryId } from './types/vietphuc';
 
 export default function App() {
@@ -283,6 +284,16 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* 4. TRỢ LÝ AI TOÀN CỤC ĐA NGỮ CẢNH (GLOBAL CONTEXT-AWARE ASSISTANT DRAWER) */}
+      <GlobalAiAssistant
+        activeTab={activeTab}
+        currentOutfitId={targetOutfit}
+        onNavigate={(tab) => {
+          setActiveTab(tab);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
     </div>
   );
 }
