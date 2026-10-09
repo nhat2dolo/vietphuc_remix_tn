@@ -14,6 +14,9 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 app.use(express.json());
 
+// Serve static files from public directory (e.g. /models/*.glb, /assets/*)
+app.use(express.static(path.resolve(__dirname, 'public')));
+
 // Initialize Gemini SDK with GEMINI_API_KEY from environment
 const apiKey = process.env.GEMINI_API_KEY || '';
 const ai = apiKey

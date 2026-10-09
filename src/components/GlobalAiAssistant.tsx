@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Sparkles,
@@ -124,8 +124,9 @@ export const GlobalAiAssistant: React.FC<GlobalAiAssistantProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Quản lý tọa độ kéo thả nút tròn tự do khắp màn hình
+  // Quản lý tọa độ kéo thả nút tròn tự do khắp màn hình & Magnet Snap-to-Edge
   const [btnPos, setBtnPos] = useState<{ x: number; y: number } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const dragInfoRef = useRef({
     isDragging: false,
     startX: 0,
@@ -135,20 +136,57 @@ export const GlobalAiAssistant: React.FC<GlobalAiAssistantProps> = ({
     hasMoved: false,
   });
 
+  // Quản lý trạng thái thu nhỏ và làm mờ sau 3.5s không tương tác
+  const [isIdle, setIsIdle] = useState<boolean>(false);
+  const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const resetIdleTimer = useCallback(() => {
+    setIsIdle(false);
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current);
+    }
+    // Sau 3.5 giây không tương tác tự động thu nhỏ nút AI (scale-65) và làm mờ (opacity-45)
+    idleTimerRef.current = setTimeout(() => {
+      setIsIdle(true);
+    }, 3500);
+  }, []);
+
+  // Khởi chạy idle timer khi mount hoặc khi đóng drawer
+  useEffect(() => {
+    if (!isOpen) {
+      resetIdleTimer();
+    } else {
+      setIsIdle(false);
+      if (idleTimerRef.current) {
+        clearTimeout(idleTimerRef.current);
+      }
+    }
+    return () => {
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    };
+  }, [isOpen, resetIdleTimer]);
+
   const outfit = OUTFITS[currentOutfitId] || OUTFITS.nguthan;
 
-  // Giữ vị trí nút trong màn hình khi cửa sổ thay đổi kích thước
+  // Giữ vị trí nút trong màn hình khi cửa sổ thay đổi kích thước & tự động hít mép an toàn
   useEffect(() => {
     const handleResize = () => {
       setBtnPos((prev) => {
         if (!prev) return null;
         const btnSize = 56;
-        const padding = 12;
-        const maxX = window.innerWidth - btnSize - padding;
-        const maxY = window.innerHeight - btnSize - padding;
+        const padding = 16;
+        const screenMid = window.innerWidth / 2;
+        const isMobile = window.innerWidth < 640;
+        const minTop = 70; // Tránh đè lên Navbar
+        const minBottom = isMobile ? 88 : 24; // Tránh đè lên Bottom Nav trên Mobile
+        const maxTop = Math.max(minTop, window.innerHeight - btnSize - minBottom);
+
+        const btnCenterX = prev.x + btnSize / 2;
+        const snapX = btnCenterX < screenMid ? padding : window.innerWidth - btnSize - padding;
+        const clampedY = Math.max(minTop, Math.min(maxTop, prev.y));
         return {
-          x: Math.max(padding, Math.min(maxX, prev.x)),
-          y: Math.max(padding, Math.min(maxY, prev.y)),
+          x: snapX,
+          y: clampedY,
         };
       });
     };
@@ -479,6 +517,7 @@ export const GlobalAiAssistant: React.FC<GlobalAiAssistantProps> = ({
 
   // Xử lý kéo thả nút tròn tự do trên màn hình (Pointer capture)
   const handlePointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+    resetIdleTimer();
     if (e.button !== 0 && e.pointerType === 'mouse') return;
     const button = e.currentTarget;
     try {
@@ -499,6 +538,7 @@ export const GlobalAiAssistant: React.FC<GlobalAiAssistantProps> = ({
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+    resetIdleTimer();
     if (!dragInfoRef.current.isDragging) return;
 
     const deltaX = e.clientX - dragInfoRef.current.startX;
@@ -507,6 +547,9 @@ export const GlobalAiAssistant: React.FC<GlobalAiAssistantProps> = ({
 
     // Phân biệt Click vs Drag: Nếu di chuyển > 4px thì chỉ dời nút
     if (dist > 4) {
+      if (!isDragging) {
+        setIsDragging(true);
+      }
       dragInfoRef.current.hasMoved = true;
       const btnSize = 56; // w-14 h-14 = 56px
       const padding = 12;
@@ -521,6 +564,7 @@ export const GlobalAiAssistant: React.FC<GlobalAiAssistantProps> = ({
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLButtonElement>) => {
+    resetIdleTimer();
     if (!dragInfoRef.current.isDragging) return;
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
@@ -530,10 +574,28 @@ export const GlobalAiAssistant: React.FC<GlobalAiAssistantProps> = ({
 
     const { hasMoved } = dragInfoRef.current;
     dragInfoRef.current.isDragging = false;
+    setIsDragging(false);
 
     // Phân biệt Click vs Drag: nếu nhấp chuột (<= 4px) thì bật/tắt Drawer
     if (!hasMoved) {
       setIsOpen((prev) => !prev);
+    } else {
+      // Hiệu ứng Nam châm Hít Mép (Magnet Snap-to-Edge)
+      const btnSize = 56;
+      const padding = 16;
+      const screenMid = window.innerWidth / 2;
+      const isMobile = window.innerWidth < 640;
+      const minTop = 70; // Tránh đè lên Navbar
+      const minBottom = isMobile ? 88 : 24; // Trên mobile luôn nằm trên Bottom Nav
+      const maxTop = Math.max(minTop, window.innerHeight - btnSize - minBottom);
+
+      setBtnPos((prev) => {
+        if (!prev) return null;
+        const btnCenterX = prev.x + btnSize / 2;
+        const snapX = btnCenterX < screenMid ? padding : window.innerWidth - btnSize - padding;
+        const clampedY = Math.max(minTop, Math.min(maxTop, prev.y));
+        return { x: snapX, y: clampedY };
+      });
     }
   };
 
@@ -549,7 +611,11 @@ export const GlobalAiAssistant: React.FC<GlobalAiAssistantProps> = ({
         onPointerUp={handlePointerUp}
         onPointerCancel={() => {
           dragInfoRef.current.isDragging = false;
+          setIsDragging(false);
+          resetIdleTimer();
         }}
+        onMouseEnter={resetIdleTimer}
+        onFocus={resetIdleTimer}
         style={
           btnPos
             ? {
@@ -559,20 +625,29 @@ export const GlobalAiAssistant: React.FC<GlobalAiAssistantProps> = ({
                 bottom: 'auto',
                 right: 'auto',
                 touchAction: 'none',
+                transition: isDragging
+                  ? 'none'
+                  : 'left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), top 0.3s ease-out, transform 0.5s ease-in-out, opacity 0.5s ease-in-out',
               }
             : {
                 touchAction: 'none',
               }
         }
-        className={`w-14 h-14 rounded-full flex items-center justify-center z-40 select-none shadow-[0_10px_30px_rgba(141,24,21,0.5)] border-2 border-[#E4A025] bg-gradient-to-tr from-[#8D1815] via-[#C82A27] to-[#E4A025] hover:scale-105 active:scale-95 cursor-grab active:cursor-grabbing transition-transform duration-150 ${
-          !btnPos ? 'fixed bottom-6 right-6' : ''
-        }`}
+        className={`w-14 h-14 rounded-full flex items-center justify-center z-40 select-none shadow-[0_10px_30px_rgba(141,24,21,0.5)] border-2 border-[#E4A025] bg-gradient-to-tr from-[#8D1815] via-[#C82A27] to-[#E4A025] active:scale-95 cursor-grab active:cursor-grabbing transition-all duration-500 ease-in-out ${
+          isIdle
+            ? 'scale-65 opacity-45 hover:scale-100 hover:opacity-100'
+            : 'scale-100 opacity-100 hover:scale-105'
+        } ${!btnPos ? 'fixed bottom-20 right-4 sm:bottom-6 sm:right-6' : ''}`}
         title="✨ Trợ lý Việt Phục (Google Gemini AI) - Nhấn để mở/đóng, nhấn giữ để kéo"
         aria-label="Trợ lý Việt Phục AI"
       >
-        {/* Hiệu ứng hào quang phát xung nhẹ (ambient glow pulse) */}
-        <span className="absolute -inset-1 rounded-full bg-[#E4A025]/35 animate-ping opacity-50 pointer-events-none" />
-        <span className="absolute -inset-2 rounded-full bg-[#8D1815]/25 animate-pulse pointer-events-none" />
+        {/* Hiệu ứng hào quang phát xung nhẹ (tự động tắt khi đang ở trạng thái mờ/idle) */}
+        {!isIdle && (
+          <>
+            <span className="absolute -inset-1 rounded-full bg-[#E4A025]/35 animate-ping opacity-50 pointer-events-none" />
+            <span className="absolute -inset-2 rounded-full bg-[#8D1815]/25 animate-pulse pointer-events-none" />
+          </>
+        )}
 
         {/* Component riêng: HeritageAiIcon (hoa sen cách điệu và tinh hoa ánh sáng AI) */}
         <HeritageAiIcon className="w-8 h-8" />

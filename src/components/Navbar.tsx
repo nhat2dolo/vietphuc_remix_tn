@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { Home, Compass, Camera, Heart, Sparkles } from 'lucide-react';
 
 export type NavTab = 'home' | 'tryon' | 'studio' | 'weather' | 'compare' | 'presets' | 'archive' | 'quiz';
@@ -18,7 +19,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     <>
       {/* 1. DESKTOP FLOATING CAPSULE NAVBAR (Thanh viên thuốc nổi sang trọng) */}
       <header className="sticky top-3 z-40 px-3 sm:px-6 w-full flex justify-center pointer-events-none">
-        <div className="max-w-7xl w-full mx-auto flex items-center justify-between py-2 px-4 sm:px-6 rounded-full bg-[#FAF7F2]/92 backdrop-blur-md border border-stone-200/90 shadow-lg pointer-events-auto transition-all duration-300">
+        <div className="max-w-7xl w-full mx-auto flex items-center justify-between py-2 px-4 sm:px-6 rounded-full bg-[#FAF7F2]/95 backdrop-blur-md border border-stone-200/90 shadow-md pointer-events-auto transition-all duration-300">
           {/* Zone 1: Brand single text element wordmark */}
           <a
             href="#home"
@@ -128,64 +129,68 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </header>
 
-      {/* 2. MOBILE BOTTOM NAVIGATION BAR (Cố định ở đáy màn hình với 4 biểu tượng lớn ngón cái dễ bấm) */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#FAF7F2]/95 backdrop-blur-md border-t border-stone-200/90 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] py-2 px-3 flex items-center justify-around safe-area-bottom">
-        {/* Nút 1: Trang Chủ */}
-        <button
-          type="button"
-          onClick={() => onSelectTab('home')}
-          className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-200 active:scale-90 cursor-pointer ${
-            activeTab === 'home'
-              ? 'text-[#C82A27] font-bold bg-[#C82A27]/10'
-              : 'text-stone-600 hover:text-stone-900'
-          }`}
-        >
-          <Home className="w-5 h-5 mb-0.5" />
-          <span className="text-[10px] tracking-tight">Trang Chủ</span>
-        </button>
+      {/* 2. MOBILE BOTTOM NAVIGATION BAR (Render trực tiếp vào document.body bằng createPortal) */}
+      {typeof document !== 'undefined' &&
+        createPortal(
+          <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pointer-events-auto bg-[#FAF7F2]/95 backdrop-blur-md border-t border-stone-200/90 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] py-2 px-3 flex items-center justify-around safe-area-bottom">
+            {/* Nút 1: Trang Chủ */}
+            <button
+              type="button"
+              onClick={() => onSelectTab('home')}
+              className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-200 active:scale-90 cursor-pointer pointer-events-auto ${
+                activeTab === 'home'
+                  ? 'text-[#C82A27] font-bold bg-[#C82A27]/10'
+                  : 'text-stone-600 hover:text-stone-900'
+              }`}
+            >
+              <Home className="w-5 h-5 mb-0.5" />
+              <span className="text-[10px] tracking-tight">Trang Chủ</span>
+            </button>
 
-        {/* Nút 2: Studio */}
-        <button
-          type="button"
-          onClick={() => onSelectTab('studio')}
-          className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-200 active:scale-90 cursor-pointer ${
-            activeTab === 'studio'
-              ? 'text-[#C82A27] font-bold bg-[#C82A27]/10'
-              : 'text-stone-600 hover:text-stone-900'
-          }`}
-        >
-          <Compass className="w-5 h-5 mb-0.5" />
-          <span className="text-[10px] tracking-tight">Studio</span>
-        </button>
+            {/* Nút 2: Studio */}
+            <button
+              type="button"
+              onClick={() => onSelectTab('studio')}
+              className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-200 active:scale-90 cursor-pointer pointer-events-auto ${
+                activeTab === 'studio'
+                  ? 'text-[#C82A27] font-bold bg-[#C82A27]/10'
+                  : 'text-stone-600 hover:text-stone-900'
+              }`}
+            >
+              <Compass className="w-5 h-5 mb-0.5" />
+              <span className="text-[10px] tracking-tight">Studio</span>
+            </button>
 
-        {/* Nút 3: Thử Đồ */}
-        <button
-          type="button"
-          onClick={() => onSelectTab('tryon')}
-          className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-200 active:scale-90 cursor-pointer ${
-            activeTab === 'tryon'
-              ? 'text-[#C82A27] font-bold bg-[#C82A27]/10'
-              : 'text-stone-600 hover:text-stone-900'
-          }`}
-        >
-          <Camera className="w-5 h-5 mb-0.5" />
-          <span className="text-[10px] tracking-tight">Thử Đồ</span>
-        </button>
+            {/* Nút 3: Thử Đồ */}
+            <button
+              type="button"
+              onClick={() => onSelectTab('tryon')}
+              className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-200 active:scale-90 cursor-pointer pointer-events-auto ${
+                activeTab === 'tryon'
+                  ? 'text-[#C82A27] font-bold bg-[#C82A27]/10'
+                  : 'text-stone-600 hover:text-stone-900'
+              }`}
+            >
+              <Camera className="w-5 h-5 mb-0.5" />
+              <span className="text-[10px] tracking-tight">Thử Đồ</span>
+            </button>
 
-        {/* Nút 4: Trắc Nghiệm */}
-        <button
-          type="button"
-          onClick={() => onSelectTab('quiz')}
-          className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-200 active:scale-90 cursor-pointer ${
-            activeTab === 'quiz'
-              ? 'text-[#C82A27] font-bold bg-[#C82A27]/10'
-              : 'text-stone-600 hover:text-stone-900'
-          }`}
-        >
-          <Heart className="w-5 h-5 mb-0.5" />
-          <span className="text-[10px] tracking-tight">Trắc Nghiệm</span>
-        </button>
-      </nav>
+            {/* Nút 4: Trắc Nghiệm */}
+            <button
+              type="button"
+              onClick={() => onSelectTab('quiz')}
+              className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-200 active:scale-90 cursor-pointer pointer-events-auto ${
+                activeTab === 'quiz'
+                  ? 'text-[#C82A27] font-bold bg-[#C82A27]/10'
+                  : 'text-stone-600 hover:text-stone-900'
+              }`}
+            >
+              <Heart className="w-5 h-5 mb-0.5" />
+              <span className="text-[10px] tracking-tight">Trắc Nghiệm</span>
+            </button>
+          </nav>,
+          document.body
+        )}
     </>
   );
 };

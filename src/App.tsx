@@ -87,7 +87,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#24211E] flex flex-col font-sans selection:bg-[#C82A27]/20 selection:text-[#8D1815]">
       {/* 1. TOP BAR (FLOATING CAPSULE NAVBAR TRÊN DESKTOP & DƯỚI MOBILE) */}
-      <div className="shrink-0 pt-2 sm:pt-3">
+      <div className="sticky top-0 z-40 w-full pt-2 sm:pt-3 pointer-events-none">
         <Navbar
           activeTab={activeTab}
           onSelectTab={setActiveTab}

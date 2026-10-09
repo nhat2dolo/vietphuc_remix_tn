@@ -15,8 +15,10 @@ import {
   Calendar,
   Eye,
   Maximize2,
+  Rotate3D,
 } from 'lucide-react';
 import { OutfitId } from '../types/vietphuc';
+import { HeritageModelViewer } from './HeritageModelViewer';
 
 // =====================================================================
 // 1. DATA STRUCTURE (MẢNG DỮ LIỆU CỔ PHỤC MẪU)
@@ -226,7 +228,25 @@ interface GarmentGraphicProps {
 }
 
 const GarmentGraphic: React.FC<GarmentGraphicProps> = ({ outfit, isFrontFacing }) => {
-  const { id, colorHex } = outfit;
+  const [imageFailed, setImageFailed] = useState(false);
+  const { id, colorHex, image } = outfit;
+
+  // Nếu có ảnh thật và chưa lỗi tải ảnh, ưu tiên hiển thị ảnh thật
+  if (image && !imageFailed) {
+    return (
+      <div className="w-full h-full flex items-center justify-center overflow-hidden">
+        <img
+          src={image}
+          alt={outfit.name}
+          onError={() => setImageFailed(true)}
+          className="w-full h-full object-contain pointer-events-none select-none transition-transform duration-300 filter drop-shadow-md"
+          style={{
+            transform: isFrontFacing ? 'scale(1.05)' : 'scale(1)',
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <svg
@@ -525,6 +545,7 @@ export const ThanhTreoCoPhuc: React.FC<ThanhTreoCoPhucProps> = ({
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [isSoundEnabled, setIsSoundEnabled] = useState<boolean>(true);
   const [inspectModalOutfit, setInspectModalOutfit] = useState<HeritageOutfit | null>(null);
+  const [active3DOutfit, setActive3DOutfit] = useState<HeritageOutfit | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const rackScrollRef = useRef<HTMLDivElement>(null);
@@ -943,6 +964,16 @@ export const ThanhTreoCoPhuc: React.FC<ThanhTreoCoPhucProps> = ({
             <div className="flex items-center gap-2.5 w-full md:w-auto shrink-0">
               <button
                 type="button"
+                onClick={() => setActive3DOutfit(currentSelectedOutfit)}
+                className="flex-1 md:flex-none px-3.5 py-2.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 text-xs sm:text-sm font-bold border border-amber-300 shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                title="Xem mô hình 3D xoay 360 độ từ Meshy AI"
+              >
+                <Rotate3D className="w-4 h-4 text-[#8D1815]" />
+                <span>Mô Hình 3D</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => setInspectModalOutfit(currentSelectedOutfit)}
                 className="flex-1 md:flex-none px-4 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center justify-center gap-2"
               >
@@ -1033,6 +1064,19 @@ export const ThanhTreoCoPhuc: React.FC<ThanhTreoCoPhucProps> = ({
               <div className="flex items-center gap-3 pt-2">
                 <button
                   type="button"
+                  onClick={() => {
+                    const outfitTo3D = inspectModalOutfit;
+                    setInspectModalOutfit(null);
+                    setActive3DOutfit(outfitTo3D);
+                  }}
+                  className="py-3 px-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-stone-950 font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                  title="Xem mô hình 3D xoay 360 độ"
+                >
+                  <Rotate3D className="w-4 h-4 text-stone-950" />
+                  <span>Xem 3D</span>
+                </button>
+                <button
+                  type="button"
                   onClick={() => setInspectModalOutfit(null)}
                   className="flex-1 py-3 rounded-xl bg-stone-200 hover:bg-stone-300 text-stone-800 text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
                 >
@@ -1055,6 +1099,22 @@ export const ThanhTreoCoPhuc: React.FC<ThanhTreoCoPhucProps> = ({
           </div>
         )}
       </AnimatePresence>
+
+      {/* MODAL XEM MÔ HÌNH 3D (.GLB) TỪ MESHY AI */}
+      {active3DOutfit && (
+        <HeritageModelViewer
+          initialOutfitId={active3DOutfit.studioOutfitId || 'nhatbinh'}
+          isModal={true}
+          onClose={() => setActive3DOutfit(null)}
+          onSelectForStudio={(studioId) => {
+            setActive3DOutfit(null);
+            const foundOutfit = HERITAGE_OUTFITS.find((o) => o.studioOutfitId === studioId);
+            if (foundOutfit) {
+              handleSelect(foundOutfit);
+            }
+          }}
+        />
+      )}
     </div>
   );
 };

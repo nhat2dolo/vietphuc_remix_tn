@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { HeroVisualBackground } from './HeroVisualBackground';
 import { GarmentKnowledgeModal } from './GarmentKnowledgeModal';
 import { ThanhTreoCoPhuc } from './ThanhTreoCoPhuc';
+import { HeritageModelViewer } from './HeritageModelViewer';
 import { OutfitId, OutfitData } from '../types/vietphuc';
 import { OUTFITS } from '../data/vietphucData';
 import {
@@ -14,6 +15,7 @@ import {
   Camera,
   Heart,
   CloudSun,
+  Rotate3D,
 } from 'lucide-react';
 
 interface HomeViewProps {
@@ -29,7 +31,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
 }) => {
   const carouselRef = useRef<HTMLDivElement>(null);
   const [selectedKnowledgeOutfit, setSelectedKnowledgeOutfit] = useState<OutfitData | null>(null);
-  const [galleryViewMode, setGalleryViewMode] = useState<'rack' | 'cards'>('rack');
+  const [galleryViewMode, setGalleryViewMode] = useState<'rack' | 'cards' | '3d'>('rack');
+  const [active3DModalOutfitId, setActive3DModalOutfitId] = useState<OutfitId | null>(null);
 
   const scrollCarousel = (direction: 'left' | 'right') => {
     if (!carouselRef.current) return;
@@ -245,10 +248,19 @@ export const HomeView: React.FC<HomeViewProps> = ({
             {/* Nút 2: Khám Phá 6 Dáng Cổ Phục */}
             <button
               onClick={scrollToGarments}
-              className="w-full sm:w-auto px-8 py-4 rounded-full bg-white/20 hover:bg-white/30 text-[#FDFBF7] font-bold text-sm sm:text-base backdrop-blur-md border border-white/40 shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2.5 cursor-pointer group"
+              className="w-full sm:w-auto px-7 py-4 rounded-full bg-white/20 hover:bg-white/30 text-[#FDFBF7] font-bold text-sm sm:text-base backdrop-blur-md border border-white/40 shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer group"
             >
               <span>📜 Khám Phá 6 Dáng Cổ Phục</span>
               <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+            </button>
+
+            {/* Nút 3: Mô Hình 3D Thực Tế Ảo (Mới) */}
+            <button
+              onClick={() => setActive3DModalOutfitId('nhatbinh')}
+              className="w-full sm:w-auto px-7 py-4 rounded-full bg-amber-500/20 hover:bg-amber-500/35 text-amber-200 font-bold text-sm sm:text-base backdrop-blur-md border border-amber-400/50 shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer group"
+            >
+              <Rotate3D className="w-5 h-5 text-amber-300 animate-spin" style={{ animationDuration: '8s' }} />
+              <span>Mô Hình 3D (.GLB)</span>
             </button>
           </div>
         </div>
@@ -296,6 +308,18 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 }`}
               >
                 <span>Thẻ Cuộn</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setGalleryViewMode('3d')}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+                  galleryViewMode === '3d'
+                    ? 'bg-[#8D1815] text-white shadow-sm'
+                    : 'text-stone-700 hover:text-stone-900'
+                }`}
+              >
+                <Rotate3D className="w-3.5 h-3.5 text-amber-300" />
+                <span>3D Meshy AI</span>
               </button>
             </div>
 
@@ -368,6 +392,20 @@ export const HomeView: React.FC<HomeViewProps> = ({
                       {outfitInfo.era.split('(')[0]}
                     </div>
 
+                    {/* Quick 3D button in card corner */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActive3DModalOutfitId(card.id);
+                      }}
+                      className="absolute bottom-4 left-4 px-2.5 py-1 rounded-full bg-black/60 hover:bg-black text-amber-300 hover:text-white text-[11px] font-semibold border border-amber-400/40 flex items-center gap-1 shadow-md transition-all cursor-pointer z-10"
+                      title="Xem mô hình 3D xoay 360 độ"
+                    >
+                      <Rotate3D className="w-3.5 h-3.5 text-amber-400" />
+                      <span>3D</span>
+                    </button>
+
                     {/* Scholarly Knowledge Info "i" Icon Button (Tối Giản Chữ) */}
                     <button
                       type="button"
@@ -397,17 +435,28 @@ export const HomeView: React.FC<HomeViewProps> = ({
                       </p>
                     </div>
 
-                    <button
-                      onClick={() => onSelectOutfit(card.id)}
-                      className="w-full py-2.5 px-4 rounded-xl bg-stone-100 group-hover:bg-[#C82A27] text-stone-800 group-hover:text-white font-bold text-xs transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
-                    >
-                      <span>Mở Studio & Phối Đồ Ngay</span>
-                      <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
-                    </button>
+                    <div className="space-y-2 pt-1">
+                      <button
+                        onClick={() => onSelectOutfit(card.id)}
+                        className="w-full py-2.5 px-4 rounded-xl bg-stone-100 group-hover:bg-[#C82A27] text-stone-800 group-hover:text-white font-bold text-xs transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                      >
+                        <span>Mở Studio & Phối Đồ Ngay</span>
+                        <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* 3. CHẾ ĐỘ TRÌNH DIỄN MÔ HÌNH 3D MESHY AI (.GLB) */}
+        {galleryViewMode === '3d' && (
+          <div className="w-full min-h-[500px]">
+            <HeritageModelViewer
+              onSelectForStudio={(outfitId) => onSelectOutfit(outfitId)}
+            />
           </div>
         )}
       </section>
@@ -497,7 +546,23 @@ export const HomeView: React.FC<HomeViewProps> = ({
         isOpen={Boolean(selectedKnowledgeOutfit)}
         onClose={() => setSelectedKnowledgeOutfit(null)}
         outfit={selectedKnowledgeOutfit}
+        onOpen3DViewer={(outfitId) => {
+          setActive3DModalOutfitId(outfitId as OutfitId);
+        }}
       />
+
+      {/* 3D Model Viewer Modal */}
+      {active3DModalOutfitId && (
+        <HeritageModelViewer
+          initialOutfitId={active3DModalOutfitId}
+          isModal={true}
+          onClose={() => setActive3DModalOutfitId(null)}
+          onSelectForStudio={(outfitId) => {
+            setActive3DModalOutfitId(null);
+            onSelectOutfit(outfitId);
+          }}
+        />
+      )}
     </div>
   );
 };

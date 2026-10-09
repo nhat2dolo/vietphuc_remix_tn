@@ -38,6 +38,10 @@ export const VirtualTryOn: React.FC = () => {
   // States
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [selectedStickerInfo, setSelectedStickerInfo] = useState<StickerItem | null>(null);
+  const [isInfoFading, setIsInfoFading] = useState<boolean>(false);
+  const infoTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const infoAnimTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   const [activeObject, setActiveObject] = useState<fabric.FabricObject | null>(null);
   const [culturalWarning, setCulturalWarning] = useState<string | null>(null);
   const [isWarningDismissed, setIsWarningDismissed] = useState<boolean>(false);
@@ -391,13 +395,49 @@ export const VirtualTryOn: React.FC = () => {
         canvas.setActiveObject(img);
         canvas.renderAll();
         saveState();
-        setSelectedStickerInfo(item);
+        showStickerNotification(item);
         evaluateCulturalCombinations();
       })
       .catch((err) => {
         console.error('Failed to load sticker:', err);
       });
   };
+
+  // Hiển thị thông tin văn hóa sticker với cơ chế tự làm mờ sau 1000ms và hủy khỏi DOM sau 1300ms
+  const showStickerNotification = (item: StickerItem) => {
+    // Hủy bỏ các timer cũ nếu đang chạy
+    if (infoTimerRef.current) clearTimeout(infoTimerRef.current);
+    if (infoAnimTimerRef.current) clearTimeout(infoAnimTimerRef.current);
+
+    setSelectedStickerInfo(item);
+    setIsInfoFading(false);
+
+    // Sau 1000ms (1s), kích hoạt hiệu ứng mờ dần và trượt nhẹ
+    infoTimerRef.current = setTimeout(() => {
+      setIsInfoFading(true);
+      // Sau 300ms tiếp theo (tổng 1300ms), xóa hoàn toàn khỏi DOM
+      infoAnimTimerRef.current = setTimeout(() => {
+        setSelectedStickerInfo(null);
+        setIsInfoFading(false);
+      }, 300);
+    }, 1000);
+  };
+
+  // Đóng thông báo ngay lập tức khi bấm nút X
+  const handleDismissStickerInfo = () => {
+    if (infoTimerRef.current) clearTimeout(infoTimerRef.current);
+    if (infoAnimTimerRef.current) clearTimeout(infoAnimTimerRef.current);
+    setSelectedStickerInfo(null);
+    setIsInfoFading(false);
+  };
+
+  // Dọn dẹp timer khi component unmount
+  useEffect(() => {
+    return () => {
+      if (infoTimerRef.current) clearTimeout(infoTimerRef.current);
+      if (infoAnimTimerRef.current) clearTimeout(infoAnimTimerRef.current);
+    };
+  }, []);
 
   const addStickerToCanvas = (item: StickerItem) => {
     addStickerToCanvasAt(item);
@@ -663,7 +703,7 @@ export const VirtualTryOn: React.FC = () => {
       </div>
 
       {/* 2. BỐ CỤC 2 PHẦN CO GIÃN LINH HOẠT: Canvas bên trái & Tủ đồ trượt xếp bên phải */}
-      <div className="relative flex w-full h-[calc(100vh-170px)] min-h-[580px] max-h-[820px] rounded-3xl overflow-hidden bg-[#0F0D0B] border border-stone-800 shadow-2xl">
+      <div className="relative flex flex-col md:flex-row w-full h-[calc(100vh-170px)] min-h-[580px] max-h-[840px] rounded-3xl overflow-hidden bg-[#0F0D0B] border border-stone-800 shadow-2xl">
         
         {/* CỘT TRÁI (PREVIEW CANVAS AREA) */}
         <div
@@ -708,16 +748,30 @@ export const VirtualTryOn: React.FC = () => {
             </button>
           </div>
 
-          {/* NÚT MỞ LẠI SIDEBAR KHI ĐANG ẨN (Góc trên bên phải khu vực Canvas) */}
+          {/* NÚT MỞ LẠI SIDEBAR KHI ĐANG ẨN (Desktop: góc trên bên phải, Mobile: cạnh đáy thuận tiện ngón cái) */}
           {!isSidebarOpen && (
-            <button
-              onClick={() => setIsSidebarOpen(true)}
-              className="absolute top-4 right-4 z-20 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#C82A27] via-[#A8221F] to-[#8D1815] text-white text-xs sm:text-sm font-bold shadow-xl border border-amber-400/40 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer animate-in fade-in zoom-in-95 group"
-            >
-              <Shirt className="w-4 h-4 text-amber-300 group-hover:rotate-12 transition-transform duration-200" />
-              <span>Chọn trang phục</span>
-              <ChevronRight className="w-4 h-4 text-amber-200/80" />
-            </button>
+            <>
+              {/* Desktop button */}
+              <button
+                onClick={() => setIsSidebarOpen(true)}
+                className="hidden md:flex absolute top-4 right-4 z-20 items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#C82A27] via-[#A8221F] to-[#8D1815] text-white text-xs sm:text-sm font-bold shadow-xl border border-amber-400/40 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer animate-in fade-in zoom-in-95 group"
+              >
+                <Shirt className="w-4 h-4 text-amber-300 group-hover:rotate-12 transition-transform duration-200" />
+                <span>Chọn trang phục</span>
+                <ChevronRight className="w-4 h-4 text-amber-200/80" />
+              </button>
+
+              {/* Mobile Floating Button cạnh đáy màn hình thuận tiện cho ngón tay cái */}
+              <button
+                onClick={() => setIsSidebarOpen(true)}
+                className="md:hidden absolute bottom-4 right-4 z-30 flex items-center gap-2 px-4 py-3 rounded-full bg-gradient-to-r from-[#C82A27] via-[#A8221F] to-[#8D1815] text-white text-xs font-bold shadow-2xl border border-amber-300/50 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer animate-in slide-in-from-bottom-3 group"
+                aria-label="Mở tủ đồ cổ phục"
+              >
+                <Shirt className="w-4 h-4 text-amber-300 group-hover:rotate-12 transition-transform duration-200" />
+                <span>Mở tủ đồ</span>
+                <ChevronUp className="w-4 h-4 text-amber-200" />
+              </button>
+            </>
           )}
 
           {/* Cultural Warnings & Info Overlay (Top Left) */}
@@ -742,17 +796,24 @@ export const VirtualTryOn: React.FC = () => {
             )}
 
             {selectedStickerInfo && (
-              <div className="pointer-events-auto p-3 rounded-2xl bg-stone-900/95 backdrop-blur-md border-l-4 border-[#E4A025] border-stone-800 text-stone-200 shadow-xl text-xs leading-relaxed animate-in fade-in duration-200">
+              <div
+                className={`pointer-events-auto p-3 rounded-2xl bg-stone-900/95 backdrop-blur-md border-l-4 border-[#E4A025] border-stone-800 text-stone-200 shadow-xl text-xs leading-relaxed transition-all duration-300 ${
+                  isInfoFading
+                    ? 'opacity-0 -translate-y-2 pointer-events-none'
+                    : 'opacity-100 translate-y-0 animate-in fade-in'
+                }`}
+              >
                 <div className="flex items-center justify-between font-bold text-[#E4A025] mb-1">
                   <span className="flex items-center gap-1.5">
                     <Info className="w-3.5 h-3.5" />
                     <span>{selectedStickerInfo.name}</span>
                   </span>
                   <button
-                    onClick={() => setSelectedStickerInfo(null)}
-                    className="text-stone-400 hover:text-white cursor-pointer"
+                    onClick={handleDismissStickerInfo}
+                    className="text-stone-400 hover:text-white cursor-pointer p-0.5 rounded-lg hover:bg-white/10 transition-colors"
+                    aria-label="Đóng thông báo"
                   >
-                    <X className="w-3 h-3" />
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
                 <div className="text-stone-300 text-[11px]">{selectedStickerInfo.info}</div>
@@ -844,39 +905,44 @@ export const VirtualTryOn: React.FC = () => {
           )}
         </div>
 
-        {/* CỘT PHẢI (COLLAPSIBLE WARDROBE SIDEBAR) */}
+        {/* CỘT PHẢI (WARDROBE: BOTTOM SHEET DRAWER TRÊN MOBILE & COLLAPSIBLE SIDEBAR TRÊN DESKTOP) */}
         <div
-          className={`h-full flex flex-col bg-stone-900 border-l border-stone-800 transition-all duration-300 ease-in-out shrink-0 select-none ${
+          className={`flex flex-col select-none transition-all duration-300 ease-in-out ${
             isSidebarOpen
-              ? 'w-[360px] md:w-[380px] translate-x-0 opacity-100'
-              : 'w-0 translate-x-full opacity-0 overflow-hidden border-none pointer-events-none'
+              ? 'absolute md:relative inset-x-0 bottom-0 md:inset-auto md:right-0 md:top-0 h-auto md:h-full max-h-[62vh] md:max-h-none w-full sm:w-[360px] md:w-[380px] z-30 opacity-100 translate-y-0 md:translate-y-0 md:translate-x-0 rounded-t-3xl md:rounded-none border-t md:border-t-0 md:border-l border-stone-700 md:border-stone-800 bg-stone-900/98 md:bg-stone-900 backdrop-blur-xl md:backdrop-blur-none shadow-2xl'
+              : 'pointer-events-none opacity-0 overflow-hidden border-none translate-y-full md:translate-y-0 md:translate-x-full h-0 md:h-full md:w-0'
           }`}
         >
-          {/* Header Sidebar với Nút Đóng X */}
-          <div className="p-4 border-b border-stone-800 flex items-center justify-between bg-stone-950/80">
+          {/* Thanh Kéo Tay Cầm Cho Mobile (Drag/Pull Handle Indicator) */}
+          <div className="md:hidden flex justify-center pt-2.5 pb-1 cursor-pointer" onClick={() => setIsSidebarOpen(false)}>
+            <div className="w-12 h-1.5 rounded-full bg-stone-600/90 hover:bg-stone-500 transition-colors" />
+          </div>
+
+          {/* Header Sidebar với Nút Đóng X nổi bật */}
+          <div className="p-3.5 sm:p-4 border-b border-stone-800 flex items-center justify-between bg-stone-950/80">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-xl bg-gradient-to-br from-[#C82A27] to-[#8D1815] text-white shadow-xs">
                 <Shirt className="w-4 h-4 text-amber-300" />
               </div>
               <div>
                 <h3 className="text-sm font-bold text-white font-display">Tủ Đồ Cổ Phục</h3>
-                <p className="text-[10px] text-stone-400">Click hoặc kéo thả vào ma-nơ-canh</p>
+                <p className="text-[10px] text-stone-400">Chạm để mặc thử thời gian thực</p>
               </div>
             </div>
 
-            {/* Nút đóng sidebar */}
+            {/* Nút đóng sidebar "✕" nổi bật */}
             <button
               onClick={() => setIsSidebarOpen(false)}
-              className="p-1.5 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800 transition-colors cursor-pointer group"
-              title="Thu gọn tủ đồ"
-              aria-label="Thu gọn tủ đồ"
+              className="p-1.5 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-300 hover:text-white border border-stone-700/80 transition-colors cursor-pointer group flex items-center justify-center shadow-xs"
+              title="Đóng tủ đồ"
+              aria-label="Đóng tủ đồ"
             >
-              <X className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              <X className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform text-stone-200" />
             </button>
           </div>
 
           {/* Danh mục (Category Tabs) */}
-          <div className="px-3 py-2.5 bg-stone-900/80 border-b border-stone-800 flex gap-1.5 overflow-x-auto scrollbar-none">
+          <div className="p-3 bg-stone-900/90 border-b border-stone-800 flex flex-wrap gap-1.5">
             {categories.map((cat) => (
               <button
                 key={cat.id}
@@ -884,7 +950,7 @@ export const VirtualTryOn: React.FC = () => {
                 className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer border ${
                   activeCategory === cat.id
                     ? 'bg-[#E4A025] text-stone-950 border-[#E4A025] shadow-xs font-bold'
-                    : 'bg-stone-800 text-stone-300 border-stone-700/60 hover:border-stone-500 hover:text-white'
+                    : 'bg-stone-800 text-stone-300 border-stone-700/60 hover:border-stone-500 hover:text-white hover:bg-stone-800'
                 }`}
               >
                 {cat.name}
@@ -892,8 +958,8 @@ export const VirtualTryOn: React.FC = () => {
             ))}
           </div>
 
-          {/* Lưới vật phẩm 3 cột (Grid Items) */}
-          <div className="flex-1 overflow-y-auto p-3.5 pr-2.5 space-y-3">
+          {/* Lưới vật phẩm 3 cột (Grid Items) với pb-16 cho mobile */}
+          <div className="flex-1 overflow-y-auto p-3.5 pr-2.5 pb-16 md:pb-6 space-y-3">
             <div className="grid grid-cols-3 gap-2.5">
               {filteredStickers.map((sticker) => (
                 <div

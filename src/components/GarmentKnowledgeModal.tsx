@@ -1,18 +1,20 @@
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { OutfitData } from '../types/vietphuc';
-import { X, BookOpen, Clock, HeartHandshake, ShieldCheck } from 'lucide-react';
+import { X, BookOpen, Clock, HeartHandshake, ShieldCheck, Rotate3D } from 'lucide-react';
 
 interface GarmentKnowledgeModalProps {
   isOpen: boolean;
   onClose: () => void;
   outfit: OutfitData | null;
+  onOpen3DViewer?: (outfitId: string) => void;
 }
 
 export const GarmentKnowledgeModal: React.FC<GarmentKnowledgeModalProps> = ({
   isOpen,
   onClose,
   outfit,
+  onOpen3DViewer,
 }) => {
   useEffect(() => {
     if (!isOpen) return;
@@ -90,13 +92,28 @@ export const GarmentKnowledgeModal: React.FC<GarmentKnowledgeModalProps> = ({
           <span>{outfit.referenceCitation}</span>
         </div>
 
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="w-full py-3 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold transition-colors cursor-pointer"
-        >
-          Đã hiểu · Trở lại trải nghiệm
-        </button>
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row items-center gap-2.5 pt-2">
+          {onOpen3DViewer && (
+            <button
+              type="button"
+              onClick={() => {
+                onOpen3DViewer(outfit.id);
+                onClose();
+              }}
+              className="w-full sm:flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-[#8D1815] to-[#C82A27] hover:from-[#A8221F] hover:to-[#DC2626] text-white text-xs font-bold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+            >
+              <Rotate3D className="w-4 h-4 text-amber-300" />
+              <span>Xem Mô Hình 3D Xoay 360°</span>
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className="w-full sm:flex-1 py-3 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold transition-colors cursor-pointer"
+          >
+            Đã hiểu · Trở lại trải nghiệm
+          </button>
+        </div>
       </div>
     </div>,
     document.body

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { OUTFITS, TRADITIONAL_COLORS } from '../data/vietphucData';
 import { OutfitId } from '../types/vietphuc';
-import { BookOpen, Scroll, CheckCircle2, Award, History, Layers } from 'lucide-react';
+import { BookOpen, Scroll, CheckCircle2, Award, History, Layers, Rotate3D } from 'lucide-react';
+import { HeritageModelViewer } from './HeritageModelViewer';
 
 interface HeritageArchiveProps {
   onSelectOutfitForStudio?: (id: OutfitId) => void;
@@ -9,6 +10,7 @@ interface HeritageArchiveProps {
 
 export const HeritageArchive: React.FC<HeritageArchiveProps> = ({ onSelectOutfitForStudio }) => {
   const [selectedOutfitId, setSelectedOutfitId] = useState<OutfitId>('nguthan');
+  const [is3DModalOpen, setIs3DModalOpen] = useState<boolean>(false);
   const activeOutfit = OUTFITS[selectedOutfitId];
 
   return (
@@ -56,14 +58,24 @@ export const HeritageArchive: React.FC<HeritageArchiveProps> = ({ onSelectOutfit
                 <span className="text-xs uppercase tracking-wider text-stone-400 font-sans">Thời đại lưu hành</span>
                 <div className="text-sm font-semibold text-stone-800">{activeOutfit.era}</div>
               </div>
-              {onSelectOutfitForStudio && (
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={() => onSelectOutfitForStudio(activeOutfit.id)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-stone-100 hover:bg-[#C82A27] hover:text-white hover:-translate-y-0.5 hover:shadow-md text-stone-800 transition-all duration-200 cursor-pointer active:scale-95"
+                  type="button"
+                  onClick={() => setIs3DModalOpen(true)}
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[#8D1815] to-[#C82A27] hover:from-[#A8221F] hover:to-[#DC2626] text-white hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 cursor-pointer active:scale-95 flex items-center gap-1.5"
                 >
-                  Thử đồ dáng này trong Studio →
+                  <Rotate3D className="w-4 h-4 text-amber-300" />
+                  <span>Xem Mô Hình 3D</span>
                 </button>
-              )}
+                {onSelectOutfitForStudio && (
+                  <button
+                    onClick={() => onSelectOutfitForStudio(activeOutfit.id)}
+                    className="px-4 py-2 rounded-xl text-xs font-bold bg-stone-100 hover:bg-[#C82A27] hover:text-white hover:-translate-y-0.5 hover:shadow-md text-stone-800 transition-all duration-200 cursor-pointer active:scale-95"
+                  >
+                    Thử đồ dáng này trong Studio →
+                  </button>
+                )}
+              </div>
             </div>
 
             <div>
@@ -181,6 +193,19 @@ export const HeritageArchive: React.FC<HeritageArchiveProps> = ({ onSelectOutfit
           </div>
         </div>
       </div>
+
+      {/* 3D Model Viewer Modal */}
+      {is3DModalOpen && (
+        <HeritageModelViewer
+          initialOutfitId={selectedOutfitId}
+          isModal={true}
+          onClose={() => setIs3DModalOpen(false)}
+          onSelectForStudio={(outfitId) => {
+            setIs3DModalOpen(false);
+            onSelectOutfitForStudio?.(outfitId);
+          }}
+        />
+      )}
     </div>
   );
 };
