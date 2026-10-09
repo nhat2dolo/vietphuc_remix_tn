@@ -35,7 +35,7 @@ export const MannequinViewer: React.FC<MannequinViewerProps> = ({
 
   return (
     <div
-      className={`relative w-full min-h-[580px] sm:min-h-[620px] md:min-h-[640px] h-[600px] sm:h-[640px] flex items-center justify-center rounded-2xl overflow-hidden transition-colors duration-500 border border-stone-200/80 shadow-inner ${
+      className={`relative w-full h-[540px] sm:h-[600px] flex items-center justify-center rounded-2xl overflow-hidden transition-colors duration-500 border border-stone-200/80 shadow-inner ${
         isNightStudio
           ? 'bg-gradient-to-b from-[#181a20] via-[#20222a] to-[#121318]'
           : 'bg-gradient-to-b from-[#FAF6F0] via-[#F3ECE0] to-[#EAE1D1]'
@@ -87,7 +87,8 @@ export const MannequinViewer: React.FC<MannequinViewerProps> = ({
       {/* High-Fidelity SVG Canvas for Vietnamese Attire - Scaled and Centered Head-to-Toe */}
       <svg
         viewBox="0 0 340 550"
-        className="w-full h-full max-h-[550px] drop-shadow-md select-none p-1.5"
+        className="w-full h-full max-h-full drop-shadow-md select-none p-2 object-contain"
+        preserveAspectRatio="xMidYMid meet"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>

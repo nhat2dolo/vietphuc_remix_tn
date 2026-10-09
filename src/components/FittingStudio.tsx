@@ -1,15 +1,16 @@
 import React, { useState, useMemo } from 'react';
-import { OutfitId, GenderMode, AccessoryId, PatternId, PresetLook } from '../types/vietphuc';
+import { OutfitId, GenderMode, AccessoryId, PatternId } from '../types/vietphuc';
 import { OUTFITS, TRADITIONAL_COLORS, ACCESSORIES, analyzeCulturalContext } from '../data/vietphucData';
 import { MannequinViewer } from './MannequinViewer';
 import { CulturalGuide } from './CulturalGuide';
 import { LookbookCardModal } from './LookbookCardModal';
 import { GeminiAiStylistModal } from './GeminiAiStylistModal';
-import { WeatherEventRecommender } from './WeatherEventRecommender';
 import { ColorHarmonyValidator } from './ColorHarmonyValidator';
-import { OutfitComparator, SavedOutfitSlot } from './OutfitComparator';
+import { SavedOutfitSlot } from './OutfitComparator';
 import { SavedLookbooksModal, saveLookToStorage } from './SavedLookbooksModal';
 import { GarmentKnowledgeModal } from './GarmentKnowledgeModal';
+import { CompareModal } from './CompareModal';
+import { WeatherEventDrawer } from './WeatherEventDrawer';
 import {
   Sparkles,
   Moon,
@@ -22,8 +23,6 @@ import {
   Calendar,
   ArrowLeftRight,
   Bookmark,
-  ChevronDown,
-  ChevronUp,
 } from 'lucide-react';
 
 interface FittingStudioProps {
@@ -46,13 +45,13 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
     }
   };
 
-  // Modals & Collapsible Sections
+  // Modals & Drawers state
   const [showLookbookModal, setShowLookbookModal] = useState<boolean>(false);
   const [showGeminiModal, setShowGeminiModal] = useState<boolean>(false);
   const [showSavedLooksModal, setShowSavedLooksModal] = useState<boolean>(false);
   const [showKnowledgeModal, setShowKnowledgeModal] = useState<boolean>(false);
-  const [showWeatherSection, setShowWeatherSection] = useState<boolean>(false);
-  const [showComparatorSection, setShowComparatorSection] = useState<boolean>(false);
+  const [showWeatherDrawer, setShowWeatherDrawer] = useState<boolean>(false);
+  const [showCompareModal, setShowCompareModal] = useState<boolean>(false);
   const [saveSuccessNotice, setSaveSuccessNotice] = useState<string | null>(null);
   const [customLookName, setCustomLookName] = useState<string>('');
 
@@ -80,7 +79,6 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
       if (prev.includes(accId)) {
         return prev.filter((id) => id !== accId);
       }
-      // If selecting a headwear item, replace existing headwear to avoid overlapping hats
       if (HEADWEAR_IDS.includes(accId)) {
         const filtered = prev.filter((id) => !HEADWEAR_IDS.includes(id));
         return [...filtered, accId];
@@ -121,8 +119,6 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
     setSelectedColorId(config.colorId);
     setAccessories(config.accessories as AccessoryId[]);
     setPattern(config.pattern);
-    setShowWeatherSection(false);
-    window.scrollTo({ top: 320, behavior: 'smooth' });
   };
 
   const handleApplyComparatorSlot = (slot: SavedOutfitSlot) => {
@@ -132,8 +128,6 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
     setSecondaryColorHex(slot.secondaryColorHex);
     setPattern(slot.pattern);
     setAccessories(slot.accessories);
-    setShowComparatorSection(false);
-    window.scrollTo({ top: 320, behavior: 'smooth' });
   };
 
   const handleApplySavedLook = (look: any) => {
@@ -144,7 +138,6 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
     setPattern(look.pattern);
     setAccessories(look.accessories);
     setCustomLookName(look.name);
-    window.scrollTo({ top: 320, behavior: 'smooth' });
   };
 
   // Object representing current look for comparator
@@ -155,40 +148,32 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
     secondaryColorHex,
     pattern,
     accessories,
-    label: customLookName || 'Phương án Hiện tại',
-  }), [outfit, gender, selectedColorId, secondaryColorHex, pattern, accessories, customLookName]);
+    label: customLookName || `${activeOutfitData.name} (${activeColorData.name})`,
+  }), [outfit, gender, selectedColorId, secondaryColorHex, pattern, accessories, customLookName, activeOutfitData, activeColorData]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* 1. TOP STUDIO ACTION TOOLBAR */}
-      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-stone-200/90 shadow-sm flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-stone-200/90 shadow-xs flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          {/* Weather & Event Toggle */}
+          {/* Weather & Event Slide Drawer Trigger */}
           <button
-            onClick={() => setShowWeatherSection(!showWeatherSection)}
-            className={`px-3.5 py-2.5 rounded-2xl border text-xs sm:text-sm font-medium transition-all flex items-center gap-2 cursor-pointer ${
-              showWeatherSection
-                ? 'border-[#1F4F89] bg-blue-50 text-[#12335A]'
-                : 'border-stone-200 hover:bg-stone-50 text-stone-700'
-            }`}
+            onClick={() => setShowWeatherDrawer(true)}
+            className="px-3.5 py-2 rounded-xl border border-stone-200 hover:border-[#1F4F89] hover:bg-blue-50/60 text-stone-700 hover:text-[#12335A] text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 cursor-pointer shadow-xs active:scale-95"
+            title="Mở thanh trượt gợi ý thời tiết và dịp lễ từ cạnh phải"
           >
             <Calendar className="w-4 h-4 text-[#1F4F89]" />
             <span>Gợi Ý Thời Tiết & Dịp Lễ</span>
-            {showWeatherSection ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
 
-          {/* Comparator Toggle */}
+          {/* Comparator Modal Trigger */}
           <button
-            onClick={() => setShowComparatorSection(!showComparatorSection)}
-            className={`px-3.5 py-2.5 rounded-2xl border text-xs sm:text-sm font-medium transition-all flex items-center gap-2 cursor-pointer ${
-              showComparatorSection
-                ? 'border-[#3D7D73] bg-[#EBF4F2] text-[#25544D]'
-                : 'border-stone-200 hover:bg-stone-50 text-stone-700'
-            }`}
+            onClick={() => setShowCompareModal(true)}
+            className="px-3.5 py-2 rounded-xl border border-stone-200 hover:border-[#3D7D73] hover:bg-[#EBF4F2] text-stone-700 hover:text-[#25544D] text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 cursor-pointer shadow-xs active:scale-95"
+            title="Mở bảng so sánh 2 phương án phối đồ (Modal Popup)"
           >
             <ArrowLeftRight className="w-4 h-4 text-[#3D7D73]" />
             <span>So Sánh Phương Án</span>
-            {showComparatorSection ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
         </div>
 
@@ -196,7 +181,7 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
         <div className="flex items-center gap-2">
           <button
             onClick={handleSaveLook}
-            className="px-3.5 py-2.5 rounded-2xl border border-stone-300 hover:border-stone-400 hover:bg-stone-50 text-stone-700 text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 cursor-pointer"
+            className="px-3.5 py-2 rounded-xl border border-stone-300 hover:border-stone-400 hover:bg-stone-50 text-stone-700 text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
             title="Lưu bản phối này vào danh sách cá nhân"
           >
             <Bookmark className="w-4 h-4 text-[#8D1815]" />
@@ -205,7 +190,7 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
 
           <button
             onClick={() => setShowSavedLooksModal(true)}
-            className="px-3.5 py-2.5 rounded-2xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 cursor-pointer"
+            className="px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
           >
             <span>Bộ Sưu Tập Của Tôi</span>
           </button>
@@ -228,75 +213,60 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
         </div>
       )}
 
-      {/* 2. OPTIONAL COLLAPSIBLE: WEATHER & EVENT RECOMMENDER */}
-      {showWeatherSection && (
-        <div className="animate-in fade-in duration-300">
-          <WeatherEventRecommender onApplyPreset={handleApplyWeatherPreset} />
-        </div>
-      )}
-
-      {/* 3. OPTIONAL COLLAPSIBLE: OUTFIT COMPARATOR */}
-      {showComparatorSection && (
-        <div className="animate-in fade-in duration-300">
-          <OutfitComparator
-            currentOutfit={currentSlotForComparator}
-            onApplyOutfit={handleApplyComparatorSlot}
-          />
-        </div>
-      )}
-
-      {/* 4. MAIN STUDIO WORKSPACE GRID */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Interactive Visual Mannequin Avatar */}
-        <div className="lg:col-span-5 space-y-4">
-          <div className="bg-white rounded-3xl p-4 sm:p-6 border border-stone-200/90 shadow-sm space-y-4">
+      {/* 2. TWO-COLUMN LAYOUT: PREVIEW LEFT & CONTROLS RIGHT */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* CỘT PREVIEW BÊN TRÁI: STICKY DESKTOP */}
+        <div className="lg:col-span-5 lg:sticky lg:top-6 space-y-4">
+          <div className="bg-white rounded-3xl p-4 sm:p-5 border border-stone-200/90 shadow-sm space-y-3">
             {/* Top Toolbar above Mannequin: Day/Night Lighting and Reset */}
-            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+            <div className="flex items-center justify-between border-b border-stone-100 pb-2.5">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-stone-700 tracking-wider uppercase font-sans">
+                <span className="text-xs font-bold text-stone-800 tracking-wider uppercase font-sans">
                   Góc Trưng Bày Phục Trang
                 </span>
-                <span className="text-[11px] text-stone-400 font-serif italic hidden sm:inline">
-                  (Dáng đứng toàn thân 2D chuẩn mực)
+                <span className="text-[11px] text-stone-400 font-serif italic hidden xl:inline">
+                  (Dáng đứng toàn thân 2D)
                 </span>
               </div>
 
               {/* Day/Night Lighting and Reset */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => setIsNightStudio(!isNightStudio)}
-                  className="p-2 rounded-xl text-stone-600 hover:bg-stone-100 hover:-translate-y-0.5 hover:shadow-xs active:scale-95 transition-all duration-200 border border-stone-200/80 cursor-pointer flex items-center gap-1.5 text-xs font-medium"
+                  className="p-1.5 px-2 rounded-xl text-stone-600 hover:bg-stone-100 hover:shadow-xs active:scale-95 transition-all border border-stone-200/80 cursor-pointer flex items-center gap-1 text-xs font-medium"
                   title="Chuyển ánh sáng ngày / đêm"
                   aria-label="Chuyển ánh sáng ngày / đêm"
                 >
-                  {isNightStudio ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-stone-600" />}
-                  <span className="hidden sm:inline">{isNightStudio ? 'Ban Ngày' : 'Ban Đêm'}</span>
+                  {isNightStudio ? <Sun className="w-3.5 h-3.5 text-amber-500" /> : <Moon className="w-3.5 h-3.5 text-stone-600" />}
+                  <span className="text-[11px] hidden sm:inline">{isNightStudio ? 'Ngày' : 'Đêm'}</span>
                 </button>
                 <button
                   onClick={handleResetOutfit}
-                  className="p-2 rounded-xl text-stone-600 hover:bg-stone-100 hover:-translate-y-0.5 hover:shadow-xs active:scale-95 transition-all duration-200 border border-stone-200/80 cursor-pointer"
+                  className="p-1.5 rounded-xl text-stone-600 hover:bg-stone-100 hover:shadow-xs active:scale-95 transition-all border border-stone-200/80 cursor-pointer"
                   title="Đặt lại nguyên bản"
                   aria-label="Đặt lại nguyên bản"
                 >
-                  <RotateCcw className="w-4 h-4" />
+                  <RotateCcw className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
 
-            {/* Mannequin Viewer */}
-            <MannequinViewer
-              outfit={outfit}
-              gender={gender}
-              colorHex={activeColorData.hex}
-              secondaryColorHex={secondaryColorHex}
-              pattern={pattern}
-              accessories={accessories}
-              isNightStudio={isNightStudio}
-              onSelectGender={handleSetGender}
-            />
+            {/* Mannequin Viewer Canvas: Auto-scaled and centered head-to-toe */}
+            <div className="relative overflow-hidden flex items-center justify-center">
+              <MannequinViewer
+                outfit={outfit}
+                gender={gender}
+                colorHex={activeColorData.hex}
+                secondaryColorHex={secondaryColorHex}
+                pattern={pattern}
+                accessories={accessories}
+                isNightStudio={isNightStudio}
+                onSelectGender={handleSetGender}
+              />
+            </div>
 
             {/* Quick Summary Pill Bar under Mannequin */}
-            <div className="pt-2 flex items-center justify-between text-xs text-stone-500 border-t border-stone-100">
+            <div className="pt-2.5 flex items-center justify-between text-xs text-stone-500 border-t border-stone-100">
               <div className="flex items-center gap-1.5 truncate">
                 <span className="font-semibold text-stone-800">{activeOutfitData.name}</span>
                 <span aria-hidden="true">·</span>
@@ -309,28 +279,18 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
 
               <button
                 onClick={() => setShowLookbookModal(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#C82A27] hover:bg-[#A8221F] hover:-translate-y-0.5 hover:shadow-md text-white text-xs font-semibold transition-all duration-200 shadow-sm cursor-pointer shrink-0 active:scale-95"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#C82A27] hover:bg-[#A8221F] active:scale-95 text-white text-xs font-semibold transition-all shadow-xs cursor-pointer shrink-0"
               >
                 <Share2 className="w-3.5 h-3.5" />
                 <span>Xuất thẻ Lookbook</span>
               </button>
             </div>
           </div>
-
-          {/* Color Harmony Validator Widget (Live Five Elements Evaluation) */}
-          <ColorHarmonyValidator
-            primaryColor={activeColorData}
-            secondaryColorHex={secondaryColorHex}
-            onSelectSecondaryColor={setSecondaryColorHex}
-          />
-
-          {/* Cultural Warnings & Real-time Insights */}
-          <CulturalGuide warnings={culturalInsights} />
         </div>
 
-        {/* Right Column: Customizer Controls */}
-        <div className="lg:col-span-7 space-y-6">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200/90 shadow-sm space-y-8">
+        {/* CỘT ĐIỀU KHIỂN BÊN PHẢI */}
+        <div className="lg:col-span-7 space-y-4">
+          <div className="bg-white rounded-3xl p-5 sm:p-7 border border-stone-200/90 shadow-sm space-y-6">
             {/* Step 1: Chọn Trang Phục (Outfits) */}
             <div className="space-y-3">
               <div className="flex items-baseline justify-between">
@@ -348,13 +308,13 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
                     <button
                       key={item.id}
                       onClick={() => setOutfit(item.id)}
-                      className={`group p-3.5 rounded-2xl text-left border transition-all duration-200 cursor-pointer hover:-translate-y-1 hover:shadow-md active:translate-y-0 active:scale-[0.98] ${
+                      className={`group p-3 rounded-2xl text-left border transition-all duration-200 cursor-pointer hover:shadow-sm active:scale-[0.98] ${
                         isSelected
                           ? 'border-[#C82A27] bg-[#FFF5F4] text-[#8D1815] shadow-xs'
                           : 'border-stone-200 bg-stone-50/50 hover:bg-stone-50 hover:border-[#C82A27]/40 text-stone-800'
                       }`}
                     >
-                      <div className="font-semibold text-sm flex items-center justify-between">
+                      <div className="font-semibold text-xs sm:text-sm flex items-center justify-between">
                         <span className="group-hover:text-[#C82A27] transition-colors">{item.name}</span>
                         {isSelected && <Check className="w-4 h-4 text-[#C82A27] transition-transform group-hover:scale-110" />}
                       </div>
@@ -377,21 +337,21 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
                 </span>
               </div>
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2.5">
                 {TRADITIONAL_COLORS.map((col) => {
                   const isSelected = col.id === selectedColorId;
                   return (
                     <button
                       key={col.id}
                       onClick={() => setSelectedColorId(col.id)}
-                      className={`group relative flex items-center gap-2 p-1.5 pr-3 rounded-full border transition-all duration-200 cursor-pointer hover:scale-105 hover:-translate-y-0.5 hover:shadow-xs active:scale-95 ${
+                      className={`group relative flex items-center gap-2 p-1.5 pr-3 rounded-full border transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95 ${
                         isSelected
                           ? 'border-stone-900 bg-stone-100 ring-2 ring-stone-900/10'
                           : 'border-stone-200 hover:border-stone-400 bg-white'
                       }`}
                     >
                       <span
-                        className="w-7 h-7 rounded-full shadow-inner border border-black/10 shrink-0 transition-transform group-hover:scale-110"
+                        className="w-6 h-6 rounded-full shadow-inner border border-black/10 shrink-0 transition-transform group-hover:scale-110"
                         style={{ backgroundColor: col.hex }}
                       />
                       <span className="text-xs font-medium text-stone-800">{col.name.split(' ')[0]}</span>
@@ -400,7 +360,7 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
                 })}
               </div>
 
-              <p className="text-xs text-stone-500 font-serif italic pt-1">
+              <p className="text-xs text-stone-500 font-serif italic pt-0.5">
                 "{activeColorData.meaning}"
               </p>
             </div>
@@ -428,7 +388,7 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
                     <button
                       key={pat.id}
                       onClick={() => setPattern(pat.id as PatternId)}
-                      className={`p-3 rounded-xl border text-left transition-all duration-200 cursor-pointer hover:-translate-y-0.5 hover:shadow-xs active:scale-[0.98] ${
+                      className={`p-2.5 rounded-xl border text-left transition-all duration-200 cursor-pointer hover:shadow-xs active:scale-[0.98] ${
                         isSelected
                           ? 'border-[#1F4F89] bg-blue-50/50 text-[#12335A] font-semibold'
                           : 'border-stone-200 bg-stone-50/40 text-stone-700 hover:bg-stone-50 hover:border-[#1F4F89]/40'
@@ -464,7 +424,7 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
                       <button
                         key={acc.id}
                         onClick={() => toggleAccessory(acc.id)}
-                        className={`p-3 rounded-xl border text-left transition-all duration-200 flex items-center gap-2 cursor-pointer hover:-translate-y-0.5 hover:shadow-xs hover:scale-[1.02] active:scale-95 ${
+                        className={`p-2.5 rounded-xl border text-left transition-all duration-200 flex items-center gap-2 cursor-pointer hover:shadow-xs active:scale-95 ${
                           active
                             ? 'border-[#3D7D73] bg-[#EBF4F2] text-[#25544D] font-semibold'
                             : 'border-stone-200 bg-stone-50/40 hover:bg-stone-50 hover:border-[#3D7D73]/40 text-stone-700'
@@ -479,7 +439,7 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
                   })}
                 </div>
 
-                <div className="text-xs font-semibold text-stone-400 uppercase tracking-wider pt-2">
+                <div className="text-xs font-semibold text-stone-400 uppercase tracking-wider pt-1">
                   Gen Z Streetwear & Hiện Đại
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -489,7 +449,7 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
                       <button
                         key={acc.id}
                         onClick={() => toggleAccessory(acc.id)}
-                        className={`p-3 rounded-xl border text-left transition-all duration-200 flex items-center gap-2 cursor-pointer hover:-translate-y-0.5 hover:shadow-xs hover:scale-[1.02] active:scale-95 ${
+                        className={`p-2.5 rounded-xl border text-left transition-all duration-200 flex items-center gap-2 cursor-pointer hover:shadow-xs active:scale-95 ${
                           active
                             ? 'border-[#C82A27] bg-[#FFF5F4] text-[#8D1815] font-semibold'
                             : 'border-stone-200 bg-stone-50/40 hover:bg-stone-50 hover:border-[#C82A27]/40 text-stone-700'
@@ -506,7 +466,17 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
               </div>
             </div>
 
-            {/* Nút Tri thức phục trang dạng viên thuốc kèm icon 'i' mở popup/modal (Tối giản chữ cho học sinh) */}
+            {/* Harmony Validator & Cultural Guide */}
+            <div className="space-y-4 pt-2 border-t border-stone-100">
+              <ColorHarmonyValidator
+                primaryColor={activeColorData}
+                secondaryColorHex={secondaryColorHex}
+                onSelectSecondaryColor={setSecondaryColorHex}
+              />
+              <CulturalGuide warnings={culturalInsights} />
+            </div>
+
+            {/* Tra cứu tri thức phục trang */}
             <div className="p-3.5 rounded-2xl bg-[#FAF7F2] border border-stone-200/90 flex items-center justify-between gap-3 shadow-xs">
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-8 h-8 rounded-full bg-[#C82A27]/10 text-[#C82A27] flex items-center justify-center shrink-0">
@@ -525,27 +495,27 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
               <button
                 type="button"
                 onClick={() => setShowKnowledgeModal(true)}
-                className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 text-xs font-bold shadow-xs hover:border-[#C82A27]/40 hover:-translate-y-0.5 active:scale-95 transition-all duration-200 cursor-pointer shrink-0"
+                className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 text-xs font-bold shadow-xs hover:border-[#C82A27]/40 active:scale-95 transition-all cursor-pointer shrink-0"
               >
                 Tra cứu 📜
               </button>
             </div>
 
-            {/* Export Lookbook Action Button */}
+            {/* Bottom Actions */}
             <div className="pt-2 flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => setShowLookbookModal(true)}
-                className="flex-1 py-4 px-6 rounded-2xl bg-[#C82A27] hover:bg-[#A8221F] hover:-translate-y-1 hover:shadow-xl text-white font-bold text-sm sm:text-base transition-all duration-200 flex items-center justify-center gap-2.5 shadow-md cursor-pointer active:translate-y-0 active:scale-95"
+                className="flex-1 py-3.5 px-5 rounded-2xl bg-[#C82A27] hover:bg-[#A8221F] text-white font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer active:scale-95"
               >
-                <Sparkles className="w-5 h-5 transition-transform hover:rotate-12" />
+                <Sparkles className="w-4 h-4" />
                 <span>Xuất Thẻ Lookbook Của Bạn</span>
               </button>
 
               <button
                 onClick={() => setShowGeminiModal(true)}
-                className="py-4 px-6 rounded-2xl bg-stone-900 hover:bg-stone-800 hover:-translate-y-1 hover:shadow-xl text-white font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-md active:translate-y-0 active:scale-95"
+                className="py-3.5 px-5 rounded-2xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md active:scale-95"
               >
-                <Bot className="w-5 h-5 text-amber-300 transition-transform hover:scale-110" />
+                <Bot className="w-4 h-4 text-amber-300" />
                 <span>Cố Vấn AI Gemini</span>
               </button>
             </div>
@@ -553,7 +523,22 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({ initialOutfit = 'n
         </div>
       </div>
 
-      {/* Garment Knowledge Modal (Tri thức khảo cứu lịch sử) */}
+      {/* 3. MODAL POPUP: SO SÁNH PHƯƠNG ÁN PHỐI (OVERLAY BACKDROP-FILTER BLUR 4PX) */}
+      <CompareModal
+        isOpen={showCompareModal}
+        onClose={() => setShowCompareModal(false)}
+        currentOutfit={currentSlotForComparator}
+        onApplyOutfit={handleApplyComparatorSlot}
+      />
+
+      {/* 4. SLIDE-OVER DRAWER: GỢI Ý THỜI TIẾT & SỰ KIỆN TỪ CẠNH PHẢI */}
+      <WeatherEventDrawer
+        isOpen={showWeatherDrawer}
+        onClose={() => setShowWeatherDrawer(false)}
+        onApplyPreset={handleApplyWeatherPreset}
+      />
+
+      {/* Garment Knowledge Modal */}
       <GarmentKnowledgeModal
         isOpen={showKnowledgeModal}
         onClose={() => setShowKnowledgeModal(false)}

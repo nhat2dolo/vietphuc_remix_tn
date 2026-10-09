@@ -87,18 +87,20 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#24211E] flex flex-col font-sans selection:bg-[#C82A27]/20 selection:text-[#8D1815]">
       {/* 1. TOP BAR (FLOATING CAPSULE NAVBAR TRÊN DESKTOP & DƯỚI MOBILE) */}
-      <Navbar
-        activeTab={activeTab}
-        onSelectTab={setActiveTab}
-        onOpenQuickStudio={() => {
-          setActiveTab('studio');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-      />
+      <div className="shrink-0 pt-2 sm:pt-3">
+        <Navbar
+          activeTab={activeTab}
+          onSelectTab={setActiveTab}
+          onOpenQuickStudio={() => {
+            setActiveTab('studio');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+        />
+      </div>
 
-      {/* 2. MAIN WORKSPACE / ACTIVE VIEW WITH SMOOTH SPRING-LIKE HORIZONTAL SLIDE & FADE TRANSITION */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 flex-1 w-full pb-24 lg:pb-12">
-        <div key={activeTab} className="animate-tab-transition">
+      {/* 2. MAIN WORKSPACE / ACTIVE VIEW */}
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full flex-1 flex flex-col min-h-0 py-6 sm:py-8 pb-24 lg:pb-12">
+        <div key={activeTab} className="animate-tab-transition flex-1 flex flex-col min-h-0">
           {/* TRANG CHỦ (HOMEPAGE TRỰC QUAN - VISUAL STORYTELLING) */}
           {activeTab === 'home' && (
             <HomeView
@@ -116,23 +118,15 @@ export default function App() {
 
           {/* VIRTUAL TRY-ON (THỬ ĐỒ ẢO FABRIC.JS) */}
           {activeTab === 'tryon' && (
-            <div className="space-y-12">
+            <div className="h-full flex-1 min-h-0">
               <VirtualTryOn />
             </div>
           )}
 
           {/* STUDIO MANNEQUIN MODE */}
           {activeTab === 'studio' && (
-            <div className="space-y-12">
+            <div className="flex-1 min-h-0">
               <FittingStudio key={targetOutfit} initialOutfit={targetOutfit} />
-
-              {/* Presets carousel underneath Studio for quick styling inspiration */}
-              <div className="pt-8 border-t border-stone-200/80">
-                <PresetLookbook
-                  onSelectPreset={handleSelectPreset}
-                  activePresetId={activePresetId}
-                />
-              </div>
             </div>
           )}
 
