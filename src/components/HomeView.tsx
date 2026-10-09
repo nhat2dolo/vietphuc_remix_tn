@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { HeroVisualBackground } from './HeroVisualBackground';
 import { GarmentKnowledgeModal } from './GarmentKnowledgeModal';
+import { ThanhTreoCoPhuc } from './ThanhTreoCoPhuc';
 import { OutfitId, OutfitData } from '../types/vietphuc';
 import { OUTFITS } from '../data/vietphucData';
 import {
@@ -28,6 +29,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
 }) => {
   const carouselRef = useRef<HTMLDivElement>(null);
   const [selectedKnowledgeOutfit, setSelectedKnowledgeOutfit] = useState<OutfitData | null>(null);
+  const [galleryViewMode, setGalleryViewMode] = useState<'rack' | 'cards'>('rack');
 
   const scrollCarousel = (direction: 'left' | 'right') => {
     if (!carouselRef.current) return;
@@ -252,9 +254,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
       </HeroVisualBackground>
 
-      {/* 2. KHU VỰC 6 CỔ PHỤC: CAROUSEL THẺ ẢNH LỚN VUỐT NGANG (VISUAL STORYTELLING) */}
+      {/* 2. KHU VỰC 6 CỔ PHỤC: THANH TREO 3D & CAROUSEL (VISUAL STORYTELLING) */}
       <section id="heritage-carousel-section" className="space-y-6 pt-4">
-        {/* Section Header with Carousel Navigation */}
+        {/* Section Header with View Mode Switcher */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-stone-200/90 pb-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#8D1815] font-sans">
@@ -265,100 +267,149 @@ export const HomeView: React.FC<HomeViewProps> = ({
               6 Kiểu Dáng Cổ Phục Tiêu Biểu
             </h2>
             <p className="text-xs sm:text-sm text-stone-600 font-serif italic">
-              Chạm vào bất kỳ cổ phục nào để đưa thẳng vào Studio thử đồ hoặc bấm "i" để tra cứu tri thức
+              Khám phá di sản trăm năm qua giá treo đồ 3D tương tác hoặc duyệt thẻ khảo cứu
             </p>
           </div>
 
-          {/* Carousel Arrows */}
-          <div className="flex items-center gap-2 self-end sm:self-auto">
-            <button
-              onClick={() => scrollCarousel('left')}
-              className="w-10 h-10 rounded-full border border-stone-300 bg-white hover:bg-stone-50 hover:border-[#C82A27] text-stone-700 hover:text-[#C82A27] flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5 active:scale-95 shadow-sm cursor-pointer"
-              aria-label="Xem trước"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => scrollCarousel('right')}
-              className="w-10 h-10 rounded-full border border-stone-300 bg-white hover:bg-stone-50 hover:border-[#C82A27] text-stone-700 hover:text-[#C82A27] flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5 active:scale-95 shadow-sm cursor-pointer"
-              aria-label="Xem tiếp"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
+          {/* View Mode Toggle: Giá Treo 3D vs Thẻ Lưới */}
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <div className="flex items-center p-1 rounded-full bg-stone-200/80 border border-stone-300/80 shadow-xs">
+              <button
+                type="button"
+                onClick={() => setGalleryViewMode('rack')}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+                  galleryViewMode === 'rack'
+                    ? 'bg-[#8D1815] text-white shadow-sm'
+                    : 'text-stone-700 hover:text-stone-900'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                <span>Giá Treo 3D</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setGalleryViewMode('cards')}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+                  galleryViewMode === 'cards'
+                    ? 'bg-[#8D1815] text-white shadow-sm'
+                    : 'text-stone-700 hover:text-stone-900'
+                }`}
+              >
+                <span>Thẻ Cuộn</span>
+              </button>
+            </div>
+
+            {/* Carousel Arrows (only in cards mode) */}
+            {galleryViewMode === 'cards' && (
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => scrollCarousel('left')}
+                  className="w-9 h-9 rounded-full border border-stone-300 bg-white hover:bg-stone-50 hover:border-[#C82A27] text-stone-700 hover:text-[#C82A27] flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5 active:scale-95 shadow-sm cursor-pointer"
+                  aria-label="Xem trước"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => scrollCarousel('right')}
+                  className="w-9 h-9 rounded-full border border-stone-300 bg-white hover:bg-stone-50 hover:border-[#C82A27] text-stone-700 hover:text-[#C82A27] flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5 active:scale-95 shadow-sm cursor-pointer"
+                  aria-label="Xem tiếp"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Carousel Container (Horizontal Swipeable Cards) */}
-        <div
-          ref={carouselRef}
-          className="flex gap-6 overflow-x-auto no-scrollbar snap-x snap-mandatory py-4 px-1"
-        >
-          {GARMENT_CARDS.map((card) => {
-            const outfitInfo = OUTFITS[card.id];
-            return (
-              <div
-                key={card.id}
-                className="snap-start shrink-0 w-[280px] sm:w-[320px] md:w-[340px] group rounded-3xl bg-white border border-stone-200/90 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col overflow-hidden relative"
-              >
-                {/* Visual Artwork Container */}
+        {/* 1. GIÁ TREO ĐỒ 3D TƯƠNG TÁC (THANH TREO CỔ PHỤC) */}
+        {galleryViewMode === 'rack' && (
+          <ThanhTreoCoPhuc
+            onSelectOutfit={(outfit) => {
+              if (outfit.studioOutfitId) {
+                onSelectOutfit(outfit.studioOutfitId);
+              }
+            }}
+            onExploreKnowledge={(outfit) => {
+              if (outfit.studioOutfitId && OUTFITS[outfit.studioOutfitId]) {
+                setSelectedKnowledgeOutfit(OUTFITS[outfit.studioOutfitId]);
+              }
+            }}
+          />
+        )}
+
+        {/* 2. CHẾ ĐỘ THẺ VUỐT NGANG TRUYỀN THỐNG */}
+        {galleryViewMode === 'cards' && (
+          <div
+            ref={carouselRef}
+            className="flex gap-6 overflow-x-auto no-scrollbar snap-x snap-mandatory py-4 px-1"
+          >
+            {GARMENT_CARDS.map((card) => {
+              const outfitInfo = OUTFITS[card.id];
+              return (
                 <div
-                  onClick={() => onSelectOutfit(card.id)}
-                  className={`h-64 sm:h-72 w-full bg-gradient-to-b ${card.bgGradient} p-6 flex items-center justify-center relative cursor-pointer overflow-hidden`}
+                  key={card.id}
+                  className="snap-start shrink-0 w-[280px] sm:w-[320px] md:w-[340px] group rounded-3xl bg-white border border-stone-200/90 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col overflow-hidden relative"
                 >
-                  {/* Subtle silk glow background */}
-                  <div className="absolute inset-0 bg-black/10 backdrop-blur-[1px] group-hover:bg-transparent transition-colors duration-300" />
-                  
-                  {/* Garment SVG Artwork Preview */}
-                  <div className="w-44 h-56 transition-transform duration-300 group-hover:scale-105">
-                    {card.svgPreview}
-                  </div>
-
-                  {/* Era Badge in Card Corner */}
-                  <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-black/35 backdrop-blur-md text-white text-[11px] font-semibold border border-white/20">
-                    {outfitInfo.era.split('(')[0]}
-                  </div>
-
-                  {/* Scholarly Knowledge Info "i" Icon Button (Tối Giản Chữ) */}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedKnowledgeOutfit(outfitInfo);
-                    }}
-                    className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/80 hover:bg-white text-stone-800 hover:text-[#C82A27] flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer z-10"
-                    title="Xem tri thức khảo cứu lịch sử"
-                    aria-label="Xem tri thức khảo cứu lịch sử"
-                  >
-                    <Info className="w-4 h-4" />
-                  </button>
-                </div>
-
-                {/* Card Content & Action */}
-                <div className="p-5 flex-1 flex flex-col justify-between space-y-3 bg-white">
-                  <div>
-                    <h3
-                      onClick={() => onSelectOutfit(card.id)}
-                      className="text-xl font-display font-bold text-stone-900 group-hover:text-[#C82A27] transition-colors cursor-pointer"
-                    >
-                      {outfitInfo.name}
-                    </h3>
-                    <p className="text-xs text-stone-600 font-serif italic mt-1 line-clamp-2">
-                      "{card.vibeShort}"
-                    </p>
-                  </div>
-
-                  <button
+                  {/* Visual Artwork Container */}
+                  <div
                     onClick={() => onSelectOutfit(card.id)}
-                    className="w-full py-2.5 px-4 rounded-xl bg-stone-100 group-hover:bg-[#C82A27] text-stone-800 group-hover:text-white font-bold text-xs transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                    className={`h-64 sm:h-72 w-full bg-gradient-to-b ${card.bgGradient} p-6 flex items-center justify-center relative cursor-pointer overflow-hidden`}
                   >
-                    <span>Mở Studio & Phối Đồ Ngay</span>
-                    <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
-                  </button>
+                    {/* Subtle silk glow background */}
+                    <div className="absolute inset-0 bg-black/10 backdrop-blur-[1px] group-hover:bg-transparent transition-colors duration-300" />
+                    
+                    {/* Garment SVG Artwork Preview */}
+                    <div className="w-44 h-56 transition-transform duration-300 group-hover:scale-105">
+                      {card.svgPreview}
+                    </div>
+
+                    {/* Era Badge in Card Corner */}
+                    <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-black/35 backdrop-blur-md text-white text-[11px] font-semibold border border-white/20">
+                      {outfitInfo.era.split('(')[0]}
+                    </div>
+
+                    {/* Scholarly Knowledge Info "i" Icon Button (Tối Giản Chữ) */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedKnowledgeOutfit(outfitInfo);
+                      }}
+                      className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/80 hover:bg-white text-stone-800 hover:text-[#C82A27] flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer z-10"
+                      title="Xem tri thức khảo cứu lịch sử"
+                      aria-label="Xem tri thức khảo cứu lịch sử"
+                    >
+                      <Info className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* Card Content & Action */}
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-3 bg-white">
+                    <div>
+                      <h3
+                        onClick={() => onSelectOutfit(card.id)}
+                        className="text-xl font-display font-bold text-stone-900 group-hover:text-[#C82A27] transition-colors cursor-pointer"
+                      >
+                        {outfitInfo.name}
+                      </h3>
+                      <p className="text-xs text-stone-600 font-serif italic mt-1 line-clamp-2">
+                        "{card.vibeShort}"
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => onSelectOutfit(card.id)}
+                      className="w-full py-2.5 px-4 rounded-xl bg-stone-100 group-hover:bg-[#C82A27] text-stone-800 group-hover:text-white font-bold text-xs transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                    >
+                      <span>Mở Studio & Phối Đồ Ngay</span>
+                      <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* 3. KHÁM PHÁ NHANH CÁC TÍNH NĂNG ĐỘC ĐÁO (FEATURE HIGHLIGHTS) */}
