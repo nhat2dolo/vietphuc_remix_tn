@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { TraditionalColor } from '../types/vietphuc';
 import { TRADITIONAL_COLORS } from '../data/vietphucData';
-import { ShieldCheck, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ShieldCheck, Info } from 'lucide-react';
 
 interface ColorHarmonyValidatorProps {
   primaryColor: TraditionalColor;
@@ -44,32 +44,32 @@ export const ColorHarmonyValidator: React.FC<ColorHarmonyValidatorProps> = ({
     const primElem = primaryColor.element.split(' ')[0]; // E.g., Hỏa, Thủy...
     const secElem = matchedSecondaryColor?.element.split(' ')[0] || 'Kim';
 
-    let harmonyType: 'sinh' | 'hoa' | 'khac' | 'tuongphan' = 'hoa';
+    let harmonyType: 'sinh' | 'hoa' | 'khac' = 'hoa';
     let score = 92;
-    let title = 'Hài Hòa Nhã Nhặn';
-    let description = `Sắc ${primaryColor.name} kết hợp cùng lớp lót tà nền nã mang lại vẻ đẹp chuẩn mực cổ phong.`;
+    let label = 'Hài Hòa Cổ Điển';
+    let detail = `Màu chính (${primElem}) & tà phối (${secElem}) cân bằng, nhã nhặn.`;
 
     if (ELEMENT_GENERATING[primElem] === secElem || ELEMENT_GENERATING[secElem] === primElem) {
       harmonyType = 'sinh';
       score = 98;
-      title = `Ngũ Hành Tương Sinh (${primElem} ⇄ ${secElem})`;
-      description = `Cực kỳ thịnh vượng và may mắn! Hai sắc màu này bổ trợ năng lượng cho nhau, tôn dáng vóc người mặc trong các nghi lễ trang trọng.`;
+      label = `Tương Sinh (${primElem} ⇄ ${secElem})`;
+      detail = `Cực kỳ thịnh vượng và may mắn theo quy luật ngũ hành truyền thống.`;
     } else if (primElem === secElem) {
       harmonyType = 'hoa';
       score = 94;
-      title = `Đồng Khí Tương Hòa (Cùng hành ${primElem})`;
-      description = `Phong cách Monochromatic (đơn sắc) thời thượng, tạo chiều sâu thị giác đồng nhất và thanh lịch.`;
+      label = `Đồng Khí (${primElem})`;
+      detail = `Phong cách đơn sắc (ton-sur-ton) tinh tế, mang chiều sâu cung đình.`;
     } else if (ELEMENT_OVERCOMING[primElem] === secElem || ELEMENT_OVERCOMING[secElem] === primElem) {
       harmonyType = 'khac';
       score = 86;
-      title = `Tương Phản Ấn Tượng (${primElem} & ${secElem})`;
-      description = `Độ tương phản màu sắc mạnh mẽ rất được Gen Z ưa chuộng để thể hiện cá tính nổi bật. Nên điểm thêm phụ kiện trung tính để cân bằng.`;
+      label = `Tương Phản (${primElem} - ${secElem})`;
+      detail = `Tương phản cá tính, phong cách hiện đại ấn tượng cho Gen Z.`;
     }
 
-    return { harmonyType, score, title, description };
+    return { harmonyType, score, label, detail };
   }, [primaryColor, matchedSecondaryColor]);
 
-  // Suggested paired colors for the current primary color
+  // Suggested paired colors
   const recommendedPairs = useMemo(() => {
     const primElem = primaryColor.element.split(' ')[0];
     const sinhElem = ELEMENT_GENERATING[primElem];
@@ -79,81 +79,50 @@ export const ColorHarmonyValidator: React.FC<ColorHarmonyValidatorProps> = ({
   }, [primaryColor]);
 
   return (
-    <div className="p-5 sm:p-6 rounded-3xl bg-white border border-stone-200/90 shadow-sm space-y-5">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#8D1815]">
-          <ShieldCheck className="w-4 h-4 text-[#C82A27]" />
-          <span>Kiểm Tra Độ Hài Hòa Màu Sắc (Color Harmony)</span>
+    <div className="pt-2 pb-1 space-y-2">
+      {/* 1-Line Compact Harmony Progress Bar */}
+      <div className="flex items-center justify-between text-xs gap-2">
+        <div className="flex items-center gap-1.5 min-w-0 font-medium text-stone-700">
+          <ShieldCheck className="w-3.5 h-3.5 text-[#C82A27] shrink-0" />
+          <span className="truncate">Độ hài hòa: <strong className="text-stone-900">{analysis.label}</strong></span>
         </div>
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-stone-100 text-stone-800 text-xs font-bold">
-          <span>Điểm:</span>
-          <span className="text-[#C82A27]">{analysis.score}/100</span>
-        </div>
-      </div>
-
-      {/* Visual Contrast Swatch Preview */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
-        <div className="p-4 rounded-2xl border border-stone-100 bg-[#FAF7F2] flex items-center gap-4">
-          <div className="flex -space-x-3 items-center shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Visual Mini Progress Bar */}
+          <div className="w-20 sm:w-28 h-2 rounded-full bg-stone-100 overflow-hidden border border-stone-200">
             <div
-              className="w-12 h-12 rounded-full border-2 border-white shadow-md"
-              style={{ backgroundColor: primaryColor.hex }}
-              title={`Màu chính: ${primaryColor.name}`}
-            />
-            <div
-              className="w-12 h-12 rounded-full border-2 border-white shadow-md"
-              style={{ backgroundColor: secondaryColorHex }}
-              title="Màu tà/quần phối kèm"
-            />
-          </div>
-          <div className="min-w-0">
-            <div className="text-xs font-bold text-stone-800 truncate">
-              {primaryColor.name} × {matchedSecondaryColor ? matchedSecondaryColor.name : 'Trắng / Tự nhiên'}
-            </div>
-            <div className="text-[11px] text-stone-500 font-medium">
-              Hành {primaryColor.element} · {analysis.title}
-            </div>
-          </div>
-        </div>
-
-        {/* Evaluation Summary */}
-        <div className="space-y-1.5 text-xs text-stone-600">
-          <div className="font-semibold text-stone-900 flex items-center gap-1.5">
-            {analysis.score >= 90 ? (
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 inline" />
-            ) : (
-              <AlertCircle className="w-4 h-4 text-amber-600 inline" />
-            )}
-            <span>{analysis.title}</span>
-          </div>
-          <p className="leading-relaxed font-serif italic">{analysis.description}</p>
-        </div>
-      </div>
-
-      {/* Suggested Pairings Quick Click */}
-      <div className="space-y-2 pt-2 border-t border-stone-100">
-        <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
-          Gợi ý phối màu tà / quần chuẩn ngũ hành tương sinh:
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {recommendedPairs.map((pair) => (
-            <button
-              key={pair.id}
-              onClick={() => onSelectSecondaryColor(pair.hex)}
-              className={`px-3 py-1.5 rounded-xl border text-xs flex items-center gap-2 transition-all cursor-pointer ${
-                secondaryColorHex.toLowerCase() === pair.hex.toLowerCase()
-                  ? 'border-stone-800 bg-stone-100 font-semibold'
-                  : 'border-stone-200 bg-white hover:border-stone-400 text-stone-700'
+              className={`h-full rounded-full transition-all duration-500 ${
+                analysis.score >= 95
+                  ? 'bg-emerald-500'
+                  : analysis.score >= 90
+                  ? 'bg-[#C82A27]'
+                  : 'bg-amber-500'
               }`}
-            >
-              <span
-                className="w-3.5 h-3.5 rounded-full border border-black/10 shadow-xs shrink-0"
-                style={{ backgroundColor: pair.hex }}
+              style={{ width: `${analysis.score}%` }}
+            />
+          </div>
+          <span className="font-mono font-bold text-xs text-stone-800">{analysis.score}%</span>
+        </div>
+      </div>
+
+      {/* Quick Secondary Color Swatch Recommendation (Minimalist 1-line) */}
+      <div className="flex items-center justify-between gap-2 text-[11px] text-stone-500 bg-stone-50/80 px-2.5 py-1.5 rounded-xl border border-stone-200/60">
+        <span className="truncate">Tà lót / viền gợi ý:</span>
+        <div className="flex items-center gap-1.5 shrink-0">
+          {recommendedPairs.map((col) => {
+            const isSelected = secondaryColorHex.toLowerCase() === col.hex.toLowerCase();
+            return (
+              <button
+                key={col.id}
+                type="button"
+                onClick={() => onSelectSecondaryColor(col.hex)}
+                className={`w-4 h-4 rounded-full border transition-transform hover:scale-125 cursor-pointer shadow-2xs ${
+                  isSelected ? 'ring-2 ring-stone-800 scale-110 border-white' : 'border-stone-300'
+                }`}
+                style={{ backgroundColor: col.hex }}
+                title={`Đổi màu tà lót: ${col.name} (${col.element})`}
               />
-              <span>{pair.name}</span>
-            </button>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

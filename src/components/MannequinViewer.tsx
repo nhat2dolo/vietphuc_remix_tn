@@ -10,6 +10,8 @@ interface MannequinViewerProps {
   accessories: AccessoryId[];
   isNightStudio?: boolean;
   onSelectGender?: (gender: GenderMode) => void;
+  className?: string;
+  scale?: number;
 }
 
 export const MannequinViewer: React.FC<MannequinViewerProps> = ({
@@ -21,6 +23,8 @@ export const MannequinViewer: React.FC<MannequinViewerProps> = ({
   accessories,
   isNightStudio = false,
   onSelectGender,
+  className,
+  scale,
 }) => {
   const hasAccessory = (acc: AccessoryId) => accessories.includes(acc);
 
@@ -35,11 +39,15 @@ export const MannequinViewer: React.FC<MannequinViewerProps> = ({
 
   return (
     <div
-      className={`relative w-full h-[540px] sm:h-[600px] flex items-center justify-center rounded-2xl overflow-hidden transition-colors duration-500 border border-stone-200/80 shadow-inner ${
-        isNightStudio
-          ? 'bg-gradient-to-b from-[#181a20] via-[#20222a] to-[#121318]'
-          : 'bg-gradient-to-b from-[#FAF6F0] via-[#F3ECE0] to-[#EAE1D1]'
-      }`}
+      className={
+        className
+          ? `relative flex items-center justify-center overflow-hidden transition-colors duration-500 ${className}`
+          : `relative w-full h-[540px] sm:h-[600px] flex items-center justify-center rounded-2xl overflow-hidden transition-colors duration-500 border border-stone-200/80 shadow-inner ${
+              isNightStudio
+                ? 'bg-gradient-to-b from-[#181a20] via-[#20222a] to-[#121318]'
+                : 'bg-gradient-to-b from-[#FAF6F0] via-[#F3ECE0] to-[#EAE1D1]'
+            }`
+      }
     >
       {/* UI Tags duy nhất: Nữ Giới / Nam Giới ở góc trên bên trái khung Canvas */}
       <div className="absolute top-3.5 left-3.5 z-20 flex items-center gap-1.5 p-1 rounded-xl bg-white/95 backdrop-blur-md border border-stone-200/90 shadow-sm">
@@ -90,6 +98,7 @@ export const MannequinViewer: React.FC<MannequinViewerProps> = ({
         className="w-full h-full max-h-full drop-shadow-md select-none p-2 object-contain"
         preserveAspectRatio="xMidYMid meet"
         xmlns="http://www.w3.org/2000/svg"
+        style={scale ? { transform: `scale(${scale})`, transformOrigin: 'center center' } : undefined}
       >
         <defs>
           {/* Gradients for dynamic realistic lighting & silk drapery */}
@@ -219,26 +228,32 @@ export const MannequinViewer: React.FC<MannequinViewerProps> = ({
 
         {/* 1. SCULPTED ANATOMICAL MANNEQUIN BASE */}
         <g id="body-base">
-          {/* Sculpted Neck */}
+          {/* Solid chest and shoulder foundation to prevent gaps under collars */}
+          <path
+            d="M124 142 C138 136 154 134 170 134 C186 134 202 136 216 142 L224 190 L116 190 Z"
+            fill="url(#skinGrad)"
+          />
+
+          {/* Sculpted Neck - Smooth transition from chin to chest */}
           {isMale ? (
-            /* Wider, sturdier masculine neck */
+            /* Wider, sturdier masculine neck seamlessly connecting chin to chest */
             <path
-              d="M152 112 C152 125 146 138 140 146 L200 146 C194 138 188 125 188 112 Z"
+              d="M152 108 C152 122 146 136 140 146 L200 146 C194 136 188 122 188 108 Z"
               fill="url(#skinGrad)"
             />
           ) : (
-            /* Graceful feminine neck */
+            /* Graceful feminine neck seamlessly connecting chin to chest */
             <path
-              d="M157 114 C157 126 153 140 148 148 L192 148 C187 140 183 126 183 114 Z"
+              d="M156 110 C156 122 152 138 147 148 L193 148 C188 138 184 122 184 110 Z"
               fill="url(#skinGrad)"
             />
           )}
 
           {/* Subtle Neck shadow under jaw */}
           <path
-            d="M156 115 Q170 123 184 115 L184 120 Q170 127 156 120 Z"
+            d="M156 112 Q170 118 184 112 L184 116 Q170 122 156 116 Z"
             fill="#C99470"
-            opacity="0.28"
+            opacity="0.25"
           />
 
           {/* Clavicle / Collarbone subtle lines */}
@@ -450,14 +465,14 @@ export const MannequinViewer: React.FC<MannequinViewerProps> = ({
                 fill="url(#fabricShine)"
               />
 
-              {/* Standing Collar */}
+              {/* Standing Collar - Elevated to hug the jaw and neck naturally */}
               <path
-                d="M155 125 C162 122 178 122 185 125 C187 131 187 138 185 142 C178 145 162 145 155 142 C153 138 153 131 155 125 Z"
+                d="M154 116 C162 112 178 112 186 116 C188 122 188 134 186 140 C178 143 162 143 154 140 C152 134 152 122 154 116 Z"
                 fill={colorHex}
                 stroke="#5B1210"
                 strokeWidth="1.2"
               />
-              <path d="M156 126 C163 124 177 124 184 126" stroke="#FAF7F2" strokeWidth="1.8" fill="none" />
+              <path d="M156 117 C163 114 177 114 184 117" stroke="#FAF7F2" strokeWidth="1.8" fill="none" />
 
               <path
                 d="M170 142 C182 144 195 152 202 165 C206 176 208 195 208 220"
@@ -508,19 +523,19 @@ export const MannequinViewer: React.FC<MannequinViewerProps> = ({
                     fill="url(#fabricShine)"
                   />
 
-                  {/* High Standing Collar (Cổ Đứng Lập Lĩnh Nam Tính Kín Đáo) */}
+                  {/* High Standing Collar (Cổ Đứng Lập Lĩnh Nam Tính Kín Đáo) - Ôm khít chân cổ */}
                   <g id="lap-linh-collar-male">
                     <path
-                      d="M152 122 C161 118 179 118 188 122 C190 128 190 136 188 141 C179 144 161 144 152 141 C150 136 150 128 152 122 Z"
+                      d="M152 113 C161 109 179 109 188 113 C190 120 190 134 188 141 C179 144 161 144 152 141 C150 134 150 120 152 113 Z"
                       fill={colorHex}
                       stroke="#5B1210"
                       strokeWidth="1.3"
                     />
-                    {/* White Inner Collar Lining */}
+                    {/* White Inner Collar Lining (Nẹp cổ lót trắng ôm khít) */}
                     <path
-                      d="M154 123 C162 120 178 120 186 123"
+                      d="M154 114 C162 111 178 111 186 114"
                       stroke="#FAF7F2"
-                      strokeWidth="2.2"
+                      strokeWidth="2.4"
                       fill="none"
                     />
                   </g>
@@ -581,17 +596,18 @@ export const MannequinViewer: React.FC<MannequinViewerProps> = ({
                     fill="url(#fabricShine)"
                   />
 
+                  {/* Cổ Đứng Lập Lĩnh Nữ Giới - Ôm sát chân cổ tự nhiên */}
                   <g id="lap-linh-collar">
                     <path
-                      d="M154 122 C162 119 178 119 186 122 C188 128 188 136 186 140 C178 143 162 143 154 140 C152 136 152 128 154 122 Z"
+                      d="M154 114 C162 110 178 110 186 114 C188 120 188 133 186 140 C178 143 162 143 154 140 C152 133 152 120 154 114 Z"
                       fill={colorHex}
                       stroke="#5B1210"
                       strokeWidth="1.4"
                     />
                     <path
-                      d="M156 123 C163 121 177 121 184 123"
+                      d="M156 115 C163 112 177 112 184 115"
                       stroke="#FAF7F2"
-                      strokeWidth="2"
+                      strokeWidth="2.2"
                       fill="none"
                     />
                   </g>
@@ -657,16 +673,32 @@ export const MannequinViewer: React.FC<MannequinViewerProps> = ({
                 fill="url(#fabricShine)"
               />
 
-              {/* Rectangular Collar */}
+              {/* Inner Royal White Collar (Áo lót trong lập lĩnh trắng ôm khít cổ triều đình) */}
+              <g id="nhat-binh-inner-collar">
+                <path
+                  d="M154 113 C162 109 178 109 186 113 C188 118 188 136 186 142 C178 144 162 144 154 142 C152 136 152 118 154 113 Z"
+                  fill="#FAF7F2"
+                  stroke="#D1D5DB"
+                  strokeWidth="1.2"
+                />
+                <path
+                  d="M156 114 C163 111 177 111 184 114"
+                  stroke="#E5E7EB"
+                  strokeWidth="2"
+                  fill="none"
+                />
+              </g>
+
+              {/* Rectangular Collar (Cổ áo Nhật Bình cung đình) - Ôm khít tôn vinh trang phục */}
               <g id="nhat-binh-collar">
                 <path
-                  d="M148 126 C155 124 185 124 192 126 L192 240 L180 240 L180 144 C175 142 165 142 160 144 L160 240 L148 240 Z"
+                  d="M148 116 C155 113 185 113 192 116 L192 240 L180 240 L180 142 C175 140 165 140 160 142 L160 240 L148 240 Z"
                   fill="url(#goldRibbon)"
                   stroke="#92400E"
                   strokeWidth="1.2"
                 />
-                <path d="M152 130 L188 130 L188 238 L182 238 L182 140 L158 140 L158 238 L152 238 Z" fill="#C82A27" />
-                <path d="M155 134 L185 134 L185 236 L183 236 L183 138 L157 138 L157 236 L155 236 Z" fill="#1F4F89" />
+                <path d="M152 120 L188 120 L188 238 L182 238 L182 138 L158 138 L158 238 L152 238 Z" fill="#C82A27" />
+                <path d="M155 124 L185 124 L185 236 L183 236 L183 136 L157 136 L157 236 L155 236 Z" fill="#1F4F89" />
 
                 <circle cx="170" cy="180" r="4.2" fill="#FDE68A" stroke="#B45309" strokeWidth="1.4" />
                 <circle cx="170" cy="220" r="3.8" fill="#FDE68A" stroke="#B45309" strokeWidth="1.2" />

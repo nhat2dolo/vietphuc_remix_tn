@@ -72,7 +72,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
       aria-modal="true"
       aria-labelledby="compare-modal-title"
     >
-      <div className="relative w-full max-w-5xl max-h-[92vh] bg-[#FAF7F2] rounded-3xl shadow-2xl border border-stone-200/90 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-5xl max-h-[90vh] bg-[#FAF7F2] rounded-3xl shadow-2xl border border-stone-200/90 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Modal Header */}
         <div className="px-6 py-4 bg-white border-b border-stone-200/90 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
@@ -125,7 +125,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
           </div>
         </div>
 
-        {/* Modal Body - Scrollable side-by-side comparison */}
+        {/* Modal Body - Scrollable side-by-side comparison with smooth overflow */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 items-stretch">
             {/* PANEL A */}
@@ -148,17 +148,21 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                   </button>
                 </div>
 
-                {/* Mannequin Preview Container: Head-to-toe */}
-                <div className="w-full h-[380px] sm:h-[420px] rounded-2xl overflow-hidden bg-[#FAF7F2] border border-stone-200 flex items-center justify-center">
-                  <MannequinViewer
-                    outfit={slotA.outfit}
-                    gender={slotA.gender}
-                    colorHex={colorA.hex}
-                    secondaryColorHex={slotA.secondaryColorHex}
-                    pattern={slotA.pattern}
-                    accessories={slotA.accessories}
-                    onSelectGender={(gender) => setSlotA({ ...slotA, gender })}
-                  />
+                {/* Mannequin Preview Container: Head-to-toe trọn vẹn (aspect-3/4, padding 16-24px, scale 0.8) */}
+                <div className="w-full aspect-[3/4] min-h-[400px] max-h-[520px] rounded-2xl overflow-hidden bg-gradient-to-b from-[#FAF6F0] via-[#F3ECE0] to-[#EAE1D1] border border-stone-200/90 flex items-center justify-center p-4 sm:p-6 relative shadow-inner">
+                  <div className="w-full h-full flex items-center justify-center">
+                    <MannequinViewer
+                      outfit={slotA.outfit}
+                      gender={slotA.gender}
+                      colorHex={colorA.hex}
+                      secondaryColorHex={slotA.secondaryColorHex}
+                      pattern={slotA.pattern}
+                      accessories={slotA.accessories}
+                      onSelectGender={(gender) => setSlotA({ ...slotA, gender })}
+                      className="w-full h-full !min-h-0 !border-0 !shadow-none !bg-transparent"
+                      scale={0.8}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -216,17 +220,21 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                   </button>
                 </div>
 
-                {/* Mannequin Preview Container: Head-to-toe */}
-                <div className="w-full h-[380px] sm:h-[420px] rounded-2xl overflow-hidden bg-[#FAF7F2] border border-stone-200 flex items-center justify-center">
-                  <MannequinViewer
-                    outfit={slotB.outfit}
-                    gender={slotB.gender}
-                    colorHex={colorB.hex}
-                    secondaryColorHex={slotB.secondaryColorHex}
-                    pattern={slotB.pattern}
-                    accessories={slotB.accessories}
-                    onSelectGender={(gender) => setSlotB({ ...slotB, gender })}
-                  />
+                {/* Mannequin Preview Container: Head-to-toe trọn vẹn (aspect-3/4, padding 16-24px, scale 0.8) */}
+                <div className="w-full aspect-[3/4] min-h-[400px] max-h-[520px] rounded-2xl overflow-hidden bg-gradient-to-b from-[#FAF6F0] via-[#F3ECE0] to-[#EAE1D1] border border-stone-200/90 flex items-center justify-center p-4 sm:p-6 relative shadow-inner">
+                  <div className="w-full h-full flex items-center justify-center">
+                    <MannequinViewer
+                      outfit={slotB.outfit}
+                      gender={slotB.gender}
+                      colorHex={colorB.hex}
+                      secondaryColorHex={slotB.secondaryColorHex}
+                      pattern={slotB.pattern}
+                      accessories={slotB.accessories}
+                      onSelectGender={(gender) => setSlotB({ ...slotB, gender })}
+                      className="w-full h-full !min-h-0 !border-0 !shadow-none !bg-transparent"
+                      scale={0.8}
+                    />
+                  </div>
                 </div>
               </div>
 

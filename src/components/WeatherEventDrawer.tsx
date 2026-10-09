@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { EVENT_PRESETS, WEATHER_PRESETS, EventOption, WeatherOption } from '../data/weatherEventData';
 import { OUTFITS, TRADITIONAL_COLORS } from '../data/vietphucData';
 import { OutfitId, PatternId } from '../types/vietphuc';
@@ -31,6 +32,18 @@ export const WeatherEventDrawer: React.FC<WeatherEventDrawerProps> = ({
     TRADITIONAL_COLORS.find((c) => c.id === selectedEvent.recommendedColorId) ||
     TRADITIONAL_COLORS[0];
 
+  // Close drawer on Escape key press
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   const handleApply = () => {
     onApplyPreset({
       outfit: selectedEvent.recommendedOutfit,
@@ -41,8 +54,6 @@ export const WeatherEventDrawer: React.FC<WeatherEventDrawerProps> = ({
     onClose();
   };
 
-  // Quick Pills configuration as requested:
-  // "Mùa hè / Mát mẻ", "Mùa thu - se lạnh", "Trời mưa", "Sự kiện: Kỷ yếu", "Dạo phố", "Lễ hội truyền thống"
   const QUICK_PILLS: Array<{
     id: QuickFilterCategory;
     label: string;
@@ -103,30 +114,43 @@ export const WeatherEventDrawer: React.FC<WeatherEventDrawerProps> = ({
     },
   ];
 
-  return (
-    <>
-      {/* Backdrop: click outside to close */}
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
+    <div
+      aria-hidden={!isOpen}
+      className={`fixed inset-0 pointer-events-none transition-all duration-300 ${
+        isOpen ? 'visible' : 'invisible'
+      }`}
+      style={{ zIndex: 99998 }}
+    >
+      {/* 1. Backdrop overlay: click to close */}
       <div
-        className={`fixed inset-0 z-40 bg-black/40 backdrop-blur-xs transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity duration-300 ${
           isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
-        onClick={onClose}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onClose();
+        }}
         aria-hidden="true"
       />
 
-      {/* Slide-over Drawer from Right edge */}
+      {/* 2. Slide-over Drawer from Right edge */}
       <aside
-        className={`fixed top-0 right-0 h-full w-full max-w-[460px] sm:max-w-[500px] z-50 bg-[#FAF7F2] border-l border-stone-200/90 shadow-2xl flex flex-col transform transition-transform duration-300 ease-in-out ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
+        style={{ zIndex: 99999 }}
+        className={`fixed top-0 right-0 h-full w-full max-w-[460px] sm:max-w-[500px] bg-[#FAF7F2] border-l border-stone-200/90 shadow-2xl flex flex-col transform transition-transform duration-300 ease-in-out ${
+          isOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full pointer-events-none'
         }`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="drawer-weather-title"
       >
-        {/* Drawer Header */}
-        <div className="px-5 py-4 bg-white border-b border-stone-200/90 flex items-center justify-between shrink-0">
+        {/* Drawer Header with guaranteed clickable X close button */}
+        <div className="relative z-50 px-5 py-4 bg-white border-b border-stone-200/90 flex items-center justify-between shrink-0 shadow-xs">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#1F4F89] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#1F4F89] flex items-center justify-center shrink-0">
               <Calendar className="w-5 h-5 text-[#1F4F89]" />
             </div>
             <div>
@@ -139,11 +163,18 @@ export const WeatherEventDrawer: React.FC<WeatherEventDrawerProps> = ({
             </div>
           </div>
 
+          {/* Close button with large hit area, high z-index, pointer events auto */}
           <button
-            onClick={onClose}
-            className="w-9 h-9 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 hover:text-stone-900 flex items-center justify-center transition-colors cursor-pointer"
-            title="Đóng (×)"
-            aria-label="Đóng thanh trượt"
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClose();
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            className="w-10 h-10 rounded-full bg-stone-100 hover:bg-stone-200 active:bg-stone-300 text-stone-600 hover:text-stone-900 flex items-center justify-center transition-all cursor-pointer pointer-events-auto shadow-xs active:scale-95 border border-stone-200"
+            title="Đóng bảng gợi ý (×)"
+            aria-label="Đóng bảng gợi ý thời tiết và dịp lễ"
           >
             <X className="w-5 h-5" />
           </button>
@@ -161,6 +192,7 @@ export const WeatherEventDrawer: React.FC<WeatherEventDrawerProps> = ({
               return (
                 <button
                   key={pill.id}
+                  type="button"
                   onClick={() => {
                     setActiveFilter(pill.id);
                     pill.onSelect();
@@ -196,6 +228,7 @@ export const WeatherEventDrawer: React.FC<WeatherEventDrawerProps> = ({
                 return (
                   <button
                     key={evt.id}
+                    type="button"
                     onClick={() => setSelectedEvent(evt)}
                     className={`w-full p-3 rounded-2xl text-left border transition-all cursor-pointer ${
                       isSelected
@@ -235,6 +268,7 @@ export const WeatherEventDrawer: React.FC<WeatherEventDrawerProps> = ({
                 return (
                   <button
                     key={w.id}
+                    type="button"
                     onClick={() => setSelectedWeather(w)}
                     className={`p-2.5 rounded-2xl text-left border transition-all cursor-pointer ${
                       isSelected
@@ -301,17 +335,30 @@ export const WeatherEventDrawer: React.FC<WeatherEventDrawerProps> = ({
           </div>
         </div>
 
-        {/* Drawer Footer Action */}
-        <div className="p-4 bg-white border-t border-stone-200/90 shrink-0">
+        {/* Drawer Footer Action with both Close and Apply buttons */}
+        <div className="p-4 bg-white border-t border-stone-200/90 shrink-0 flex items-center gap-2.5">
           <button
-            onClick={handleApply}
-            className="w-full py-3.5 px-4 rounded-2xl bg-[#C82A27] hover:bg-[#A8221F] hover:-translate-y-0.5 active:translate-y-0 active:scale-95 text-white font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer"
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClose();
+            }}
+            className="py-3 px-4 rounded-xl border border-stone-300 hover:border-stone-400 hover:bg-stone-100 text-stone-700 text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-xs active:scale-95"
           >
-            <span>Áp Dụng Bản Phối Này Vào Studio</span>
+            Đóng
+          </button>
+          <button
+            type="button"
+            onClick={handleApply}
+            className="flex-1 py-3 px-4 rounded-2xl bg-[#C82A27] hover:bg-[#A8221F] hover:-translate-y-0.5 active:translate-y-0 active:scale-95 text-white font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer"
+          >
+            <span>Áp Dụng Vào Studio</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </aside>
-    </>
+    </div>,
+    document.body
   );
 };

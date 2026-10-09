@@ -96,7 +96,7 @@ export const OutfitComparator: React.FC<OutfitComparatorProps> = ({
             </button>
           </div>
 
-          <div className="w-full min-h-[580px] sm:min-h-[620px] md:min-h-[640px] rounded-2xl overflow-hidden bg-white border border-stone-200 flex items-center justify-center">
+          <div className="w-full min-h-[540px] sm:min-h-[580px] rounded-2xl overflow-hidden bg-white border border-stone-200 flex items-center justify-center p-3">
             <MannequinViewer
               outfit={slotA.outfit}
               gender={slotA.gender}
@@ -105,6 +105,7 @@ export const OutfitComparator: React.FC<OutfitComparatorProps> = ({
               pattern={slotA.pattern}
               accessories={slotA.accessories}
               onSelectGender={(gender) => setSlotA({ ...slotA, gender })}
+              scale={0.82}
             />
           </div>
 
@@ -149,7 +150,7 @@ export const OutfitComparator: React.FC<OutfitComparatorProps> = ({
             </button>
           </div>
 
-          <div className="w-full min-h-[580px] sm:min-h-[620px] md:min-h-[640px] rounded-2xl overflow-hidden bg-white border border-stone-200 flex items-center justify-center">
+          <div className="w-full min-h-[540px] sm:min-h-[580px] rounded-2xl overflow-hidden bg-white border border-stone-200 flex items-center justify-center p-3">
             <MannequinViewer
               outfit={slotB.outfit}
               gender={slotB.gender}
@@ -158,6 +159,7 @@ export const OutfitComparator: React.FC<OutfitComparatorProps> = ({
               pattern={slotB.pattern}
               accessories={slotB.accessories}
               onSelectGender={(gender) => setSlotB({ ...slotB, gender })}
+              scale={0.82}
             />
           </div>
 
