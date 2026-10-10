@@ -14,7 +14,7 @@ export const PresetLookbook: React.FC<PresetLookbookProps> = ({ onSelectPreset, 
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-xl sm:text-2xl font-display font-bold text-stone-900">
-            Cảm Hứng Phối Đồ Sẵn Có (Curated Presets)
+            Cảm Hứng Phối Đồ Sẵn Có
           </h3>
           <p className="text-xs sm:text-sm text-stone-500 font-serif italic mt-0.5">
             Các công thức phối tiêu biểu được giới trẻ chuộng nhất trong các mùa lễ hội & photowalk

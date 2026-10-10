@@ -137,18 +137,20 @@ export const WeatherEventDrawer: React.FC<WeatherEventDrawerProps> = ({
         aria-hidden="true"
       />
 
-      {/* 2. Slide-over Drawer from Right edge */}
+      {/* 2. Slide-over Drawer: Cố định sát mép phải, toàn bộ chiều cao 100dvh */}
       <aside
         style={{ zIndex: 99999 }}
-        className={`fixed top-0 right-0 h-full w-full max-w-[460px] sm:max-w-[500px] bg-[#FAF7F2] border-l border-stone-200/90 shadow-2xl flex flex-col transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-[100dvh] h-screen w-full max-w-[480px] sm:max-w-[520px] bg-[#FAF7F2] border-l border-stone-200/90 shadow-2xl flex flex-col min-h-0 transform transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full pointer-events-none'
         }`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="drawer-weather-title"
       >
-        {/* Drawer Header with guaranteed clickable X close button */}
-        <div className="relative z-50 px-5 py-4 bg-white border-b border-stone-200/90 flex items-center justify-between shrink-0 shadow-xs">
+        {/* =========================================================================
+            KHU VỰC 1: HEADER (Cố định, luôn hiển thị, không bị cuộn khuất)
+            ========================================================================= */}
+        <header className="px-5 py-4 bg-white border-b border-stone-200/90 flex items-center justify-between shrink-0 shadow-xs z-10">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#1F4F89] flex items-center justify-center shrink-0">
               <Calendar className="w-5 h-5 text-[#1F4F89]" />
@@ -163,7 +165,7 @@ export const WeatherEventDrawer: React.FC<WeatherEventDrawerProps> = ({
             </div>
           </div>
 
-          {/* Close button with large hit area, high z-index, pointer events auto */}
+          {/* Nút đóng drawer */}
           <button
             type="button"
             onClick={(e) => {
@@ -172,48 +174,50 @@ export const WeatherEventDrawer: React.FC<WeatherEventDrawerProps> = ({
               onClose();
             }}
             onPointerDown={(e) => e.stopPropagation()}
-            className="w-10 h-10 rounded-full bg-stone-100 hover:bg-stone-200 active:bg-stone-300 text-stone-600 hover:text-stone-900 flex items-center justify-center transition-all cursor-pointer pointer-events-auto shadow-xs active:scale-95 border border-stone-200"
+            className="w-10 h-10 rounded-full bg-stone-100 hover:bg-stone-200 active:bg-stone-300 text-stone-600 hover:text-stone-900 flex items-center justify-center transition-all cursor-pointer pointer-events-auto shadow-xs active:scale-95 border border-stone-200 shrink-0"
             title="Đóng bảng gợi ý (×)"
             aria-label="Đóng bảng gợi ý thời tiết và dịp lễ"
           >
             <X className="w-5 h-5" />
           </button>
-        </div>
+        </header>
 
-        {/* Quick Filter Pills Bar */}
-        <div className="px-5 py-3 bg-stone-50 border-b border-stone-200/80 shrink-0">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-stone-600 mb-2">
-            <Filter className="w-3.5 h-3.5 text-[#8D1815]" />
-            <span>Thẻ Lọc Nhanh (Quick Pills):</span>
+        {/* =========================================================================
+            KHU VỰC 2: NỘI DUNG (Bộ lọc nhanh & danh sách gợi ý - Chiếm trọn không gian, cuộn dọc duy nhất)
+            ========================================================================= */}
+        <main className="flex-1 min-h-0 overflow-y-auto no-scrollbar p-4 sm:p-5 space-y-5 pb-8">
+          {/* Bộ lọc nhanh (Quick Filter Pills - Bố cục wrap gọn gàng, loại bỏ hoàn toàn thanh cuộn lồng) */}
+          <div className="bg-stone-50 rounded-2xl p-3.5 border border-stone-200/80 space-y-2">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-stone-700">
+              <Filter className="w-3.5 h-3.5 text-[#8D1815]" />
+              <span>Bộ Lọc Nhanh:</span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {QUICK_PILLS.map((pill) => {
+                const active = activeFilter === pill.id;
+                return (
+                  <button
+                    key={pill.id}
+                    type="button"
+                    onClick={() => {
+                      setActiveFilter(pill.id);
+                      pill.onSelect();
+                    }}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
+                      active
+                        ? 'bg-[#8D1815] text-white shadow-xs font-semibold'
+                        : 'bg-white text-stone-700 hover:bg-stone-100 border border-stone-200'
+                    }`}
+                  >
+                    {pill.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
-            {QUICK_PILLS.map((pill) => {
-              const active = activeFilter === pill.id;
-              return (
-                <button
-                  key={pill.id}
-                  type="button"
-                  onClick={() => {
-                    setActiveFilter(pill.id);
-                    pill.onSelect();
-                  }}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all cursor-pointer shrink-0 ${
-                    active
-                      ? 'bg-[#8D1815] text-white shadow-xs font-semibold'
-                      : 'bg-white text-stone-700 hover:bg-stone-100 border border-stone-200'
-                  }`}
-                >
-                  {pill.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
 
-        {/* Drawer Body - Scrollable content */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-6">
-          {/* Section 1: Chọn Sự Kiện */}
-          <div className="space-y-2.5">
+          {/* Section 1: Chọn Sự Kiện / Dịp */}
+          <section className="space-y-2.5">
             <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-stone-800">
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-[#C82A27]" />
@@ -230,30 +234,30 @@ export const WeatherEventDrawer: React.FC<WeatherEventDrawerProps> = ({
                     key={evt.id}
                     type="button"
                     onClick={() => setSelectedEvent(evt)}
-                    className={`w-full p-3 rounded-2xl text-left border transition-all cursor-pointer ${
+                    className={`w-full p-3.5 rounded-2xl text-left border transition-all cursor-pointer ${
                       isSelected
                         ? 'border-[#C82A27] bg-[#FFF5F4] text-[#8D1815] shadow-xs ring-1 ring-[#C82A27]/20'
                         : 'border-stone-200 bg-white hover:bg-stone-50 text-stone-800'
                     }`}
                   >
                     <div className="flex items-start gap-3">
-                      <span className="text-2xl pt-0.5">{evt.emoji}</span>
+                      <span className="text-2xl pt-0.5 shrink-0">{evt.emoji}</span>
                       <div className="min-w-0 flex-1">
                         <div className="text-xs sm:text-sm font-bold flex items-center justify-between">
                           <span className={isSelected ? 'text-[#8D1815]' : 'text-stone-900'}>{evt.name}</span>
                           {isSelected && <Check className="w-4 h-4 text-[#C82A27] shrink-0 ml-1" />}
                         </div>
-                        <div className="text-[11px] text-stone-500 mt-0.5 line-clamp-2">{evt.desc}</div>
+                        <div className="text-[11px] text-stone-500 mt-1 line-clamp-2 leading-relaxed">{evt.desc}</div>
                       </div>
                     </div>
                   </button>
                 );
               })}
             </div>
-          </div>
+          </section>
 
           {/* Section 2: Chọn Thời Tiết */}
-          <div className="space-y-2.5">
+          <section className="space-y-2.5">
             <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-stone-800">
               <span className="flex items-center gap-1.5">
                 <CloudSun className="w-3.5 h-3.5 text-[#1F4F89]" />
@@ -262,7 +266,7 @@ export const WeatherEventDrawer: React.FC<WeatherEventDrawerProps> = ({
               <span className="text-[11px] text-stone-500 lowercase font-normal">{WEATHER_PRESETS.length} thời tiết</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2.5">
               {WEATHER_PRESETS.map((w) => {
                 const isSelected = w.id === selectedWeather.id;
                 return (
@@ -270,28 +274,30 @@ export const WeatherEventDrawer: React.FC<WeatherEventDrawerProps> = ({
                     key={w.id}
                     type="button"
                     onClick={() => setSelectedWeather(w)}
-                    className={`p-2.5 rounded-2xl text-left border transition-all cursor-pointer ${
+                    className={`p-3 rounded-2xl text-left border transition-all cursor-pointer flex flex-col justify-between ${
                       isSelected
-                        ? 'border-[#1F4F89] bg-blue-50/70 text-[#12335A] font-semibold ring-1 ring-[#1F4F89]/20'
+                        ? 'border-[#1F4F89] bg-blue-50/70 text-[#12335A] font-semibold ring-1 ring-[#1F4F89]/20 shadow-xs'
                         : 'border-stone-200 bg-white hover:bg-stone-50 text-stone-700'
                     }`}
                   >
-                    <div className="flex items-center justify-between text-base">
-                      <span>{w.icon}</span>
-                      <span className="text-[10px] font-mono text-stone-500">{w.temp}</span>
+                    <div>
+                      <div className="flex items-center justify-between text-base">
+                        <span>{w.icon}</span>
+                        <span className="text-[10px] font-mono text-stone-500 bg-stone-100 px-1.5 py-0.5 rounded">{w.temp}</span>
+                      </div>
+                      <div className="text-xs font-bold mt-1.5 truncate">{w.name}</div>
                     </div>
-                    <div className="text-xs font-bold mt-1 truncate">{w.name}</div>
-                    <div className="text-[10px] text-stone-500 line-clamp-1 mt-0.5">{w.desc}</div>
+                    <div className="text-[10px] text-stone-500 line-clamp-1 mt-1">{w.desc}</div>
                   </button>
                 );
               })}
             </div>
-          </div>
+          </section>
 
-          {/* Section 3: Synthesis Card */}
-          <div className="bg-white rounded-2xl p-4 border border-stone-200/90 shadow-sm space-y-3">
+          {/* Section 3: Synthesis Card (Đề xuất tối ưu) */}
+          <section className="bg-white rounded-2xl p-4 border border-stone-200/90 shadow-xs space-y-3">
             <div className="flex items-center justify-between text-xs font-bold text-stone-800 border-b border-stone-100 pb-2">
-              <span className="flex items-center gap-1 text-[#8D1815]">
+              <span className="flex items-center gap-1.5 text-[#8D1815]">
                 <Sparkles className="w-3.5 h-3.5 text-[#C82A27]" />
                 Đề Xuất Phối Đồ Tối Ưu
               </span>
@@ -302,7 +308,7 @@ export const WeatherEventDrawer: React.FC<WeatherEventDrawerProps> = ({
 
             <div className="flex items-center gap-3">
               <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-sm shrink-0"
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-xs shrink-0"
                 style={{ backgroundColor: targetColor.hex }}
               >
                 <Shirt className="w-6 h-6 text-white" />
@@ -313,7 +319,7 @@ export const WeatherEventDrawer: React.FC<WeatherEventDrawerProps> = ({
                 </div>
                 <div className="text-xs text-stone-500 flex items-center gap-1.5 mt-0.5">
                   <span
-                    className="inline-block w-2.5 h-2.5 rounded-full"
+                    className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
                     style={{ backgroundColor: targetColor.hex }}
                   />
                   <span>Sắc {targetColor.name}</span>
@@ -332,11 +338,13 @@ export const WeatherEventDrawer: React.FC<WeatherEventDrawerProps> = ({
                 <span className="font-serif italic">{selectedEvent.vibeTip}</span>
               </div>
             </div>
-          </div>
-        </div>
+          </section>
+        </main>
 
-        {/* Drawer Footer Action with both Close and Apply buttons */}
-        <div className="p-4 bg-white border-t border-stone-200/90 shrink-0 flex items-center gap-2.5">
+        {/* =========================================================================
+            KHU VỰC 3: FOOTER (Cố định ở đáy, luôn nhìn thấy, không che khuất nội dung)
+            ========================================================================= */}
+        <footer className="p-4 sm:p-5 bg-white border-t border-stone-200/90 shrink-0 flex items-center gap-3 shadow-[0_-4px_16px_rgba(0,0,0,0.04)] z-10">
           <button
             type="button"
             onClick={(e) => {
@@ -344,19 +352,19 @@ export const WeatherEventDrawer: React.FC<WeatherEventDrawerProps> = ({
               e.stopPropagation();
               onClose();
             }}
-            className="py-3 px-4 rounded-xl border border-stone-300 hover:border-stone-400 hover:bg-stone-100 text-stone-700 text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-xs active:scale-95"
+            className="py-3 px-5 rounded-xl border border-stone-300 hover:border-stone-400 hover:bg-stone-100 active:bg-stone-200 text-stone-700 text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
           >
             Đóng
           </button>
           <button
             type="button"
             onClick={handleApply}
-            className="flex-1 py-3 px-4 rounded-2xl bg-[#C82A27] hover:bg-[#A8221F] hover:-translate-y-0.5 active:translate-y-0 active:scale-95 text-white font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer"
+            className="flex-1 py-3 px-4 rounded-xl bg-[#C82A27] hover:bg-[#A8221F] active:scale-[0.98] text-white font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg cursor-pointer"
           >
             <span>Áp Dụng Vào Studio</span>
             <ArrowRight className="w-4 h-4" />
           </button>
-        </div>
+        </footer>
       </aside>
     </div>,
     document.body

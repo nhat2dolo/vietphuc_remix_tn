@@ -122,11 +122,48 @@
   animation: tabSlideFadeIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Hide scrollbar for clean horizontal carousel */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+/* =========================================================================
+   ẨN HOÀN TOÀN THANH SCROLLBAR TRÊN TOÀN WEBSITE & CÁC CONTAINER
+   (Chrome, Safari, Edge, Firefox - Vẫn giữ 100% khả năng cuộn chuột, cảm ứng)
+   ========================================================================= */
+
+/* 1. Ẩn thanh scrollbar cho html và body (toàn bộ website) */
+html,
+body {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE, Edge */
 }
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari, Opera, Edge mới */
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* 2. Ẩn thanh scrollbar cho tất cả các phần tử có overflow */
+*,
+*::before,
+*::after {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE / Edge */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+  width: 0;
+  height: 0;
+}
+
+/* 3. Lớp tiện ích no-scrollbar chuyên dụng */
 .no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
 }
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+

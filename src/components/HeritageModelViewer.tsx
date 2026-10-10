@@ -77,7 +77,7 @@ export const HERITAGE_3D_CATALOG: Record<OutfitId, Heritage3DModelConfig> = {
     accentColor: '#1F4F89',
     badge: 'Phẩm Phục Hoàng Tộc',
     description: 'Chiếc áo Nhật Bình cung đình triều Nguyễn lộng lẫy với cổ áo thêu hoa văn ngũ sắc viền vàng kim, tà áo thùy lưu dài trang nhã biểu trưng cho sự quang minh chính đại.',
-    meshyPromptCitation: 'Meshy AI Gen-3: "Traditional Vietnamese Royal Nhat Binh Court Dress, Nguyen Dynasty Empress Robe, elaborate gold embroidery, silk textures, 8k PBR".',
+    meshyPromptCitation: '"Traditional Vietnamese Royal Nhat Binh Court Dress, Nguyen Dynasty Empress Robe, elaborate gold embroidery, silk textures, 8k PBR".',
   },
   nguthan: {
     id: 'nguthan',
@@ -89,7 +89,7 @@ export const HERITAGE_3D_CATALOG: Record<OutfitId, Heritage3DModelConfig> = {
     accentColor: '#D49B26',
     badge: 'Chuẩn Mực Sĩ Phu',
     description: 'Áo Ngũ Thân 5 thân đại diện tứ thân phụ mẫu và thân con, 5 khuy cài tượng trưng Ngũ Thường: Nhân, Lễ, Nghĩa, Trí, Tín.',
-    meshyPromptCitation: 'Meshy AI: "Traditional Vietnamese Ngu Than robe, upright lap linh collar, 5 buttons, authentic silk damask, museum quality".',
+    meshyPromptCitation: '"Traditional Vietnamese Ngu Than robe, upright lap linh collar, 5 buttons, authentic silk damask, museum quality".',
   },
   aodai: {
     id: 'aodai',
@@ -101,7 +101,7 @@ export const HERITAGE_3D_CATALOG: Record<OutfitId, Heritage3DModelConfig> = {
     accentColor: '#C92828',
     badge: 'Quốc Phục Đương Đại',
     description: 'Thiết kế tôn vinh vóc dáng thanh xuân Việt Nam, hai tà áo thướt tha kết hợp quần lụa trắng thanh lịch.',
-    meshyPromptCitation: 'Meshy AI: "Vietnamese Ao Dai flowing silk gown, crimson red silk, golden embroidery, modern 3D drape".',
+    meshyPromptCitation: '"Vietnamese Ao Dai flowing silk gown, crimson red silk, golden embroidery, modern 3D drape".',
   },
   giaolinh: {
     id: 'giaolinh',
@@ -113,7 +113,7 @@ export const HERITAGE_3D_CATALOG: Record<OutfitId, Heritage3DModelConfig> = {
     accentColor: '#7C3F24',
     badge: 'Cổ Phong Hoàng Kim',
     description: 'Vạt áo vắt chéo cổ kính thâm nghiêm thời Lý - Trần - Lê, biểu tượng của tri thức và phong thái đại nhân.',
-    meshyPromptCitation: 'Meshy AI: "Ancient Vietnamese Giao Linh cross-collar silk robe, Ly Tran dynasty scholar attire".',
+    meshyPromptCitation: '"Ancient Vietnamese Giao Linh cross-collar silk robe, Ly Tran dynasty scholar attire".',
   },
   tuthan: {
     id: 'tuthan',
@@ -125,7 +125,7 @@ export const HERITAGE_3D_CATALOG: Record<OutfitId, Heritage3DModelConfig> = {
     accentColor: '#4A2338',
     badge: 'Hồn Nhiên Dân Gian',
     description: 'Bốn vạt áo buông lơi hoặc buộc thắt tao nhã, hòa cùng sắc yếm đào thắm và khăn mỏ quạ đậm nét dân ca.',
-    meshyPromptCitation: 'Meshy AI: "Traditional Vietnamese Tu Than four-panel folk dress with pink yem halter top and silk skirt".',
+    meshyPromptCitation: '"Traditional Vietnamese Tu Than four-panel folk dress with pink yem halter top and silk skirt".',
   },
   baba: {
     id: 'baba',
@@ -137,7 +137,7 @@ export const HERITAGE_3D_CATALOG: Record<OutfitId, Heritage3DModelConfig> = {
     accentColor: '#2E5A44',
     badge: 'Phóng Khoáng Miệt Vườn',
     description: 'Thiết kế giản dị, xẻ tà hai bên hông tạo sự phóng khoáng, thoải mái đậm chất phù sa châu thổ Cửu Long.',
-    meshyPromptCitation: 'Meshy AI: "Vietnamese Ba Ba southern blouse, comfortable linen cotton, emerald green, authentic peasant aesthetic".',
+    meshyPromptCitation: '"Vietnamese Ba Ba southern blouse, comfortable linen cotton, emerald green, authentic peasant aesthetic".',
   },
 };
 
@@ -265,10 +265,10 @@ export const HeritageModelViewer: React.FC<HeritageModelViewerProps> = ({
             type="button"
             onClick={() => setShowCitation(!showCitation)}
             className="px-2.5 py-1.5 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-300 text-xs font-semibold border border-stone-700 flex items-center gap-1.5 transition-all cursor-pointer"
-            title="Xem thông tin tái tạo từ Meshy AI"
+            title="Xem thông tin tái tạo"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span className="hidden sm:inline">Meshy 3D AI</span>
+            <span className="hidden sm:inline">3D</span>
           </button>
 
           {/* Nút Phóng to / Toàn màn hình */}
@@ -420,7 +420,7 @@ export const HeritageModelViewer: React.FC<HeritageModelViewerProps> = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-amber-300 text-xs font-bold uppercase tracking-wider">
                 <Sparkles className="w-4 h-4 text-amber-400" />
-                <span>Quy trình tái tạo 3D bằng Meshy AI (Text-to-3D)</span>
+                <span>Quy trình tái tạo 3D</span>
               </div>
               <button
                 onClick={() => setShowCitation(false)}

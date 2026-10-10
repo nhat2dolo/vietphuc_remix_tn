@@ -413,7 +413,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               className="w-full sm:w-auto px-7 py-4 rounded-full bg-amber-500/20 hover:bg-amber-500/35 text-amber-200 font-bold text-sm sm:text-base backdrop-blur-md border border-amber-400/50 shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer group"
             >
               <Rotate3D className="w-5 h-5 text-amber-300 animate-spin" style={{ animationDuration: '8s' }} />
-              <span>Mô Hình 3D (.GLB)</span>
+              <span>Mô Hình 3D</span>
             </button>
           </div>
         </div>
@@ -432,7 +432,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               6 Kiểu Dáng Cổ Phục Tiêu Biểu
             </h2>
             <p className="text-xs sm:text-sm text-stone-600 font-serif italic">
-              Khám phá di sản trăm năm qua tủ kính bảo tàng hoàng gia hoặc mô hình 3D Meshy AI
+              Khám phá di sản trăm năm qua tủ kính bảo tàng hoàng gia hoặc mô hình 3D 
             </p>
           </div>
 
@@ -461,7 +461,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 }`}
               >
                 <Rotate3D className="w-3.5 h-3.5 text-amber-300" />
-                <span>3D Meshy AI</span>
+                <span>Mô hình 3D</span>
               </button>
             </div>
 

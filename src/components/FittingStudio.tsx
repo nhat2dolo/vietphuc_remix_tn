@@ -853,7 +853,7 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({
                     1
                   </span>
                   <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-stone-900 truncate">
-                    Trang Phục (Outfit)
+                    Trang Phục
                   </span>
 
                   {/* Collapsed summary pill */}
@@ -899,21 +899,8 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({
                         }`}
                       >
                         <div>
-                          {/* Mini visual icon & Checkmark */}
-                          <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-base sm:text-lg">
-                              {item.id === 'aodai'
-                                ? '👘'
-                                : item.id === 'nguthan'
-                                ? '🥻'
-                                : item.id === 'nhatbinh'
-                                ? '👑'
-                                : item.id === 'tuthan'
-                                ? '🌾'
-                                : item.id === 'baba'
-                                ? '🛶'
-                                : '📜'}
-                            </span>
+                          {/* Selection Checkmark */}
+                          <div className="flex items-center justify-end h-4 mb-1">
                             {isSelected && (
                               <span className="w-4 h-4 rounded-full bg-[#b84a14] text-white flex items-center justify-center shrink-0">
                                 <Check className="w-3 h-3 stroke-[3]" />
@@ -960,7 +947,7 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({
                     2
                   </span>
                   <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-stone-900 truncate">
-                    Màu Sắc (Colors)
+                    Màu Sắc
                   </span>
 
                   {/* Collapsed summary pill */}
@@ -1084,7 +1071,7 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({
                   <div className="flex items-center justify-between text-[11px] font-bold text-stone-700 uppercase tracking-wider">
                     <span className="flex items-center gap-1.5">
                       <Palette className="w-3.5 h-3.5 text-[#b84a14]" />
-                      <span>2. Tùy Chỉnh Màu Tự Do (Color Picker)</span>
+                      <span>2. Tùy Chỉnh Màu Tự Do</span>
                     </span>
 
                     {/* Native color picker launcher */}
@@ -1102,7 +1089,7 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({
                   {/* Thanh trượt Hue (Dải màu 0 - 360) */}
                   <div className="space-y-1">
                     <div className="flex items-center justify-between text-[10px] text-stone-500 font-medium">
-                      <span>Dải màu (Hue):</span>
+                      <span>Dải màu:</span>
                       <span className="font-mono">{hueValue}°</span>
                     </div>
                     <input
@@ -1122,7 +1109,7 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({
                   {/* Thanh trượt Độ sáng / Đậm nhạt (Lightness 15% - 85%) */}
                   <div className="space-y-1">
                     <div className="flex items-center justify-between text-[10px] text-stone-500 font-medium">
-                      <span>Độ đậm / sáng (Lightness):</span>
+                      <span>Độ đậm / sáng:</span>
                       <span className="font-mono">{lightnessValue}%</span>
                     </div>
                     <input
@@ -1485,7 +1472,7 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({
                   </span>
                   <div>
                     <h4 className="text-xs sm:text-sm font-bold text-stone-900 font-sans uppercase tracking-wide">
-                      ĐÁNH GIÁ & CHẤM ĐIỂM (AI SCORE)
+                      ĐÁNH GIÁ & CHẤM ĐIỂM
                     </h4>
                     <span className="text-[11px] text-stone-500 font-serif italic">
                       Chấm điểm thẩm mỹ & chuẩn mực văn hóa
@@ -1674,7 +1661,7 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({
                 ★
               </span>
               <h3 className="text-base sm:text-lg font-bold text-stone-900 font-display">
-                Bộ Sưu Tập Cảm Hứng Phối Đồ (Lookbook Presets)
+                Bộ Sưu Tập Cảm Hứng Phối Đồ
               </h3>
             </div>
             <p className="text-xs text-stone-500 font-serif italic mt-0.5">
