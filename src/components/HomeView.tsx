@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { HeroVisualBackground } from './HeroVisualBackground';
 import { GarmentKnowledgeModal } from './GarmentKnowledgeModal';
-import { ThanhTreoCoPhuc } from './ThanhTreoCoPhuc';
 import { HeritageModelViewer } from './HeritageModelViewer';
 import { OutfitId, OutfitData } from '../types/vietphuc';
 import { OUTFITS } from '../data/vietphucData';
 import {
   Sparkles,
+  ChevronLeft,
   ChevronRight,
   Info,
   ArrowRight,
@@ -17,26 +17,40 @@ import {
   Rotate3D,
 } from 'lucide-react';
 
-// Component hiển thị hình ảnh trang phục với fallback SVG
+// Component hiển thị hình ảnh thật từ Assets với fallback thông minh
 const CardGarmentArtwork: React.FC<{
   image?: string;
   fallbackSvg: React.ReactNode;
   alt: string;
 }> = ({ image, fallbackSvg, alt }) => {
   const [imageError, setImageError] = useState(false);
+  const [currentSrc, setCurrentSrc] = useState(image);
 
-  if (image && !imageError) {
+  const handleError = () => {
+    if (currentSrc && currentSrc.startsWith('/assets/')) {
+      setCurrentSrc(currentSrc.replace('/assets/', '/'));
+    } else {
+      setImageError(true);
+    }
+  };
+
+  if (currentSrc && !imageError) {
     return (
       <img
-        src={image}
+        src={currentSrc}
         alt={alt}
-        onError={() => setImageError(true)}
-        className="max-h-full max-w-full object-contain filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.85)]"
+        onError={handleError}
+        className="w-full h-full object-contain filter drop-shadow-[0_16px_28px_rgba(0,0,0,0.85)] group-hover:scale-108 group-hover:-translate-y-2.5 transition-all duration-500 ease-out select-none pointer-events-none"
+        loading="lazy"
       />
     );
   }
 
-  return <div className="w-full h-full flex items-center justify-center filter drop-shadow-xl">{fallbackSvg}</div>;
+  return (
+    <div className="w-full h-full flex items-center justify-center filter drop-shadow-xl transition-transform duration-500 group-hover:scale-105">
+      {fallbackSvg}
+    </div>
+  );
 };
 
 interface HomeViewProps {
@@ -51,26 +65,16 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onNavigateTab,
 }) => {
   const [selectedKnowledgeOutfit, setSelectedKnowledgeOutfit] = useState<OutfitData | null>(null);
-  const [galleryViewMode, setGalleryViewMode] = useState<'rack' | 'cards' | '3d'>(() => {
-    if (typeof window !== 'undefined') {
-      return window.innerWidth >= 768 ? 'rack' : 'cards';
-    }
-    return 'rack';
-  });
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 768 && galleryViewMode === 'rack') {
-        setGalleryViewMode('cards');
-      } else if (window.innerWidth >= 768 && galleryViewMode === 'cards') {
-        setGalleryViewMode('rack');
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [galleryViewMode]);
+  const [galleryViewMode, setGalleryViewMode] = useState<'cards' | '3d'>('cards');
 
   const [active3DModalOutfitId, setActive3DModalOutfitId] = useState<OutfitId | null>(null);
+  const [manualOffset, setManualOffset] = useState(0);
+  const [isMarqueePaused, setIsMarqueePaused] = useState(false);
+
+  const scrollCarousel = (direction: 'left' | 'right') => {
+    const step = 344;
+    setManualOffset((prev) => (direction === 'left' ? prev + step : prev - step));
+  };
 
   const scrollToGarments = () => {
     const el = document.getElementById('heritage-carousel-section');
@@ -285,9 +289,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
           <div className="absolute bottom-2.5 left-2.5 w-3.5 h-3.5 border-b-2 border-l-2 border-amber-500/60 pointer-events-none" />
           <div className="absolute bottom-2.5 right-2.5 w-3.5 h-3.5 border-b-2 border-r-2 border-amber-500/60 pointer-events-none" />
 
-          {/* 3. TÁC PHẨM CỔ PHỤC (GARMENT PREVIEW) */}
-          <div className="w-44 h-56 transition-transform duration-500 group-hover/card:scale-108 group-hover/glass:scale-108 drop-shadow-[0_12px_24px_rgba(0,0,0,0.85)] z-10 flex items-center justify-center">
-            {card.svgPreview}
+          {/* 3. TÁC PHẨM CỔ PHỤC: ƯU TIÊN ẢNH THẬT 2D TỪ ASSETS THAY THẾ VECTOR */}
+          <div className="w-48 sm:w-52 h-60 sm:h-64 transition-transform duration-500 group-hover/card:scale-108 group-hover/glass:scale-108 z-10 flex items-center justify-center p-1">
+            <CardGarmentArtwork
+              image={card.image}
+              fallbackSvg={card.svgPreview}
+              alt={outfitInfo.name}
+            />
           </div>
 
           {/* 4. HUY HIỆU TRIỀU ĐẠI / THỜI KỲ (ERA BADGE) */}
@@ -424,25 +432,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
               6 Kiểu Dáng Cổ Phục Tiêu Biểu
             </h2>
             <p className="text-xs sm:text-sm text-stone-600 font-serif italic">
-              Khám phá di sản trăm năm qua giá treo đồ 3D tương tác hoặc duyệt thẻ khảo cứu
+              Khám phá di sản trăm năm qua tủ kính bảo tàng hoàng gia hoặc mô hình 3D Meshy AI
             </p>
           </div>
 
-          {/* View Mode Toggle: Giá Treo 3D vs Thẻ Lưới */}
-          <div className="flex items-center gap-2 self-start sm:self-auto">
+          {/* View Mode Toggle: Thẻ Cuộn Tủ Kính vs 3D Meshy AI & Cụm Nút Điều Hướng Trái/Phải */}
+          <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
             <div className="flex items-center p-1 rounded-full bg-stone-200/80 border border-stone-300/80 shadow-xs">
-              <button
-                type="button"
-                onClick={() => setGalleryViewMode('rack')}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
-                  galleryViewMode === 'rack'
-                    ? 'bg-[#8D1815] text-white shadow-sm'
-                    : 'text-stone-700 hover:text-stone-900'
-                }`}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                <span>Giá Treo 3D</span>
-              </button>
               <button
                 type="button"
                 onClick={() => setGalleryViewMode('cards')}
@@ -452,7 +448,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     : 'text-stone-700 hover:text-stone-900'
                 }`}
               >
-                <span>Thẻ Cuộn</span>
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                <span>Thẻ Cuộn Tủ Kính</span>
               </button>
               <button
                 type="button"
@@ -467,26 +464,43 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 <span>3D Meshy AI</span>
               </button>
             </div>
+
+            {/* Cụm điều hướng Trái / Phải & Tạm dừng */}
+            {galleryViewMode === 'cards' && (
+              <div className="flex items-center gap-1 p-1 rounded-full bg-stone-200/80 border border-stone-300/80 shadow-xs">
+                <button
+                  type="button"
+                  onClick={() => setIsMarqueePaused((prev) => !prev)}
+                  className="px-2.5 py-1 rounded-full text-xs font-semibold text-stone-700 hover:text-stone-900 hover:bg-stone-100 transition-colors cursor-pointer flex items-center gap-1"
+                  title={isMarqueePaused ? 'Bật trôi tự động' : 'Tạm dừng trôi'}
+                >
+                  <span>{isMarqueePaused ? '▶ Trôi' : '⏸ Dừng'}</span>
+                </button>
+                <div className="h-4 w-px bg-stone-300 mx-0.5" />
+                <button
+                  type="button"
+                  onClick={() => scrollCarousel('left')}
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-900 hover:bg-white transition-all shadow-xs cursor-pointer active:scale-95"
+                  title="Cuộn thẻ sang trái"
+                  aria-label="Cuộn thẻ sang trái"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollCarousel('right')}
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-900 hover:bg-white transition-all shadow-xs cursor-pointer active:scale-95"
+                  title="Cuộn thẻ sang phải"
+                  aria-label="Cuộn thẻ sang phải"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* 1. GIÁ TREO ĐỒ 3D TƯƠNG TÁC (THANH TREO CỔ PHỤC) */}
-        {galleryViewMode === 'rack' && (
-          <ThanhTreoCoPhuc
-            onSelectOutfit={(outfit) => {
-              if (outfit.studioOutfitId) {
-                onSelectOutfit(outfit.studioOutfitId);
-              }
-            }}
-            onExploreKnowledge={(outfit) => {
-              if (outfit.studioOutfitId && OUTFITS[outfit.studioOutfitId]) {
-                setSelectedKnowledgeOutfit(OUTFITS[outfit.studioOutfitId]);
-              }
-            }}
-          />
-        )}
-
-        {/* 2. CHẾ ĐỘ THẺ CUỘN VÒNG LẶP VÔ TẬN THUẦN GPU (PURE CSS INFINITE LOOP - KHÔNG KHỰNG) */}
+        {/* CHẾ ĐỘ THẺ CUỘN VÒNG LẶP VÔ TẬN THUẦN GPU (PURE CSS INFINITE LOOP - KHÔNG KHỰNG) */}
         {galleryViewMode === 'cards' && (
           <>
             {/* Nhúng Style Keyframe GPU thuần CSS: dịch chuyển mượt mà không bao giờ giật/khựng */}
@@ -514,16 +528,48 @@ export const HomeView: React.FC<HomeViewProps> = ({
               <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-r from-[#FAF8F5] via-[#FAF8F5]/80 to-transparent z-20 pointer-events-none" />
               <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-l from-[#FAF8F5] via-[#FAF8F5]/80 to-transparent z-20 pointer-events-none" />
 
-              {/* Dải trượt chính áp dụng GPU animation */}
-              <div className="flex w-max animate-heritage-loop">
-                {/* Cụm 1 */}
-                <div className="flex gap-6 pr-6 shrink-0">
-                  {GARMENT_CARDS.map((card) => renderGarmentCard(card, 'set1'))}
-                </div>
+              {/* Nút điều hướng nổi Trái / Phải tiện lợi */}
+              <button
+                type="button"
+                onClick={() => scrollCarousel('left')}
+                className="absolute left-3 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-stone-900/80 hover:bg-stone-950 text-white backdrop-blur-md border border-amber-400/50 shadow-xl flex items-center justify-center opacity-0 group-hover/loop:opacity-100 transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer"
+                title="Cuộn thẻ sang trái"
+                aria-label="Cuộn thẻ sang trái"
+              >
+                <ChevronLeft className="w-5 h-5 text-amber-300" />
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollCarousel('right')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-stone-900/80 hover:bg-stone-950 text-white backdrop-blur-md border border-amber-400/50 shadow-xl flex items-center justify-center opacity-0 group-hover/loop:opacity-100 transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer"
+                title="Cuộn thẻ sang phải"
+                aria-label="Cuộn thẻ sang phải"
+              >
+                <ChevronRight className="w-5 h-5 text-amber-300" />
+              </button>
 
-                {/* Cụm 2 (Nhân bản liền mạch chu kỳ vô tận) */}
-                <div className="flex gap-6 pr-6 shrink-0" aria-hidden="true">
-                  {GARMENT_CARDS.map((card) => renderGarmentCard(card, 'set2'))}
+              {/* Dải trượt chính áp dụng GPU animation & dịch chuyển thủ công */}
+              <div
+                style={{
+                  transform: `translate3d(${manualOffset}px, 0, 0)`,
+                  transition: 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
+                }}
+              >
+                <div
+                  className={`flex w-max ${isMarqueePaused ? '' : 'animate-heritage-loop'}`}
+                  style={{
+                    animationPlayState: isMarqueePaused ? 'paused' : undefined,
+                  }}
+                >
+                  {/* Cụm 1 */}
+                  <div className="flex gap-6 pr-6 shrink-0">
+                    {GARMENT_CARDS.map((card) => renderGarmentCard(card, 'set1'))}
+                  </div>
+
+                  {/* Cụm 2 (Nhân bản liền mạch chu kỳ vô tận) */}
+                  <div className="flex gap-6 pr-6 shrink-0" aria-hidden="true">
+                    {GARMENT_CARDS.map((card) => renderGarmentCard(card, 'set2'))}
+                  </div>
                 </div>
               </div>
             </div>

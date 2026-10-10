@@ -29,7 +29,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }}
             className="text-lg sm:text-xl font-display font-bold text-[#8D1815] tracking-tight whitespace-nowrap transition-all duration-200 hover:scale-[1.02] hover:text-[#C82A27] active:scale-95"
           >
-            Việt phục Remix
+            Việt Phục Remix
           </a>
 
           {/* Zone 2: Navigation links */}

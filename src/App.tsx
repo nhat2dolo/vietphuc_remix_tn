@@ -85,8 +85,36 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#24211E] flex flex-col font-sans selection:bg-[#C82A27]/20 selection:text-[#8D1815]">
-      {/* 1. TOP BAR (FLOATING CAPSULE NAVBAR TRÊN DESKTOP & DƯỚI MOBILE) */}
+    <div className="min-h-screen bg-[#FAF7F2] text-[#24211E] flex flex-col font-sans selection:bg-[#C82A27]/20 selection:text-[#8D1815] relative overflow-x-hidden">
+      {/* NỀN HỌA TIẾT DI SẢN TOÀN TRANG (GLOBAL HERITAGE BROCADE & DONG SON MOTIF) */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none">
+        {/* 1. Lớp hoa văn gấm Kỷ Hà Chữ Vạn lặp liền mạch toàn màn hình */}
+        <div
+          className="absolute inset-0 opacity-[0.032]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0 L60 30 L30 60 L0 30 Z M30 10 L50 30 L30 50 L10 30 Z M0 0 L15 0 L0 15 Z M60 0 L45 0 L60 15 Z M60 60 L45 60 L60 45 Z M0 60 L15 60 L0 45 Z' fill='none' stroke='%238D1815' stroke-width='1.2'/%3E%3Ccircle cx='30' cy='30' r='4' fill='none' stroke='%238D1815' stroke-width='1'/%3E%3C/svg%3E")`,
+            backgroundRepeat: 'repeat',
+            backgroundSize: '60px 60px',
+          }}
+        />
+
+        {/* 2. Thủy ấn Trống Đồng Đông Sơn & Họa tiết chim Lạc mờ ảo ở trung tâm */}
+        <div
+          className="absolute inset-0 bg-center bg-no-repeat bg-contain transition-opacity duration-1000 opacity-[0.035]"
+          style={{
+            backgroundImage: "url('/assets/background.jpeg'), url('/background.jpeg')",
+            filter: 'sepia(0.5) contrast(1.1)',
+          }}
+        />
+
+        {/* 3. Vầng sáng hoàng kim nhẹ nhàng góc màn hình tạo chiều sâu cung đình */}
+        <div className="absolute -top-32 -right-32 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-amber-600/5 rounded-full blur-3xl pointer-events-none" />
+      </div>
+
+      {/* LỚP NỘI DUNG CHÍNH (Z-INDEX NỔI TRÊN NỀN DI SẢN) */}
+      <div className="relative z-10 flex flex-col min-h-screen">
+        {/* 1. TOP BAR (FLOATING CAPSULE NAVBAR TRÊN DESKTOP & DƯỚI MOBILE) */}
       <div className="sticky top-0 z-40 w-full pt-2 sm:pt-3 pointer-events-none">
         <Navbar
           activeTab={activeTab}
@@ -279,15 +307,16 @@ export default function App() {
         </div>
       </footer>
 
-      {/* 4. TRỢ LÝ AI TOÀN CỤC ĐA NGỮ CẢNH (GLOBAL CONTEXT-AWARE ASSISTANT DRAWER) */}
-      <GlobalAiAssistant
-        activeTab={activeTab}
-        currentOutfitId={targetOutfit}
-        onNavigate={(tab) => {
-          setActiveTab(tab);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-      />
+        {/* 4. TRỢ LÝ AI TOÀN CỤC ĐA NGỮ CẢNH (GLOBAL CONTEXT-AWARE ASSISTANT DRAWER) */}
+        <GlobalAiAssistant
+          activeTab={activeTab}
+          currentOutfitId={targetOutfit}
+          onNavigate={(tab) => {
+            setActiveTab(tab);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+        />
+      </div>
     </div>
   );
 }

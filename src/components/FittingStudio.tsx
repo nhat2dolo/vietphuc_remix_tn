@@ -680,17 +680,21 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsNightStudio(!isNightStudio)}
-                  className="p-1.5 px-2.5 rounded-xl text-stone-600 hover:bg-stone-100 hover:shadow-xs active:scale-95 transition-all border border-stone-200/80 cursor-pointer flex items-center gap-1 text-xs font-medium"
-                  title="Chuyển ánh sáng ngày / đêm"
-                  aria-label="Chuyển ánh sáng ngày / đêm"
+                  className={`p-1.5 px-3 rounded-xl transition-all border cursor-pointer flex items-center gap-1.5 text-xs font-semibold shadow-xs active:scale-95 ${
+                    isNightStudio
+                      ? 'bg-amber-950/80 border-amber-500/50 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.25)] hover:bg-amber-900'
+                      : 'bg-white border-stone-200/90 text-stone-700 hover:bg-stone-100 hover:text-stone-900'
+                  }`}
+                  title="Chuyển chế độ ánh sáng studio Ngày / Đêm"
+                  aria-label="Chuyển chế độ ánh sáng studio Ngày / Đêm"
                 >
                   {isNightStudio ? (
-                    <Sun className="w-3.5 h-3.5 text-amber-500" />
+                    <Sun className="w-4 h-4 text-amber-400 animate-pulse" />
                   ) : (
-                    <Moon className="w-3.5 h-3.5 text-stone-600" />
+                    <Moon className="w-4 h-4 text-stone-600" />
                   )}
                   <span className="text-[11px]">
-                    {isNightStudio ? 'Ngày' : 'Đêm'}
+                    {isNightStudio ? 'Ánh Sáng Đêm' : 'Ánh Sáng Ngày'}
                   </span>
                 </button>
 
@@ -717,7 +721,7 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({
                 accessories={accessories}
                 isNightStudio={isNightStudio}
                 onSelectGender={handleSetGender}
-                className="relative w-full h-[470px] sm:h-[520px] lg:h-[540px] xl:h-[560px] flex items-center justify-center rounded-2xl overflow-hidden transition-colors duration-500 border border-stone-200/80 shadow-inner"
+                className="w-full h-[470px] sm:h-[520px] lg:h-[540px] xl:h-[560px]"
               />
             </div>
 

@@ -39,17 +39,41 @@ export const MannequinViewer: React.FC<MannequinViewerProps> = ({
 
   return (
     <div
-      className={
-        className
-          ? `relative flex items-center justify-center overflow-hidden transition-colors duration-500 ${className}`
-          : `relative w-full h-[540px] sm:h-[600px] flex items-center justify-center rounded-2xl overflow-hidden transition-colors duration-500 border border-stone-200/80 shadow-inner ${
-              isNightStudio
-                ? 'bg-gradient-to-b from-[#181a20] via-[#20222a] to-[#121318]'
-                : 'bg-gradient-to-b from-[#FAF6F0] via-[#F3ECE0] to-[#EAE1D1]'
-            }`
-      }
+      className={`relative w-full h-[540px] sm:h-[600px] flex items-center justify-center rounded-2xl overflow-hidden transition-all duration-500 border shadow-inner ${
+        isNightStudio
+          ? 'bg-gradient-to-b from-[#0B0E14] via-[#141A24] to-[#080B10] border-amber-900/40 shadow-2xl'
+          : 'bg-gradient-to-b from-[#FAF6F0] via-[#F3ECE0] to-[#EAE1D1] border-stone-200/80 shadow-inner'
+      } ${className || ''}`}
     >
-      {/* UI Tags duy nhất: Nữ Giới / Nam Giới ở góc trên bên trái khung Canvas */}
+      {/* Hiệu ứng Ánh sáng Studio Theo Thời Gian (Day / Night Studio Lighting) */}
+      {isNightStudio ? (
+        <>
+          {/* Đèn rọi trần studio vàng ấm (Top Spotlight) */}
+          <div className="absolute inset-x-0 top-0 h-44 bg-[radial-gradient(ellipse_at_top,_rgba(251,191,36,0.3)_0%,_rgba(217,119,6,0.1)_50%,_transparent_80%)] pointer-events-none" />
+          {/* Vầng sáng vàng viền xung quanh phòng thử đồ (Perimeter Rim Glow) */}
+          <div className="absolute inset-0 shadow-[inset_0_0_60px_rgba(245,158,11,0.18)] pointer-events-none" />
+          {/* Hào quang vàng hoàng gia trung tâm sau lưng ma-nơ-canh */}
+          <div className="absolute w-64 h-80 rounded-full bg-gradient-to-b from-amber-500/20 via-yellow-600/10 to-transparent blur-3xl pointer-events-none" />
+        </>
+      ) : (
+        <>
+          {/* Ánh sáng ban ngày tự nhiên trong trẻo */}
+          <div className="absolute inset-x-0 top-0 h-36 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.7)_0%,_transparent_70%)] pointer-events-none" />
+        </>
+      )}
+
+      {/* NỀN HỌA TIẾT DI SẢN TRỐNG ĐỒNG ĐÔNG SƠN & BẢN ĐỒ VIỆT NAM (TỪ BACKGROUND.JPEG) */}
+      <div
+        className="absolute inset-0 pointer-events-none bg-center bg-no-repeat bg-contain transition-all duration-700 select-none"
+        style={{
+          backgroundImage: "url('/assets/background.jpeg'), url('/background.jpeg')",
+          opacity: isNightStudio ? 0.22 : 0.16,
+          filter: isNightStudio
+            ? 'invert(0.9) sepia(1) hue-rotate(340deg) saturate(2.5) contrast(1.1)'
+            : 'sepia(0.3) saturate(1.2) contrast(1.05)',
+        }}
+      />
+
       <div className="absolute top-3.5 left-3.5 z-20 flex items-center gap-1.5 p-1 rounded-xl bg-white/95 backdrop-blur-md border border-stone-200/90 shadow-sm">
         <button
           type="button"
@@ -74,6 +98,7 @@ export const MannequinViewer: React.FC<MannequinViewerProps> = ({
           Nam Giới
         </button>
       </div>
+
       {/* Subtle Studio Backdrop Elements */}
       <div className="absolute inset-0 pointer-events-none opacity-20">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -84,13 +109,13 @@ export const MannequinViewer: React.FC<MannequinViewerProps> = ({
             </radialGradient>
           </defs>
           <rect width="100%" height="100%" fill="url(#studioGlow)" />
-          <circle cx="50%" cy="50%" r="160" stroke="#8D1815" strokeWidth="0.5" fill="none" opacity="0.3" strokeDasharray="4 4" />
-          <circle cx="50%" cy="50%" r="220" stroke="#8D1815" strokeWidth="0.5" fill="none" opacity="0.2" />
+          <circle cx="50%" cy="50%" r="160" stroke={isNightStudio ? "#FBBF24" : "#8D1815"} strokeWidth="0.5" fill="none" opacity="0.3" strokeDasharray="4 4" />
+          <circle cx="50%" cy="50%" r="220" stroke={isNightStudio ? "#FBBF24" : "#8D1815"} strokeWidth="0.5" fill="none" opacity="0.2" />
         </svg>
       </div>
 
       {/* Ground Soft Ambient Shadow */}
-      <div className="absolute bottom-4 w-52 h-5 bg-stone-900/12 blur-md rounded-full pointer-events-none" />
+      <div className={`absolute bottom-4 w-52 h-5 blur-md rounded-full pointer-events-none ${isNightStudio ? 'bg-amber-400/10' : 'bg-stone-900/12'}`} />
 
       {/* High-Fidelity SVG Canvas for Vietnamese Attire - Scaled and Centered Head-to-Toe */}
       <svg
@@ -432,55 +457,121 @@ export const MannequinViewer: React.FC<MannequinViewerProps> = ({
           {/* A. ÁO DÀI */}
           {outfit === 'aodai' && (
             <g id="garment-aodai">
-              {/* Natural Sleeves */}
-              <path
-                d="M130 144 C116 170 96 200 80 230 L102 240 C114 210 128 185 138 180 Z"
-                fill={colorHex}
-              />
-              <path
-                d="M210 144 C224 170 244 200 260 230 L238 240 C226 210 212 185 202 180 Z"
-                fill={colorHex}
-              />
-              {/* Circular Peach-Pink Hands */}
-              <circle cx="90" cy="235" r="9.5" fill="#FBD8B8" />
-              <circle cx="250" cy="235" r="9.5" fill="#FBD8B8" />
+              {isMale ? (
+                /* FORM ÁO DÀI NAM GIỚI: VAI RỘNG VUÔNG VẮN, DÁNG SUÔNG CHUẨN MỰC DI SẢN, KHÔNG CHIẾT EO */
+                <g id="aodai-male-form">
+                  {/* Broad Straight Masculine Sleeves */}
+                  <path
+                    d="M118 140 L64 218 L88 236 L128 184 Z"
+                    fill={colorHex}
+                  />
+                  <path
+                    d="M222 140 L276 218 L252 236 L212 184 Z"
+                    fill={colorHex}
+                  />
+                  {/* Circular Peach-Pink Hands */}
+                  <circle cx="75" cy="227" r="9.5" fill="#FBD8B8" />
+                  <circle cx="265" cy="227" r="9.5" fill="#FBD8B8" />
 
-              {/* Main Body & Front Panel */}
-              <path
-                d="M134 142 C142 138 158 136 170 136 C182 136 198 138 206 142 C212 156 214 186 210 230 C206 252 200 270 200 286 L226 448 L114 448 L140 286 C140 270 134 252 130 230 C126 186 128 156 134 142 Z"
-                fill={colorHex}
-              />
-              <path d="M140 286 L114 448" stroke="rgba(0,0,0,0.18)" strokeWidth="1.5" />
-              <path d="M200 286 L226 448" stroke="rgba(0,0,0,0.18)" strokeWidth="1.5" />
+                  {/* Straight Broad Masculine Body Form (Dáng suông phong trần, không thắt eo) */}
+                  <path
+                    d="M120 140 C136 136 154 134 170 134 C186 134 204 136 220 140 L226 270 L234 446 L106 446 L114 270 Z"
+                    fill={colorHex}
+                  />
+                  {/* Side Crease & Structure Shadows */}
+                  <path d="M120 140 L114 270 L106 446" stroke="rgba(0,0,0,0.22)" strokeWidth="1.5" />
+                  <path d="M220 140 L226 270 L234 446" stroke="rgba(0,0,0,0.22)" strokeWidth="1.5" />
 
-              {pattern !== 'plain' && (
-                <path
-                  d="M134 142 C142 138 158 136 170 136 C182 136 198 138 206 142 C212 156 214 186 210 230 C206 252 200 270 200 286 L226 448 L114 448 L140 286 C140 270 134 252 130 230 Z"
-                  fill={`url(#pattern-${pattern})`}
-                />
+                  {pattern !== 'plain' && (
+                    <path
+                      d="M120 140 C136 136 154 134 170 134 C186 134 204 136 220 140 L226 270 L234 446 L106 446 L114 270 Z"
+                      fill={`url(#pattern-${pattern})`}
+                    />
+                  )}
+
+                  <path
+                    d="M120 140 C136 136 154 134 170 134 C186 134 204 136 220 140 L226 270 L234 446 L106 446 L114 270 Z"
+                    fill="url(#fabricShine)"
+                  />
+
+                  {/* Vạt cài khuy chéo bên nách phải của Nam */}
+                  <path
+                    d="M170 138 C184 140 200 148 208 162 C214 176 216 200 216 230 L224 446"
+                    stroke="rgba(0,0,0,0.25)"
+                    strokeWidth="1.8"
+                    fill="none"
+                  />
+                  {/* Cúc cài áo dài truyền thống ngũ thân / áo dài nam */}
+                  <circle cx="178" cy="142" r="2.8" fill="#FFDF9B" stroke="#92400E" strokeWidth="1" />
+                  <circle cx="192" cy="150" r="2.8" fill="#FFDF9B" stroke="#92400E" strokeWidth="1" />
+                  <circle cx="206" cy="164" r="2.8" fill="#FFDF9B" stroke="#92400E" strokeWidth="1" />
+                  <circle cx="214" cy="186" r="2.8" fill="#FFDF9B" stroke="#92400E" strokeWidth="1" />
+                  <circle cx="216" cy="216" r="2.8" fill="#FFDF9B" stroke="#92400E" strokeWidth="1" />
+
+                  {/* Cổ Đứng Lập Lĩnh Nam Giới - Cao, vững chãi, uy nghiêm */}
+                  <path
+                    d="M152 114 C160 110 180 110 188 114 C191 121 190 133 188 138 C180 141 160 141 152 138 C150 133 149 121 152 114 Z"
+                    fill={colorHex}
+                    stroke="#5B1210"
+                    strokeWidth="1.3"
+                  />
+                  <path d="M153 115 C162 112 178 112 187 115" stroke="#FAF7F2" strokeWidth="1.8" fill="none" />
+                </g>
+              ) : (
+                /* FORM ÁO DÀI NỮ GIỚI: THANH THOÁT, CHIẾT EO MỀM MẠI, TÀ BAY DUYÊN DÁNG */
+                <g id="aodai-female-form">
+                  {/* Natural Sleeves */}
+                  <path
+                    d="M130 144 C116 170 96 200 80 230 L102 240 C114 210 128 185 138 180 Z"
+                    fill={colorHex}
+                  />
+                  <path
+                    d="M210 144 C224 170 244 200 260 230 L238 240 C226 210 212 185 202 180 Z"
+                    fill={colorHex}
+                  />
+                  {/* Circular Peach-Pink Hands */}
+                  <circle cx="90" cy="235" r="9.5" fill="#FBD8B8" />
+                  <circle cx="250" cy="235" r="9.5" fill="#FBD8B8" />
+
+                  {/* Main Body & Front Panel với eo thon duyên dáng */}
+                  <path
+                    d="M134 142 C142 138 158 136 170 136 C182 136 198 138 206 142 C212 156 214 186 210 230 C206 252 200 270 200 286 L226 448 L114 448 L140 286 C140 270 134 252 130 230 C126 186 128 156 134 142 Z"
+                    fill={colorHex}
+                  />
+                  <path d="M140 286 L114 448" stroke="rgba(0,0,0,0.18)" strokeWidth="1.5" />
+                  <path d="M200 286 L226 448" stroke="rgba(0,0,0,0.18)" strokeWidth="1.5" />
+
+                  {pattern !== 'plain' && (
+                    <path
+                      d="M134 142 C142 138 158 136 170 136 C182 136 198 138 206 142 C212 156 214 186 210 230 C206 252 200 270 200 286 L226 448 L114 448 L140 286 C140 270 134 252 130 230 Z"
+                      fill={`url(#pattern-${pattern})`}
+                    />
+                  )}
+
+                  <path
+                    d="M134 142 C142 138 158 136 170 136 C182 136 198 138 206 142 C212 156 214 186 210 230 C206 252 200 270 200 286 L226 448 L114 448 L140 286 C140 270 134 252 130 230 Z"
+                    fill="url(#fabricShine)"
+                  />
+
+                  {/* Standing Collar - Elevated to hug the jaw and neck naturally */}
+                  <path
+                    d="M154 116 C162 112 178 112 186 116 C188 122 188 134 186 140 C178 143 162 143 154 140 C152 134 152 122 154 116 Z"
+                    fill={colorHex}
+                    stroke="#5B1210"
+                    strokeWidth="1.2"
+                  />
+                  <path d="M156 117 C163 114 177 114 184 117" stroke="#FAF7F2" strokeWidth="1.8" fill="none" />
+
+                  {/* Đường chỉ may cúc bấm chéo thanh mảnh */}
+                  <path
+                    d="M170 142 C182 144 195 152 202 165 C206 176 208 195 208 220"
+                    stroke="#FFDF9B"
+                    strokeWidth="1.8"
+                    strokeDasharray="2 3"
+                    fill="none"
+                  />
+                </g>
               )}
-
-              <path
-                d="M134 142 C142 138 158 136 170 136 C182 136 198 138 206 142 C212 156 214 186 210 230 C206 252 200 270 200 286 L226 448 L114 448 L140 286 C140 270 134 252 130 230 Z"
-                fill="url(#fabricShine)"
-              />
-
-              {/* Standing Collar - Elevated to hug the jaw and neck naturally */}
-              <path
-                d="M154 116 C162 112 178 112 186 116 C188 122 188 134 186 140 C178 143 162 143 154 140 C152 134 152 122 154 116 Z"
-                fill={colorHex}
-                stroke="#5B1210"
-                strokeWidth="1.2"
-              />
-              <path d="M156 117 C163 114 177 114 184 117" stroke="#FAF7F2" strokeWidth="1.8" fill="none" />
-
-              <path
-                d="M170 142 C182 144 195 152 202 165 C206 176 208 195 208 220"
-                stroke="#FFDF9B"
-                strokeWidth="1.8"
-                strokeDasharray="2 3"
-                fill="none"
-              />
             </g>
           )}
 
