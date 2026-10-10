@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HeroVisualBackground } from './HeroVisualBackground';
 import { GarmentKnowledgeModal } from './GarmentKnowledgeModal';
 import { ThanhTreoCoPhuc } from './ThanhTreoCoPhuc';
@@ -8,7 +8,6 @@ import { OUTFITS } from '../data/vietphucData';
 import {
   Sparkles,
   ChevronRight,
-  ChevronLeft,
   Info,
   ArrowRight,
   Compass,
@@ -17,6 +16,28 @@ import {
   CloudSun,
   Rotate3D,
 } from 'lucide-react';
+
+// Component hiển thị hình ảnh trang phục với fallback SVG
+const CardGarmentArtwork: React.FC<{
+  image?: string;
+  fallbackSvg: React.ReactNode;
+  alt: string;
+}> = ({ image, fallbackSvg, alt }) => {
+  const [imageError, setImageError] = useState(false);
+
+  if (image && !imageError) {
+    return (
+      <img
+        src={image}
+        alt={alt}
+        onError={() => setImageError(true)}
+        className="max-h-full max-w-full object-contain filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.85)]"
+      />
+    );
+  }
+
+  return <div className="w-full h-full flex items-center justify-center filter drop-shadow-xl">{fallbackSvg}</div>;
+};
 
 interface HomeViewProps {
   onStartTryOn: () => void;
@@ -29,19 +50,27 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onSelectOutfit,
   onNavigateTab,
 }) => {
-  const carouselRef = useRef<HTMLDivElement>(null);
   const [selectedKnowledgeOutfit, setSelectedKnowledgeOutfit] = useState<OutfitData | null>(null);
-  const [galleryViewMode, setGalleryViewMode] = useState<'rack' | 'cards' | '3d'>('rack');
-  const [active3DModalOutfitId, setActive3DModalOutfitId] = useState<OutfitId | null>(null);
+  const [galleryViewMode, setGalleryViewMode] = useState<'rack' | 'cards' | '3d'>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 768 ? 'rack' : 'cards';
+    }
+    return 'rack';
+  });
 
-  const scrollCarousel = (direction: 'left' | 'right') => {
-    if (!carouselRef.current) return;
-    const scrollAmount = 360;
-    carouselRef.current.scrollBy({
-      left: direction === 'left' ? -scrollAmount : scrollAmount,
-      behavior: 'smooth',
-    });
-  };
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768 && galleryViewMode === 'rack') {
+        setGalleryViewMode('cards');
+      } else if (window.innerWidth >= 768 && galleryViewMode === 'cards') {
+        setGalleryViewMode('rack');
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [galleryViewMode]);
+
+  const [active3DModalOutfitId, setActive3DModalOutfitId] = useState<OutfitId | null>(null);
 
   const scrollToGarments = () => {
     const el = document.getElementById('heritage-carousel-section');
@@ -56,6 +85,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
     vibeShort: string;
     bgGradient: string;
     accentColor: string;
+    image: string;
+    bgPatternDesc: string;
     svgPreview: React.ReactNode;
   }> = [
     {
@@ -63,6 +94,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
       vibeShort: 'Quốc phục thanh lịch, hai tà bay bổng tôn vinh nét duyên',
       bgGradient: 'from-[#8D1815] via-[#C82A27] to-[#F59E0B]',
       accentColor: '#C82A27',
+      image: '/assets/aodai.png',
+      bgPatternDesc: 'Lụa tơ tằm Hà Đông thêu hoa chỉ tơ',
       svgPreview: (
         <svg viewBox="0 0 160 220" className="w-full h-full drop-shadow-xl">
           <ellipse cx="80" cy="35" rx="14" ry="18" fill="#FCE7D2" />
@@ -84,6 +117,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
       vibeShort: 'Đạo làm người trong từng đường kim, dáng áo chuẩn mực xưa',
       bgGradient: 'from-[#92400E] via-[#D97706] to-[#FBBF24]',
       accentColor: '#E4A025',
+      image: '/assets/nguthan.png',
+      bgPatternDesc: 'Gấm sa Hàn vân mây hoàng yến',
       svgPreview: (
         <svg viewBox="0 0 160 220" className="w-full h-full drop-shadow-xl">
           <ellipse cx="80" cy="35" rx="14" ry="18" fill="#FCE7D2" />
@@ -115,6 +150,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
       vibeShort: 'Phẩm phục vương triều lộng lẫy chốn hoàng cung Huế',
       bgGradient: 'from-[#1E3A8A] via-[#2563EB] to-[#DC2626]',
       accentColor: '#1F4F89',
+      image: '/assets/nhatbinh.png',
+      bgPatternDesc: 'Đoạn bát ty dệt rồng phượng cung đình',
       svgPreview: (
         <svg viewBox="0 0 160 220" className="w-full h-full drop-shadow-xl">
           <ellipse cx="80" cy="35" rx="14" ry="18" fill="#FCE7D2" />
@@ -139,6 +176,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
       vibeShort: 'Vẻ đẹp thuần hậu mộc mạc, đậm hồn ca dao Bắc Bộ',
       bgGradient: 'from-[#78350F] via-[#9A3412] to-[#15803D]',
       accentColor: '#5E402D',
+      image: '/assets/tuthan.png',
+      bgPatternDesc: 'Đũi tơ tằm nhuộm bùn sông Kinh Bắc',
       svgPreview: (
         <svg viewBox="0 0 160 220" className="w-full h-full drop-shadow-xl">
           <ellipse cx="80" cy="35" rx="14" ry="18" fill="#FCE7D2" />
@@ -160,6 +199,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
       vibeShort: 'Hồn nhiên, mộc mạc, phóng khoáng miền sông nước Nam Bộ',
       bgGradient: 'from-[#065F46] via-[#0D9488] to-[#0284C7]',
       accentColor: '#3D7D73',
+      image: '/assets/baba.png',
+      bgPatternDesc: 'Vải the ú mỏng dệt thủ công miệt vườn',
       svgPreview: (
         <svg viewBox="0 0 160 220" className="w-full h-full drop-shadow-xl">
           <ellipse cx="80" cy="35" rx="14" ry="18" fill="#FCE7D2" />
@@ -189,6 +230,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
       vibeShort: 'Cổ kính uy nghi, dấu ấn triều đại Lý - Trần - Lê sơ',
       bgGradient: 'from-[#4C1D95] via-[#6D28D9] to-[#047857]',
       accentColor: '#1F4F89',
+      image: '/assets/giaolinh.png',
+      bgPatternDesc: 'Lụa the dệt nổi vân kỷ hà & hoa sen',
       svgPreview: (
         <svg viewBox="0 0 160 220" className="w-full h-full drop-shadow-xl">
           <ellipse cx="80" cy="35" rx="14" ry="18" fill="#FCE7D2" />
@@ -206,6 +249,108 @@ export const HomeView: React.FC<HomeViewProps> = ({
       ),
     },
   ];
+
+  const renderGarmentCard = (card: (typeof GARMENT_CARDS)[0], setPrefix: string) => {
+    const outfitInfo = OUTFITS[card.id];
+    return (
+      <div
+        key={`${setPrefix}-${card.id}`}
+        className="shrink-0 w-[280px] sm:w-[320px] md:w-[340px] group/card rounded-3xl bg-white border border-amber-900/30 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col overflow-hidden relative"
+      >
+        {/* Visual Artwork Container: Tủ Kính Bảo Tàng Hoàng Gia & Ánh Sáng Vàng Chiếu Từ Xung Quanh */}
+        <div
+          onClick={() => onSelectOutfit(card.id)}
+          className="h-68 sm:h-76 w-full bg-gradient-to-b from-[#181614] via-[#100F0E] to-[#0A0908] p-5 flex items-center justify-center relative cursor-pointer overflow-hidden border-b border-amber-900/40 select-none group/glass"
+        >
+          {/* 1. ÁNH SÁNG VÀNG CHIẾU TỪ XUNG QUANH (PERIMETER & RIM GOLDEN SPOTLIGHTS) */}
+          {/* Vầng sáng vàng rọi từ đỉnh tủ kính (Top Spotlight) */}
+          <div className="absolute inset-x-0 top-0 h-36 bg-[radial-gradient(ellipse_at_top,_rgba(251,191,36,0.32)_0%,_rgba(217,119,6,0.12)_50%,_transparent_80%)] pointer-events-none" />
+
+          {/* Vầng sáng vàng ấm bao quanh 4 góc & viền tủ kính (Perimeter Golden Rim Glow) */}
+          <div className="absolute inset-0 shadow-[inset_0_0_55px_rgba(245,158,11,0.22)] pointer-events-none" />
+
+          {/* Vầng sáng vàng chân đế hắt ngược lên (Bottom Pedestal Up-light) */}
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-[radial-gradient(ellipse_at_bottom,_rgba(245,158,11,0.25)_0%,_transparent_75%)] pointer-events-none" />
+
+          {/* Hào quang vàng hoàng gia trung tâm tỏa ra phía sau chiếc áo */}
+          <div className="absolute w-48 h-56 rounded-full bg-gradient-to-b from-amber-400/25 via-yellow-500/15 to-transparent blur-2xl group-hover:from-amber-300/40 group-hover:scale-110 transition-all duration-700 pointer-events-none" />
+
+          {/* 2. HIỆU ỨNG TỦ KÍNH BẢO TÀNG (MUSEUM GLASS CABINET SPECULAR & CORNERS) */}
+          {/* Vệt phản chiếu ánh sáng chéo trên bề mặt kính (Diagonal Glass Glare Sheen) */}
+          <div className="absolute -inset-full bg-gradient-to-tr from-transparent via-white/8 to-transparent rotate-25 pointer-events-none group-hover:translate-x-20 transition-transform duration-1000 ease-out" />
+
+          {/* Khung viền mạ đồng / vàng bảo tàng ở 4 góc tủ kính */}
+          <div className="absolute top-2.5 left-2.5 w-3.5 h-3.5 border-t-2 border-l-2 border-amber-500/60 pointer-events-none" />
+          <div className="absolute top-2.5 right-2.5 w-3.5 h-3.5 border-t-2 border-r-2 border-amber-500/60 pointer-events-none" />
+          <div className="absolute bottom-2.5 left-2.5 w-3.5 h-3.5 border-b-2 border-l-2 border-amber-500/60 pointer-events-none" />
+          <div className="absolute bottom-2.5 right-2.5 w-3.5 h-3.5 border-b-2 border-r-2 border-amber-500/60 pointer-events-none" />
+
+          {/* 3. TÁC PHẨM CỔ PHỤC (GARMENT PREVIEW) */}
+          <div className="w-44 h-56 transition-transform duration-500 group-hover/card:scale-108 group-hover/glass:scale-108 drop-shadow-[0_12px_24px_rgba(0,0,0,0.85)] z-10 flex items-center justify-center">
+            {card.svgPreview}
+          </div>
+
+          {/* 4. HUY HIỆU TRIỀU ĐẠI / THỜI KỲ (ERA BADGE) */}
+          <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-stone-900/80 backdrop-blur-md text-amber-200 text-[11px] font-semibold border border-amber-500/30 z-20 shadow-md">
+            {outfitInfo.era.split('(')[0]}
+          </div>
+
+          {/* 5. NÚT XEM 3D 360 ĐỘ */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setActive3DModalOutfitId(card.id);
+            }}
+            className="absolute bottom-4 left-4 px-2.5 py-1 rounded-full bg-stone-900/85 hover:bg-amber-950/80 text-amber-300 hover:text-amber-200 text-[11px] font-semibold border border-amber-500/50 flex items-center gap-1 shadow-md transition-all cursor-pointer z-20 hover:scale-105 active:scale-95"
+            title="Xem mô hình 3D xoay 360 độ"
+          >
+            <Rotate3D className="w-3.5 h-3.5 text-amber-400" />
+            <span>3D</span>
+          </button>
+
+          {/* 6. NÚT TRI THỨC KHẢO CỨU LỊCH SỬ (INFO) */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedKnowledgeOutfit(outfitInfo);
+            }}
+            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-stone-900/80 hover:bg-amber-600 text-amber-300 hover:text-white flex items-center justify-center shadow-md border border-amber-500/30 transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer z-20"
+            title="Xem tri thức khảo cứu lịch sử"
+            aria-label="Xem tri thức khảo cứu lịch sử"
+          >
+            <Info className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Card Content & Action */}
+        <div className="p-5 flex-1 flex flex-col justify-between space-y-3 bg-white">
+          <div>
+            <h3
+              onClick={() => onSelectOutfit(card.id)}
+              className="text-xl font-display font-bold text-stone-900 group-hover/card:text-[#C82A27] transition-colors cursor-pointer"
+            >
+              {outfitInfo.name}
+            </h3>
+            <p className="text-xs text-stone-600 font-serif italic mt-1 line-clamp-2">
+              "{card.vibeShort}"
+            </p>
+          </div>
+
+          <div className="space-y-2 pt-1">
+            <button
+              onClick={() => onSelectOutfit(card.id)}
+              className="w-full py-2.5 px-4 rounded-xl bg-stone-100 group-hover/card:bg-[#C82A27] text-stone-800 group-hover/card:text-white font-bold text-xs transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+            >
+              <span>Mở Studio & Phối Đồ Ngay</span>
+              <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover/card:translate-x-1" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-16 sm:space-y-24 pb-12">
@@ -322,26 +467,6 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 <span>3D Meshy AI</span>
               </button>
             </div>
-
-            {/* Carousel Arrows (only in cards mode) */}
-            {galleryViewMode === 'cards' && (
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => scrollCarousel('left')}
-                  className="w-9 h-9 rounded-full border border-stone-300 bg-white hover:bg-stone-50 hover:border-[#C82A27] text-stone-700 hover:text-[#C82A27] flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5 active:scale-95 shadow-sm cursor-pointer"
-                  aria-label="Xem trước"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => scrollCarousel('right')}
-                  className="w-9 h-9 rounded-full border border-stone-300 bg-white hover:bg-stone-50 hover:border-[#C82A27] text-stone-700 hover:text-[#C82A27] flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5 active:scale-95 shadow-sm cursor-pointer"
-                  aria-label="Xem tiếp"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            )}
           </div>
         </div>
 
@@ -361,94 +486,48 @@ export const HomeView: React.FC<HomeViewProps> = ({
           />
         )}
 
-        {/* 2. CHẾ ĐỘ THẺ VUỐT NGANG TRUYỀN THỐNG */}
+        {/* 2. CHẾ ĐỘ THẺ CUỘN VÒNG LẶP VÔ TẬN THUẦN GPU (PURE CSS INFINITE LOOP - KHÔNG KHỰNG) */}
         {galleryViewMode === 'cards' && (
-          <div
-            ref={carouselRef}
-            className="flex gap-6 overflow-x-auto no-scrollbar snap-x snap-mandatory py-4 px-1"
-          >
-            {GARMENT_CARDS.map((card) => {
-              const outfitInfo = OUTFITS[card.id];
-              return (
-                <div
-                  key={card.id}
-                  className="snap-start shrink-0 w-[280px] sm:w-[320px] md:w-[340px] group rounded-3xl bg-white border border-stone-200/90 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col overflow-hidden relative"
-                >
-                  {/* Visual Artwork Container */}
-                  <div
-                    onClick={() => onSelectOutfit(card.id)}
-                    className={`h-64 sm:h-72 w-full bg-gradient-to-b ${card.bgGradient} p-6 flex items-center justify-center relative cursor-pointer overflow-hidden`}
-                  >
-                    {/* Subtle silk glow background */}
-                    <div className="absolute inset-0 bg-black/10 backdrop-blur-[1px] group-hover:bg-transparent transition-colors duration-300" />
-                    
-                    {/* Garment SVG Artwork Preview */}
-                    <div className="w-44 h-56 transition-transform duration-300 group-hover:scale-105">
-                      {card.svgPreview}
-                    </div>
+          <>
+            {/* Nhúng Style Keyframe GPU thuần CSS: dịch chuyển mượt mà không bao giờ giật/khựng */}
+            <style>{`
+              @keyframes heritageInfiniteLoop {
+                0% {
+                  transform: translate3d(-50%, 0, 0);
+                }
+                100% {
+                  transform: translate3d(0%, 0, 0);
+                }
+              }
+              .animate-heritage-loop {
+                animation: heritageInfiniteLoop 42s linear infinite;
+                will-change: transform;
+              }
+              .group\\/loop:hover .animate-heritage-loop,
+              .group\\/loop:active .animate-heritage-loop {
+                animation-play-state: paused;
+              }
+            `}</style>
 
-                    {/* Era Badge in Card Corner */}
-                    <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-black/35 backdrop-blur-md text-white text-[11px] font-semibold border border-white/20">
-                      {outfitInfo.era.split('(')[0]}
-                    </div>
+            <div className="w-full overflow-hidden py-4 px-1 relative group/loop select-none">
+              {/* Dải viền mờ nghệ thuật (Vignette edge blur) ở mép trái và mép phải */}
+              <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-r from-[#FAF8F5] via-[#FAF8F5]/80 to-transparent z-20 pointer-events-none" />
+              <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-l from-[#FAF8F5] via-[#FAF8F5]/80 to-transparent z-20 pointer-events-none" />
 
-                    {/* Quick 3D button in card corner */}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setActive3DModalOutfitId(card.id);
-                      }}
-                      className="absolute bottom-4 left-4 px-2.5 py-1 rounded-full bg-black/60 hover:bg-black text-amber-300 hover:text-white text-[11px] font-semibold border border-amber-400/40 flex items-center gap-1 shadow-md transition-all cursor-pointer z-10"
-                      title="Xem mô hình 3D xoay 360 độ"
-                    >
-                      <Rotate3D className="w-3.5 h-3.5 text-amber-400" />
-                      <span>3D</span>
-                    </button>
-
-                    {/* Scholarly Knowledge Info "i" Icon Button (Tối Giản Chữ) */}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedKnowledgeOutfit(outfitInfo);
-                      }}
-                      className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/80 hover:bg-white text-stone-800 hover:text-[#C82A27] flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer z-10"
-                      title="Xem tri thức khảo cứu lịch sử"
-                      aria-label="Xem tri thức khảo cứu lịch sử"
-                    >
-                      <Info className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  {/* Card Content & Action */}
-                  <div className="p-5 flex-1 flex flex-col justify-between space-y-3 bg-white">
-                    <div>
-                      <h3
-                        onClick={() => onSelectOutfit(card.id)}
-                        className="text-xl font-display font-bold text-stone-900 group-hover:text-[#C82A27] transition-colors cursor-pointer"
-                      >
-                        {outfitInfo.name}
-                      </h3>
-                      <p className="text-xs text-stone-600 font-serif italic mt-1 line-clamp-2">
-                        "{card.vibeShort}"
-                      </p>
-                    </div>
-
-                    <div className="space-y-2 pt-1">
-                      <button
-                        onClick={() => onSelectOutfit(card.id)}
-                        className="w-full py-2.5 px-4 rounded-xl bg-stone-100 group-hover:bg-[#C82A27] text-stone-800 group-hover:text-white font-bold text-xs transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
-                      >
-                        <span>Mở Studio & Phối Đồ Ngay</span>
-                        <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
-                      </button>
-                    </div>
-                  </div>
+              {/* Dải trượt chính áp dụng GPU animation */}
+              <div className="flex w-max animate-heritage-loop">
+                {/* Cụm 1 */}
+                <div className="flex gap-6 pr-6 shrink-0">
+                  {GARMENT_CARDS.map((card) => renderGarmentCard(card, 'set1'))}
                 </div>
-              );
-            })}
-          </div>
+
+                {/* Cụm 2 (Nhân bản liền mạch chu kỳ vô tận) */}
+                <div className="flex gap-6 pr-6 shrink-0" aria-hidden="true">
+                  {GARMENT_CARDS.map((card) => renderGarmentCard(card, 'set2'))}
+                </div>
+              </div>
+            </div>
+          </>
         )}
 
         {/* 3. CHẾ ĐỘ TRÌNH DIỄN MÔ HÌNH 3D MESHY AI (.GLB) */}

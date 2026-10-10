@@ -605,7 +605,7 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({
             type="button"
             onClick={() => setShowCompareModal(true)}
             className="px-3.5 py-2 rounded-xl border border-stone-200 hover:border-[#3D7D73] hover:bg-[#EBF4F2] text-stone-700 hover:text-[#25544D] text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 cursor-pointer shadow-xs active:scale-95"
-            title="Mở bảng so sánh 2 phương án phối đồ (Modal Popup)"
+            title="Mở bảng so sánh 2 phương án phối đồ"
           >
             <ArrowLeftRight className="w-4 h-4 text-[#3D7D73]" />
             <span>So Sánh Phương Án</span>
@@ -618,7 +618,7 @@ export const FittingStudio: React.FC<FittingStudioProps> = ({
             type="button"
             onClick={handleSaveLook}
             className="px-3.5 py-2 rounded-xl border border-stone-300 hover:border-[#b84a14] hover:bg-[#FFF8F5] text-stone-700 hover:text-[#b84a14] text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
-            title="Lưu bản phối này vào danh sách cá nhân"
+            title="Lưu bản phối vào danh sách cá nhân"
           >
             <Bookmark className="w-4 h-4 text-[#b84a14]" />
             <span>Lưu Lookbook</span>

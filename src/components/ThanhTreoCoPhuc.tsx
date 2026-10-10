@@ -239,7 +239,7 @@ const GarmentGraphic: React.FC<GarmentGraphicProps> = ({ outfit, isFrontFacing }
           src={image}
           alt={outfit.name}
           onError={() => setImageFailed(true)}
-          className="w-full h-full object-contain pointer-events-none select-none transition-transform duration-300 filter drop-shadow-md"
+          className="w-full h-full object-contain pointer-events-none select-none transition-transform duration-300 filter drop-shadow-xl"
           style={{
             transform: isFrontFacing ? 'scale(1.05)' : 'scale(1)',
           }}
@@ -265,14 +265,6 @@ const GarmentGraphic: React.FC<GarmentGraphicProps> = ({ outfit, isFrontFacing }
         <linearGradient id={`foldShadow-${id}`} x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stopColor="#000" stopOpacity="0.05" />
           <stop offset="100%" stopColor="#000" stopOpacity="0.35" />
-        </linearGradient>
-
-        {/* Shading cho góc nhìn nghiêng (tạo độ sâu 3D dày cộm như vải gấp) */}
-        <linearGradient id={`sideCrease-${id}`} x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#000000" stopOpacity="0.32" />
-          <stop offset="25%" stopColor="#000000" stopOpacity="0.08" />
-          <stop offset="65%" stopColor="#ffffff" stopOpacity="0.18" />
-          <stop offset="100%" stopColor="#000000" stopOpacity="0.4" />
         </linearGradient>
       </defs>
 
@@ -444,85 +436,12 @@ const GarmentGraphic: React.FC<GarmentGraphicProps> = ({ outfit, isFrontFacing }
           <path d="M 97 134 L 95 185 L 105 185 L 103 134 Z" fill="#047857" />
         </g>
       )}
-
-      {/* Lớp phủ bóng đổ nếp gấp chiều sâu (Side fold creases) khi ở góc nhìn nghiêng */}
-      {!isFrontFacing && (
-        <rect
-          x="10"
-          y="20"
-          width="180"
-          height="240"
-          fill={`url(#sideCrease-${id})`}
-          pointerEvents="none"
-          opacity="0.6"
-        />
-      )}
     </svg>
   );
 };
 
 // =====================================================================
-// 3. CHI TIẾC MÓC TREO (HANGER HOOK & WOODEN SHOULDER)
-// =====================================================================
-const WoodenHanger: React.FC<{ isHovered: boolean; isFrontFacing: boolean }> = ({
-  isHovered,
-  isFrontFacing,
-}) => {
-  return (
-    <div className="relative w-full flex flex-col items-center justify-start pointer-events-none select-none">
-      {/* 1. MÓC KIM LOẠI ĐỒNG THAU (BRASS HOOK) */}
-      <svg
-        viewBox="0 0 60 48"
-        className="w-8 h-7 -mb-1 z-30 overflow-visible transition-transform duration-300 drop-shadow-sm"
-        style={{
-          transform: isHovered ? 'rotate(-4deg)' : 'rotate(0deg)',
-        }}
-      >
-        <path
-          d="M 30 46 L 30 26 C 30 14 18 8 25 2 C 32 -4 42 6 40 16 C 39 20 33 24 33 26"
-          fill="none"
-          stroke="#C8963E"
-          strokeWidth="3.2"
-          strokeLinecap="round"
-        />
-        <path
-          d="M 29 26 C 29 15 20 10 25 4"
-          fill="none"
-          stroke="#FDE68A"
-          strokeWidth="1"
-          strokeLinecap="round"
-        />
-      </svg>
-
-      {/* 2. KHUNG MẮC GỖ VÁT VAI (WOODEN HANGER) */}
-      <div className="relative w-full h-5 z-20 flex items-center justify-center">
-        <svg viewBox="0 0 160 20" className="w-full h-full drop-shadow-md">
-          <defs>
-            <linearGradient id="hangerWood" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#3E1700" />
-              <stop offset="45%" stopColor="#6E310C" />
-              <stop offset="55%" stopColor="#8A3C0E" />
-              <stop offset="100%" stopColor="#3E1700" />
-            </linearGradient>
-          </defs>
-          <path
-            d="M 80 3 C 105 4 150 12 158 17 C 152 18 135 17 80 10 C 25 17 8 18 2 17 C 10 12 55 4 80 3 Z"
-            fill="url(#hangerWood)"
-            stroke="#260E00"
-            strokeWidth="0.8"
-          />
-          <circle cx="80" cy="8" r="1.8" fill="#D4AF37" />
-        </svg>
-
-        {/* Dây tag lủng lẳng */}
-        <div className="absolute right-4 top-2.5 w-[1px] h-6 bg-amber-900/70" />
-      </div>
-    </div>
-  );
-};
-
-// =====================================================================
-// 4. MAIN COMPONENT: "ThanhTreoCoPhuc" (INTERACTIVE HERITAGE RACK)
+// 3. MAIN COMPONENT: "ThanhTreoCoPhuc" (INTERACTIVE HERITAGE RACK)
 // =====================================================================
 export interface ThanhTreoCoPhucProps {
   onSelectOutfit?: (outfit: HeritageOutfit) => void;
@@ -679,7 +598,7 @@ export const ThanhTreoCoPhuc: React.FC<ThanhTreoCoPhucProps> = ({
       {/* =================================================================
           B. KHUNG GIÁ TREO QUẦN ÁO 3D / 2.5D (THE CLOTHING RACK STAGE)
          ================================================================= */}
-      <div className="relative w-full pt-14 pb-8 px-4 sm:px-6 bg-gradient-to-b from-[#EFE8DC]/80 via-[#F7F3EB]/60 to-[#EFE8DC]/90 rounded-2xl border border-stone-300/80 overflow-hidden shadow-inner">
+      <div className="relative w-full pt-14 pb-8 px-4 sm:px-6 bg-gradient-to-b from-[#FAF7F2] via-[#F5EFE6] to-[#ECE1D0] rounded-3xl border border-amber-900/25 overflow-hidden shadow-xl">
         {/* 1. THANH ĐÒN TREO KIM LOẠI ĐỒNG THAU BÓNG BẨY (METALLIC BRASS RAIL) */}
         <div className="absolute top-16 left-2 right-2 z-30 pointer-events-none">
           {/* Cột đỡ 2 bên trần */}
@@ -777,10 +696,10 @@ export const ThanhTreoCoPhuc: React.FC<ThanhTreoCoPhucProps> = ({
                     willChange: 'transform',
                   }}
                   animate={{
-                    rotateY: isHovered ? 0 : -58,
-                    skewY: isHovered ? 0 : -8,
-                    scaleX: isHovered ? 1 : 0.58,
-                    scale: isHovered ? 1.14 : 1,
+                    rotateY: isHovered ? 0 : -18,
+                    skewY: isHovered ? 0 : -3,
+                    scaleX: 1,
+                    scale: isHovered ? 1.12 : 1,
                     y: isSelected ? -24 : isHovered ? -16 : 0,
                   }}
                   transition={{
@@ -827,14 +746,15 @@ export const ThanhTreoCoPhuc: React.FC<ThanhTreoCoPhucProps> = ({
                     </div>
                   )}
 
-                  {/* Móc treo gỗ & móc đồng */}
-                  <div className="w-36 sm:w-44 z-20">
-                    <WoodenHanger isHovered={isHovered} isFrontFacing={isHovered} />
+                  {/* Khuyên treo đồng thau thanh nhã nối với xà ngang (loại bỏ móc gỗ thô che cổ) */}
+                  <div className="w-6 h-6 z-20 flex flex-col items-center justify-start pointer-events-none mb-1">
+                    <div className="w-3.5 h-4 rounded-full border-2 border-amber-400 bg-amber-950/40 shadow-xs" />
+                    <div className="w-[1.5px] h-2 bg-gradient-to-b from-amber-400 to-amber-600" />
                   </div>
 
                   {/* Dáng Áo Cổ Phục Rủ Xuống */}
                   <div
-                    className="w-48 sm:w-52 h-64 sm:h-72 -mt-2 z-15 flex items-center justify-center transition-all duration-300"
+                    className="w-52 sm:w-56 h-72 sm:h-80 -mt-2 z-15 flex items-center justify-center transition-all duration-300"
                     style={{
                       filter: isSelected
                         ? 'drop-shadow(0 14px 22px rgba(200, 42, 39, 0.35))'

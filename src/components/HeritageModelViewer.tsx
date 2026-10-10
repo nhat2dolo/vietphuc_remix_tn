@@ -93,7 +93,7 @@ export const HERITAGE_3D_CATALOG: Record<OutfitId, Heritage3DModelConfig> = {
   },
   aodai: {
     id: 'aodai',
-    name: 'Áo Dài Tân Thời Duyên Dáng',
+    name: 'Áo Dài Tân Thời',
     dynasty: 'Thập niên 1930 - Nay',
     glbSrc: '/models/aodai.glb',
     fallbackGlbSrc: '/models/heritage-fallback.glb',
@@ -129,7 +129,7 @@ export const HERITAGE_3D_CATALOG: Record<OutfitId, Heritage3DModelConfig> = {
   },
   baba: {
     id: 'baba',
-    name: 'Áo Bà Ba Nam Bộ Hồn Hậu',
+    name: 'Áo Bà Ba Nam Bộ',
     dynasty: 'Miệt Vườn Phương Nam',
     glbSrc: '/models/baba.glb',
     fallbackGlbSrc: '/models/heritage-fallback.glb',
